@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StickyUI JS Demo</title>
+    <link rel="stylesheet" href="StickyUI.css">
+</head>
+<body>
+    <h1>Sticky UI Javascript Demo</h1>
+    <script src="StickyUI.js"></script>
+    <script>
+        // --------------------------------------
+        // Main Library - SmoothieUI
+        let ui = new StickyUI();
+
+        // --------------------------------------
+        // Menu Bar
+        let menuBar = ui.menuBar();
+        let barButton1 = ui.barButton();
+        let barButton2 = ui.barButton();
+        let barButton3 = ui.barButton();
+        menuBar.appendChild(barButton1);
+        menuBar.appendChild(barButton2);
+        menuBar.appendChild(barButton3);
+        ui.setDraggable(menuBar);    
+        document.body.appendChild(menuBar);
+
+        // --------------------------------------
+        // Panel
+        let panel = ui.panel('Panel 1');
+        
+        // Buttons
+        let separator1 = ui.separator('Buttons', '#06f3b1');
+        let button1 = ui.button('Random Button 1');
+        let button2 = ui.button('Random Button 2', '#06f3b1');
+        let button3 = ui.button('Random Button 3', '#06f3b1', '#cc0050');
+        panel.addContent(separator1);
+        panel.addContent(button1);
+        panel.addContent(button2);
+        panel.addContent(button3);
+
+        // Switches
+        let separator2 = ui.separator('Switches', '#06f3b1');
+        let switch1 = ui.switch('Switch 1');
+        let switch2 = ui.switch('Switch 2', '#06f3b1');
+        let switch3 = ui.switch('Switch 3', '#06f3b1', '#F7227E');
+        panel.addContent(separator2);
+        panel.addContent(switch1);
+        panel.addContent(switch2);
+        panel.addContent(switch3);
+
+        // Dropdown / Color Picker / Text Input
+        let separator3 = ui.separator('Dropdown / Color Picker / Text Input', '#06f3b1');
+        let dropdownOptions = [
+            { value: 'option1', label: 'Option 1' },
+            { value: 'option2', label: 'Option 2' }
+        ];
+        let dropdown = ui.dropdown('Dropdown List', dropdownOptions, 'option1');
+        let colorPicker = ui.colorPicker('Select Color', '#06f3b1');
+        let textInput = ui.textInput('Text Input 1', 'Write here...', '');
+        panel.addContent(separator3);
+        panel.addContent(dropdown);
+        panel.addContent(colorPicker);
+        panel.addContent(textInput);
+
+        // Sliders
+        let separator4 = ui.separator('Sliders', '#06f3b1');
+        let rangeSlider = ui.sliderRange('Range Slider 1', 0, 100, 1, 50);
+        let stepperSlider = ui.sliderStepper('Stepper Slider 2', 0, 100, 5, 50);
+        let intervalSlider = ui.sliderInterval('Interval Slider 3', 0, 100, 1, 25, 75);
+        panel.addContent(separator4);
+        panel.addContent(rangeSlider);
+        panel.addContent(stepperSlider);
+        panel.addContent(intervalSlider);
+
+        // Checkbox Group
+        let separator5 = ui.separator('Checkbox Group', '#06f3b1');
+        let checkboxOptions = [
+            { value: 'option1', label: 'Opción 1', checked: true },
+            { value: 'option2', label: 'Opción 2', checked: false }
+        ];
+        let checkboxGroup = ui.checkboxGroup('Select Multiple Options', checkboxOptions);
+        panel.addContent(separator5);
+        panel.addContent(checkboxGroup);
+
+        // Folder
+        let separator6 = ui.separator('Folder', '#06f3b1');
+        // Buttons for Collapsable Folder
+        let folderButton1 = ui.button('Folder Button 1');
+        let folderButton2 = ui.button('Folder Button 2');
+        let folder = ui.folder('My Folder', 'icon-folder-close', 'icon-folder-open', '#06f3b1', '#F7227E', true, [folderButton1, folderButton2]);
+        panel.addContent(separator6);
+        panel.addContent(folder);
+
+        // Tabs
+        let separator7 = ui.separator('Tabs', '#06f3b1');
+        let tabPage1Button1 = ui.button('Tab Page 1 Button 1');
+        let tabPage1Button2 = ui.button('Tab Page 1 Button 2');
+        let tabPage1Switch1 = ui.switch('Switch 1');
+        let tabPage1ColorPicker = ui.colorPicker('Color Picker');
+        let tabPage1 = ui.tabPage('General', 'icon-folder-close', [tabPage1Button1, tabPage1Button2, tabPage1Switch1, tabPage1ColorPicker]);
+
+        let tabPage2Button1 = ui.button('Tab Page 2 Button 1');
+        let tabPage2SliderRange = ui.sliderRange('Slider Range', 0, 100, 1, 50);
+        let tabPage2Dropdown = ui.dropdown('Dropdown', 
+        [
+            { value: '1', label: 'Option 1' },
+            { value: '2', label: 'Option 2' }
+        ], '1');
+        let tabPage2 = ui.tabPage('Settings', 'icon-folder-close', [tabPage2Button1, tabPage2SliderRange, tabPage2Dropdown]);
+        let tabs = ui.tabs([tabPage1, tabPage2], 0);
+        panel.addContent(separator7);
+        panel.addContent(tabs);
+        
+        document.body.appendChild(panel);
+    </script>
+</body>
+</html>
