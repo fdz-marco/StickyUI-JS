@@ -11,20 +11,46 @@
     <script src="StickyUI.js"></script>
     <script>
         // --------------------------------------
-        // Main Library - SmoothieUI
+        // Main Library - StickyUI
         let ui = new StickyUI();
-
+            
         // --------------------------------------
         // Menu Bar
-        let menuBar = ui.menuBar();
-        let barButton1 = ui.barButton();
-        let barButton2 = ui.barButton();
-        let barButton3 = ui.barButton();
-        menuBar.appendChild(barButton1);
-        menuBar.appendChild(barButton2);
-        menuBar.appendChild(barButton3);
-        ui.setDraggable(menuBar);    
+        let menu1contextMenuItem1 = ui.contextMenuItem('New', 'icon-new', () => console.log('New clicked'));
+        let menu1contextMenuItem2 = ui.contextMenuItem('Open', 'icon-open', () => console.log('Open clicked'));
+        let menu1contextMenuItem3 = ui.contextMenuItem('Save', 'icon-save', () => console.log('Save clicked'));
+        let menu1contextMenuItem4 = ui.contextMenuItem('Close', 'icon-close', () => console.log('Close clicked'));
+
+        let menu2contextMenuItem1 = ui.contextMenuItem('Zoom In', 'icon-zoom-in', () => console.log('Zoom in clicked'));
+        let menu2contextMenuItem2 = ui.contextMenuItem('Zoom Out', 'icon-zoom-out', () => console.log('Zoom out clicked'));
+
+        let menu3contextMenuItem1 = ui.contextMenuItem('Settings', 'icon-settings', () => console.log('Settings clicked'));
+        let menu3contextMenuItem2 = ui.contextMenuItem('Preferences', 'icon-preferences', () => console.log('Preferences clicked'));
+        let menu3contextMenuItem3 = ui.contextMenuItem('About', 'icon-about', () => console.log('About clicked'));
+        let menu3contextMenuItem4 = ui.contextMenuItem('Help', 'icon-help', () => console.log('Help clicked'));
+
+        let contextMenu1 = ui.contextMenu([menu1contextMenuItem1, menu1contextMenuItem2, menu1contextMenuItem3, menu1contextMenuItem4]);
+        let contextMenu2 = ui.contextMenu([menu2contextMenuItem1, menu2contextMenuItem2]);
+        let contextMenu3 = ui.contextMenu([menu3contextMenuItem1, menu3contextMenuItem2, menu3contextMenuItem3, menu3contextMenuItem4]);
+
+        let menuBarItem1 = ui.menuBarItem('File', 'icon-file', contextMenu1);
+        let menuBarItem2 = ui.menuBarItem('View', 'icon-view', contextMenu2);
+        let menuBarItem3 = ui.menuBarItem('Help', 'icon-help', contextMenu3);
+       
+        let menuBar = ui.menuBar([menuBarItem1, menuBarItem2, menuBarItem3]);
         document.body.appendChild(menuBar);
+
+        // --------------------------------------
+        // Icon Bars
+        let iconBarHorizontal = ui.iconBarHorizontal();
+        let iconBarButton1 = ui.iconBarButton();
+        let iconBarButton2 = ui.iconBarButton();
+        let iconBarButton3 = ui.iconBarButton();
+        iconBarHorizontal.appendChild(iconBarButton1);
+        iconBarHorizontal.appendChild(iconBarButton2);
+        iconBarHorizontal.appendChild(iconBarButton3);
+        ui.setDraggable(iconBarHorizontal);    
+        document.body.appendChild(iconBarHorizontal);
 
         // --------------------------------------
         // Panel

@@ -42,6 +42,7 @@
 }
 
 /* ---------------------- Dark Mode Variables ---------------------- */
+
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-color: #2d2d2d;
@@ -64,6 +65,7 @@
 }
 
 /* ---------------------- Base Styles ---------------------- */
+
 body { 
     font-family: Bahnschrift, 'DIN Alternate', 
                 'Franklin Gothic Medium', 
@@ -71,10 +73,103 @@ body {
                 sans-serif-condensed, 
                 sans-serif;
     font-weight: normal;
+    padding-top: 50px;
 }
 
-/* ---------------------- Horizontal Menu Bar (WIP) ---------------------- */
+/* ---------------------- Menu Bar ---------------------- */
+
 .menuBar {
+    display: flex;
+    background-color: var(--bg-color-secondary);
+    padding: var(--spacing-sm);
+    box-shadow: var(--shadow-md);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.menuBarItem {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    color: var(--text-color);
+    transition: background 0.3s;
+    user-select: none;
+    gap: var(--spacing-sm);
+}
+
+.menuBarItemLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.menuBarItemIconContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.menuBarItem:hover {
+    background-color: var(--hover-color);
+}
+
+/* ---------------------- Menú Contextual ---------------------- */
+
+.contextMenu {
+    position: absolute;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-md);
+    z-index: 1001;
+    min-width: 180px;
+    padding: var(--spacing-xs) 0;
+    display: none;
+}
+
+.contextMenu.show {
+    display: block;
+}
+
+.contextMenuItem {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    color: var(--text-color);
+    transition: background 0.3s;
+    user-select: none;
+}
+
+.contextMenuItemIconContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--text-color);
+}
+
+.contextMenuItemLabel {
+    flex: 1;
+    color: var(--text-color);
+}
+
+.contextMenuItem:hover {
+    background-color: var(--hover-color);
+}
+
+/* ---------------------- Icon Bars (WIP) ---------------------- */
+
+.iconBarHorizontal {
     position: fixed;
     top: 50px;
     right: 50px;
@@ -89,7 +184,7 @@ body {
     z-index: 1000;
 }
 
-.barButton {
+.iconBarButton {
     min-width: 20px;
     min-height: 20px;
     padding: var(--spacing-xs);
@@ -101,7 +196,7 @@ body {
     font-size: 14px;
 }
 
-.barButton:hover {
+.iconBarButton:hover {
     background: var(--hover-color);
 }
 
@@ -856,4 +951,16 @@ input:checked + .switchSlider:before {
 
 .icon-scale {
     mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M16 8h5v5m0-5-7 7m-5 3H4v-5m0 5 7-7'/%3E%3C/svg%3E");
+}
+
+.icon-file {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M3 5C3 3.34315 4.34315 2 6 2H14C17.866 2 21 5.13401 21 9V19C21 20.6569 19.6569 22 18 22H6C4.34315 22 3 20.6569 3 19V5ZM13 4H6C5.44772 4 5 4.44772 5 5V19C5 19.5523 5.44772 20 6 20H18C18.5523 20 19 19.5523 19 19V9H13V4ZM18.584 7C17.9413 5.52906 16.6113 4.4271 15 4.10002V7H18.584Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-view {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 8C2 6.34315 3.34315 5 5 5H19C20.6569 5 22 6.34315 22 8V16C22 17.6569 20.6569 19 19 19H5C3.34315 19 2 17.6569 2 16V8ZM13 7H19C19.5523 7 20 7.44771 20 8V11H13V7ZM11 7H5C4.44772 7 4 7.44772 4 8V11H11V7ZM4 13V16C4 16.5523 4.44772 17 5 17H11V13H4ZM13 17H19C19.5523 17 20 16.5523 20 16V13H13V17Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-help {
+    mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'/%3E%3C/svg%3E%0A");
 }

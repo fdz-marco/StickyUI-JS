@@ -58,6 +58,122 @@ class StickyUI {
     // Main Containers
     // ----------------------------------------
  
+    // Context Menu 
+    contextMenuItem = (labelText = null, icon = null, onClick = null) => {
+        const UID = this.UID();
+        const contextMenuItem = this.element('div', `contextMenuItem_${UID}`, 'contextMenuItem');
+        const contextMenuItemLabel = this.element('div', `contextMenuItemLabel_${UID}`, 'contextMenuItemLabel', labelText);
+        
+        if (icon) {
+            const contextMenuItemIconContainer = this.element('div', `contextMenuItemIconContainer_${UID}`, 'contextMenuItemIconContainer');
+            const contextMenuItemIcon = this.element('div', `contextMenuItemIcon_${UID}`, `icon ${icon}`);
+            contextMenuItemIconContainer.appendChild(contextMenuItemIcon);
+            contextMenuItem.appendChild(contextMenuItemIconContainer);
+        }
+        
+        contextMenuItem.appendChild(contextMenuItemLabel);
+
+        if (onClick) {
+            contextMenuItem.onClick = onClick;
+            contextMenuItem.addEventListener('click', (e) => {
+                e.stopPropagation();
+                contextMenuItem.onClick();
+                //contextMenu.remove();
+            });
+        }
+        
+        return contextMenuItem;
+    }
+
+    contextMenu = (contextMenuItems) => {
+        const UID = this.UID();
+        const contextMenu = this.element('div', `contextMenu_${this.UID()}`, 'contextMenu');
+        
+        contextMenuItems.forEach(item => {
+            contextMenu.appendChild(item);
+        });
+
+        // Methods to show and hide the context menu externally
+        contextMenu.showContextMenu = (x, y) => {
+            const menuRect = contextMenu.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+        
+            if (x + menuRect.width > viewportWidth) {
+                x = viewportWidth - menuRect.width;
+            }
+            
+            if (y + menuRect.height > viewportHeight) {
+                y = y - menuRect.height;
+            }
+        
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+            contextMenu.classList.add('show');
+        }
+
+        contextMenu.hideContextMenu = () => {
+            contextMenu.classList.remove('show');
+        }
+        
+        return contextMenu;
+    }
+
+    // Menu Bar
+    menuBarItem = (labelText = null, icon = null, contextMenu = null) => {
+        const UID = this.UID();
+        const menuBarItem = this.element('div', `menuBarItem_${UID}`, 'menuBarItem');
+        const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText);
+        
+        if (icon) {
+            const menuBarItemIconContainer = this.element('div', `menuBarItemIconContainer_${UID}`, 'menuBarItemIconContainer');
+            const menuBarItemIcon = this.element('div', `menuBarItemIcon_${UID}`, `icon ${icon}`);
+            menuBarItemIconContainer.appendChild(menuBarItemIcon);
+            menuBarItem.appendChild(menuBarItemIconContainer);
+        }
+
+        menuBarItem.appendChild(menuBarItemLabel);
+        
+        if (contextMenu) {
+            menuBarItem.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const activeContextMenu = document.querySelector('.contextMenu.show');
+                if (activeContextMenu) {
+                    activeContextMenu.hideContextMenu();
+                }
+                const rect = menuBarItem.getBoundingClientRect();
+                const menuBarItemPadding = menuBarItem.style.padding;
+                const parentPadding = menuBarItem.parentElement.style.paddingBottom;
+                const x = rect.left;
+                const y = rect.bottom + parentPadding + menuBarItemPadding;
+                contextMenu.showContextMenu(x, y);
+            });
+            document.body.appendChild(contextMenu);
+        }
+        return menuBarItem;
+    }
+
+    menuBar = (menuBarItems) => {
+        const UID = this.UID();
+        const menuBar = this.element('div', `menuBar_${UID}`, 'menuBar');
+
+        // Add menu items to the menu bar
+        menuBarItems.forEach(item => {
+            menuBar.appendChild(item);
+        });
+
+        // Hide context menu when clicking outside
+        document.addEventListener('click', () => {
+            const activeContextMenu = document.querySelector('.contextMenu.show');
+            if (activeContextMenu) {
+                activeContextMenu.hideContextMenu();
+            }
+        });
+
+        return menuBar;
+    }
+        
     // Panel Title Bar
     panelTitleBar = (titleText = 'Panel') => {
         const UID = this.UID();
@@ -137,9 +253,9 @@ class StickyUI {
         return panel;
     }
 
-    // Horizontal Menu Bar (WIP)
-    menuBar = () => this.element('div','menuBar_' + this.UID(), 'menuBar');
-    barButton = () => this.element('div','barButton_' + this.UID(), 'barButton');
+    // Icon Bars
+    iconBarHorizontal = () => this.element('div','iconBarHorizontal_' + this.UID(), 'iconBarHorizontal');
+    iconBarButton = () => this.element('div','iconBarButton_' + this.UID(), 'iconBarButton');
 
     // ----------------------------------------
     // Basic Controls
