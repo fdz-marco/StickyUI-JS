@@ -712,7 +712,7 @@ class StickyUI {
             folderIcon.innerHTML = (iconClose) ? `<div class="icon ${iconClose}"></div>` : (iconClose !== false) ?'<div class="icon icon-folder-close"></div>' : '';
         } else {
             folderToggleButton.innerHTML = '<div class="icon icon-chevron-down"></div>';
-            folderIcon.innerHTML = (iconOpen) ? `<div class="icon ${iconOpen}"></div>` : (iconOpen !== false) ?'<div class="icon icon-folder-open"></div>' : '';
+            folderIcon.innerHTML = (iconOpen) ? `<div class="icon ${iconOpen}"></div>` : (iconOpen !== false) ? '<div class="icon icon-folder-open"></div>' : '';
         }
         
         // Add Controls
@@ -902,4 +902,302 @@ class StickyUI {
         styleSheet.innerText = styles
         document.head.appendChild(styleSheet)
     }*/
+
+    vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
+        const UID = this.UID();
+        const vector2 = this.element('div', `vector2Container_${UID}`, 'vector2Container');
+        
+        if (labelText) {
+            const label = this.element('label', `vector2Label_${UID}`, 'sliderLabel', labelText);
+            vector2.appendChild(label);
+        }
+
+        const controlWrapper = this.element('div', `vector2ControlWrapper_${UID}`, 'vector2ControlWrapper');
+        const area = this.element('div', `vector2Area_${UID}`, 'vector2Area');
+        const grid = this.element('div', `vector2Grid_${UID}`, 'vector2Grid');
+        const point = this.element('div', `vector2Point_${UID}`, 'vector2Point');
+        const values = this.element('div', `vector2Values_${UID}`, 'vector2Values');
+        
+        // Crear contenedores de valor con etiquetas
+        const valueX = this.element('div', `vector2ValueX_${UID}`, 'vector2Value');
+        const valueY = this.element('div', `vector2ValueY_${UID}`, 'vector2Value');
+        const labelX = this.element('span', `vector2LabelX_${UID}`, 'vector2ValueLabel', 'X:');
+        const labelY = this.element('span', `vector2LabelY_${UID}`, 'vector2ValueLabel', 'Y:');
+        const valueXText = this.element('span', `vector2ValueXText_${UID}`);
+        const valueYText = this.element('span', `vector2ValueYText_${UID}`);
+        
+        valueX.appendChild(labelX);
+        valueX.appendChild(valueXText);
+        valueY.appendChild(labelY);
+        valueY.appendChild(valueYText);
+
+        // Configurar el tamaño de la cuadrícula
+        grid.style.setProperty('--grid-size', `${gridSize}px`);
+        
+        area.appendChild(grid);
+        area.appendChild(point);
+        values.appendChild(valueX);
+        values.appendChild(valueY);
+
+        const updatePosition = (x, y, updatePoint = true) => {
+            const normalizedX = (x - minX) / (maxX - minX);
+            const normalizedY = 1 - (y - minY) / (maxY - minY);
+            
+            if (updatePoint) {
+                point.style.left = `${normalizedX * 100}%`;
+                point.style.top = `${normalizedY * 100}%`;
+            }
+            
+            valueXText.textContent = x.toFixed(2);
+            valueYText.textContent = y.toFixed(2);
+            
+            if (onChange) onChange(x, y);
+        };
+
+        // Establecer posición inicial
+        updatePosition(defaultX, defaultY);
+
+        // Eventos de arrastre
+        let isDragging = false;
+
+        const handleDrag = (e) => {
+            if (!isDragging) return;
+
+            const rect = area.getBoundingClientRect();
+            const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+            
+            const valueX = minX + x * (maxX - minX);
+            const valueY = maxY - y * (maxY - minY);
+            
+            updatePosition(valueX, valueY);
+        };
+
+        const startDragging = (e) => {
+            isDragging = true;
+            const rect = area.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            
+            const valueX = minX + x * (maxX - minX);
+            const valueY = maxY - y * (maxY - minY);
+            
+            updatePosition(valueX, valueY);
+        };
+
+        // Click y arrastre en el área
+        area.addEventListener('mousedown', startDragging);
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        controlWrapper.appendChild(area);
+        controlWrapper.appendChild(values);
+        vector2.appendChild(controlWrapper);
+        
+        return vector2;
+    }
+
+    statusBar = () => {
+        const statusBar = this.element('div', null, 'statusBar');
+        return statusBar;
+    }
+
+    statusBarItem = (text = '', icon = null) => {
+        const statusBarItem = this.element('div', null, 'statusBarItem');
+        
+        if (icon) {
+            const iconElement = this.element('div', null, 'icon');
+            iconElement.classList.add(icon);
+            statusBarItem.appendChild(iconElement);
+        }
+        
+        if (text) {
+            const textElement = this.element('span', null, null, text);
+            statusBarItem.appendChild(textElement);
+        }
+        
+        return statusBarItem;
+    }
+
+    tooltip = (element, text, position = 'top') => {
+        const tooltip = this.element('div', null, 'tooltip', text);
+        document.body.appendChild(tooltip);
+
+        const showTooltip = (e) => {
+            tooltip.classList.add('show');
+            
+            // Calcular posición
+            const elementRect = element.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            let left, top;
+            let preferredPosition = position;
+            
+            // Verificar espacio disponible y ajustar posición si es necesario
+            const spaceTop = elementRect.top;
+            const spaceBottom = window.innerHeight - elementRect.bottom;
+            const spaceLeft = elementRect.left;
+            const spaceRight = window.innerWidth - elementRect.right;
+            
+            // Ajustar posición basado en el espacio disponible
+            if (preferredPosition === 'top' && spaceTop < tooltipRect.height) {
+                preferredPosition = 'bottom';
+            } else if (preferredPosition === 'bottom' && spaceBottom < tooltipRect.height) {
+                preferredPosition = 'top';
+            } else if (preferredPosition === 'left' && spaceLeft < tooltipRect.width) {
+                preferredPosition = 'right';
+            } else if (preferredPosition === 'right' && spaceRight < tooltipRect.width) {
+                preferredPosition = 'left';
+            }
+            
+            // Aplicar posición
+            switch (preferredPosition) {
+                case 'top':
+                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
+                    top = elementRect.top - tooltipRect.height - 8;
+                    break;
+                case 'bottom':
+                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
+                    top = elementRect.bottom + 8;
+                    break;
+                case 'left':
+                    left = elementRect.left - tooltipRect.width - 8;
+                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
+                    break;
+                case 'right':
+                    left = elementRect.right + 8;
+                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
+                    break;
+            }
+            
+            // Asegurar que el tooltip no se salga de la ventana
+            left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
+            top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
+            
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            
+            // Actualizar clase de posición
+            tooltip.className = `tooltip show ${preferredPosition}`;
+        };
+
+        const hideTooltip = () => {
+            tooltip.classList.remove('show');
+        };
+
+        element.addEventListener('mouseenter', showTooltip);
+        element.addEventListener('mouseleave', hideTooltip);
+        
+        return tooltip;
+    }
+
+    faceplate = (controls = []) => {
+        const UID = this.UID();
+        const faceplate = this.element('div', `faceplate_${UID}`, 'faceplate');
+        
+        // Add Controls
+        controls.forEach(control => {
+            faceplate.appendChild(control);
+        });
+        
+        return faceplate;
+    }
+
+    joystick = (labelText = 'Joystick', size = 200, onChange = null) => {
+        const UID = this.UID();
+        const joystickContainer = this.element('div', `joystickContainer_${UID}`, 'joystickContainer');
+        
+        if (labelText) {
+            const label = this.element('label', `joystickLabel_${UID}`, 'sliderLabel', labelText);
+            joystickContainer.appendChild(label);
+        }
+
+        const joystickArea = this.element('div', `joystickArea_${UID}`, 'joystickArea');
+        const stick = this.element('div', `joystick_${UID}`, 'joystick');
+        const valueDisplay = this.element('div', `joystickValue_${UID}`, 'joystickValue');
+        
+        // Set size
+        joystickArea.style.width = `${size}px`;
+        joystickArea.style.height = `${size}px`;
+        
+        let isDragging = false;
+        let centerX = size / 2;
+        let centerY = size / 2;
+        let currentX = centerX;
+        let currentY = centerY;
+        
+        const updateStickPosition = (x, y, updateDisplay = true) => {
+            // Calculate distance from center
+            const deltaX = x - centerX;
+            const deltaY = centerY - y; // Invertimos Y para que arriba sea positivo
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const radius = size / 2 - 20;
+            
+            // Normalize if outside bounds
+            let normalizedX = x;
+            let normalizedY = y;
+            if (distance > radius) {
+                const angle = Math.atan2(deltaY, deltaX);
+                normalizedX = centerX + Math.cos(angle) * radius;
+                normalizedY = centerY - Math.sin(angle) * radius; // Invertimos Y
+            }
+            
+            // Update stick position
+            stick.style.left = `${normalizedX}px`;
+            stick.style.top = `${normalizedY}px`;
+            
+            if (updateDisplay) {
+                // Calculate direction (-180 to +180)
+                let direction = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+                
+                // Calculate normalized X/Y coordinates (-1 to +1)
+                const normalizedCoordX = Math.cos(direction * Math.PI / 180);
+                const normalizedCoordY = Math.sin(direction * Math.PI / 180);
+                
+                // Calculate magnitude (0-1)
+                const magnitude = Math.min(distance / radius, 1);
+                
+                valueDisplay.textContent = `Direction: ${Math.round(direction)}°, Speed: ${magnitude.toFixed(2)}, X: ${(normalizedCoordX * magnitude).toFixed(2)}, Y: ${(normalizedCoordY * magnitude).toFixed(2)}`;
+                
+                if (onChange) {
+                    onChange(direction, magnitude, normalizedCoordX * magnitude, normalizedCoordY * magnitude);
+                }
+            }
+        };
+
+        const handleDrag = (e) => {
+            if (!isDragging) return;
+            
+            const rect = joystickArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            updateStickPosition(x, y);
+        };
+
+        joystickArea.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = joystickArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            updateStickPosition(x, y);
+        });
+
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                updateStickPosition(centerX, centerY);
+            }
+        });
+
+        // Initial position
+        updateStickPosition(centerX, centerY);
+        
+        joystickArea.appendChild(stick);
+        joystickContainer.appendChild(joystickArea);
+        joystickContainer.appendChild(valueDisplay);
+        
+        return joystickContainer;
+    }
 }

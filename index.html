@@ -53,8 +53,8 @@
         document.body.appendChild(iconBarHorizontal);
 
         // --------------------------------------
-        // Panel
-        let panel = ui.panel('Panel 1');
+        // Panel 1
+        let panel = ui.panel('Panel 1', null, null, 10, 10);
         
         // Buttons
         let separator1 = ui.separator('Buttons', '#06f3b1');
@@ -110,14 +110,22 @@
         panel.addContent(separator5);
         panel.addContent(checkboxGroup);
 
+        // Add panel to body
+        document.body.appendChild(panel);
+
+        // --------------------------------------
+        // Panel 2
+        //let panel2 = ui.panel('Panel 2', null, null, 300, 500);
+        let panel2 = panel;
+    
         // Folder
         let separator6 = ui.separator('Folder', '#06f3b1');
         // Buttons for Collapsable Folder
         let folderButton1 = ui.button('Folder Button 1');
         let folderButton2 = ui.button('Folder Button 2');
         let folder = ui.folder('My Folder', 'icon-folder-close', 'icon-folder-open', '#06f3b1', '#F7227E', true, [folderButton1, folderButton2]);
-        panel.addContent(separator6);
-        panel.addContent(folder);
+        panel2.addContent(separator6);
+        panel2.addContent(folder);
 
         // Tabs
         let separator7 = ui.separator('Tabs', '#06f3b1');
@@ -136,10 +144,57 @@
         ], '1');
         let tabPage2 = ui.tabPage('Settings', 'icon-folder-close', [tabPage2Button1, tabPage2SliderRange, tabPage2Dropdown]);
         let tabs = ui.tabs([tabPage1, tabPage2], 0);
-        panel.addContent(separator7);
-        panel.addContent(tabs);
+        panel2.addContent(separator7);
+        panel2.addContent(tabs);
         
-        document.body.appendChild(panel);
+        // Vector2
+        let separator8 = ui.separator('Vector2', '#06f3b1');
+        let vector2Control = ui.vector2('Position', -10, 10, -10, 10, 0, 0, 15,
+            (x, y) => console.log(`Position changed: x=${x}, y=${y}`)
+        );
+        panel2.addContent(separator8);
+        panel2.addContent(vector2Control);
+        
+
+        // Add panel to body
+       // document.body.appendChild(panel2);
+
+
+
+        // Crear status bar
+        const statusBar = ui.statusBar();
+
+        // Agregar items al status bar
+        const statusItem1 = ui.statusBarItem('Ready', 'icon-check');
+        const statusItem2 = ui.statusBarItem('Line 1, Column 1', 'icon-cursor');
+        const statusItem3 = ui.statusBarItem('UTF-8', 'icon-file');
+
+        statusBar.appendChild(statusItem1);
+        statusBar.appendChild(statusItem2);
+        statusBar.appendChild(statusItem3);
+
+        document.body.appendChild(statusBar);
+
+        // Crear un botón con tooltip
+        const button = ui.button('Hover me');
+        ui.tooltip(button, 'This is a tooltip that will adjust its position automatically!', 'top');
+        document.body.appendChild(button);
+
+        // Crear un faceplate
+        const faceplate = ui.faceplate([
+
+            ui.joystick(null, 140, (direction, speed, x, y) => {
+                    console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+            })
+        ]);
+
+        // Hacer el faceplate draggable
+       // ui.setDraggable(faceplate);
+
+        // Agregar el faceplate al documento
+        document.body.appendChild(faceplate);
+
+
     </script>
 </body>
 </html>
