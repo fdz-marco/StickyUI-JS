@@ -4,7 +4,7 @@
 /* Description: A simple class to create user interfaces over the browser DOM
 /* specially useful for canvas-based applications or HMIs.
 /* Author: Marco Fernandez (marcofdz.com)
-/* Version: 1.0.0
+/* Version: 1.0.1
 /* License: MIT
 /* Repository: https://github.com/fdz-marco/StickyUI-JS
 /* File: StickyUI.js
@@ -55,7 +55,7 @@ class StickyUI {
     }
 
     // ----------------------------------------
-    // Main Containers
+    // Context Menu & Menu Bar
     // ----------------------------------------
  
     // Context Menu 
@@ -78,7 +78,7 @@ class StickyUI {
             contextMenuItem.addEventListener('click', (e) => {
                 e.stopPropagation();
                 contextMenuItem.onClick();
-                //contextMenu.remove();
+                contextMenuItem.closest(".contextMenu").hideContextMenu();
             });
         }
         
@@ -173,6 +173,111 @@ class StickyUI {
 
         return menuBar;
     }
+
+    // ----------------------------------------
+    // Status Bar
+    // ----------------------------------------
+    
+    statusBar = () => {
+        const container = this.element('div', null, 'statusBar');
+        return container;
+    }
+
+    statusBarItem = (text = '', icon = null) => {
+        const container = this.element('div', null, 'statusBarItem');
+        
+        if (icon) {
+            const iconElement = this.element('div', null, 'icon');
+            iconElement.classList.add(icon);
+            container.appendChild(iconElement);
+        }
+        
+        if (text) {
+            const textElement = this.element('span', null, null, text);
+            container.appendChild(textElement);
+        }
+        
+        return container;
+    }
+
+    // ----------------------------------------
+    // Tooltip
+    // ----------------------------------------
+
+    tooltip = (element, text, position = 'top') => {
+        const tooltip = this.element('div', null, 'tooltip', text);
+
+        const showTooltip = (e) => {
+            tooltip.classList.add('show');
+            
+            // Calculate position
+            const elementRect = element.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+            
+            let left, top;
+            let preferredPosition = position;
+            
+            // Check available space
+            const spaceTop = elementRect.top;
+            const spaceBottom = window.innerHeight - elementRect.bottom;
+            const spaceLeft = elementRect.left;
+            const spaceRight = window.innerWidth - elementRect.right;
+            
+            // Adjust position based on available space
+            if (preferredPosition === 'top' && spaceTop < tooltipRect.height) {
+                preferredPosition = 'bottom';
+            } else if (preferredPosition === 'bottom' && spaceBottom < tooltipRect.height) {
+                preferredPosition = 'top';
+            } else if (preferredPosition === 'left' && spaceLeft < tooltipRect.width) {
+                preferredPosition = 'right';
+            } else if (preferredPosition === 'right' && spaceRight < tooltipRect.width) {
+                preferredPosition = 'left';
+            }
+            
+            // Apply position
+            switch (preferredPosition) {
+                case 'top':
+                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
+                    top = elementRect.top - tooltipRect.height - 8;
+                    break;
+                case 'bottom':
+                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
+                    top = elementRect.bottom + 8;
+                    break;
+                case 'left':
+                    left = elementRect.left - tooltipRect.width - 8;
+                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
+                    break;
+                case 'right':
+                    left = elementRect.right + 8;
+                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
+                    break;
+            }
+            
+            // Ensure the tooltip does not go out of the window
+            left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
+            top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
+            
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            
+            // Update position class
+            tooltip.className = `tooltip show ${preferredPosition}`;
+        };
+
+        const hideTooltip = () => {
+            tooltip.classList.remove('show');
+        };
+
+        element.addEventListener('mouseenter', showTooltip);
+        element.addEventListener('mouseleave', hideTooltip);
+        
+        return tooltip;
+    }
+
+    // ----------------------------------------
+    // Main Containers
+    // ----------------------------------------
         
     // Panel Title Bar
     panelTitleBar = (titleText = 'Panel') => {
@@ -206,10 +311,12 @@ class StickyUI {
         panel.appendChild(content);
 
         // Configurations
-        if (width)      panel.style.width = width;
-        if (height)     panel.style.height = height;
-        if (positionX)  panel.style.right = positionX;
-        if (positionY)  panel.style.top = positionY;
+        if (width)      panel.style.width = `${width}px`;
+        if (height)     panel.style.height = `${height}px`;
+        if (positionX > 0)  panel.style.left = `${positionX}px`;
+        if (positionY > 0)  panel.style.top = `${positionY}px`;      
+        if (positionX < 0)  panel.style.right = `${positionX*-1}px`;
+        if (positionY < 0)  panel.style.bottom = `${positionY*-1}px`;
 
         // Method to add content externally
         panel.addContent = (element) => {
@@ -248,7 +355,7 @@ class StickyUI {
 
         // Add Drag and Resize
         this.setDraggable(panel, titleBar);
-        this.setResize(panel);
+        this.setResizable(panel);
 
         return panel;
     }
@@ -263,172 +370,165 @@ class StickyUI {
 
     separator = (titleText = null, color = null) => {
         const UID = this.UID();
-        const separator = this.element('div', `separator_${UID}`, 'separator');
+        const container = this.element('div', `separator_${UID}`, 'separator');
         
-        // Configurations
         if (titleText) {
-            separator.classList.add('separator-with-title');
+            container.classList.add('separator-with-title');
             const titleSpan = this.element('span', `separatorTitle_${UID}`, 'separator-title', titleText);
-            separator.appendChild(titleSpan);
+            container.appendChild(titleSpan);
         }
+
         if (color)
-            separator.style.setProperty('--separator-color', color);
+            container.style.setProperty('--separator-color', color);
         
-        return separator;
+        return container;
     }
 
     button = (labelText = 'Button', bgColor = null, bgColorHover = null) => {
         const UID = this.UID();
-        const button = this.element('div', `btn_${UID}`, 'button');
-        button.innerHTML = labelText;
-        
-        // Configurations
+        const container = this.element('div', `btn_${UID}`, 'button', labelText);
+                
         if (bgColor)
-            button.style.background = bgColor;
+            container.style.background = bgColor;
+
         if (bgColorHover) {
-            button.addEventListener('mouseenter', () => {
-                button.style.background = bgColorHover;
+            container.addEventListener('mouseenter', () => {
+                container.style.background = bgColorHover;
             });
             
-            button.addEventListener('mouseleave', () => {
-                button.style.background = bgColor || ''; 
+            container.addEventListener('mouseleave', () => {
+                container.style.background = bgColor || ''; 
             });
         }
-        return button;
+        return container;
     }
 
     switch = (labelText = 'Switch', colorActive = null, colorInactive = null) => {
         const UID = this.UID();
-        const switchContainer = this.element('div', `switchContainer_${UID}`, 'switchContainer');
-        const switchLabel = this.element('div', `switchLabel_${UID}`, 'switchLabel', labelText);
-        const switchControlWrapper = this.element('div', `switchControlWrapper_${UID}`, 'controlWrapper');
-        const switchControl = this.element('label', `switchControl_${UID}`, null);
+        const container = this.element('div', `switchContainer_${UID}`, 'controlContainer');
+        const label = this.element('div', `label_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
+        const switchControl = this.element('label', `switchGroup_${UID}`, 'switchGroup');
         const switchInput = this.element('input', `switchInput_${UID}`, 'switchInput');
         const switchSlider = this.element('span', `switchSlider_${UID}`, 'switchSlider');
+        
         switchInput.type = 'checkbox';
 
+        if (labelText) 
+            container.appendChild(label);
+
+        controlWrapper.appendChild(switchControl);
         switchControl.appendChild(switchInput);
         switchControl.appendChild(switchSlider);
-        switchControlWrapper.appendChild(switchControl);
-        switchContainer.appendChild(switchLabel);
-        switchContainer.appendChild(switchControlWrapper);
+        container.appendChild(controlWrapper);
 
-        // Configurations
         if (colorInactive) 
             switchSlider.style.backgroundColor = colorInactive;
+
         if (colorActive)
             switchInput.addEventListener('change', () => {
                 switchSlider.style.backgroundColor = switchInput.checked ? colorActive : (colorInactive || '');
             });
 
-        return switchContainer;
+        return container;
     }
     
     textInput = (labelText = 'Text Input', placeholder = '', defaultValue = '') => {
         const UID = this.UID();
-        const textInput = this.element('div', `inputContainer_${UID}`, 'inputContainer');
-        
-        // Configurations
-        if (labelText) {
-            const labelElement = this.element('label', `inputLabel_${UID}`, 'inputLabel', labelText);
-            textInput.appendChild(labelElement);
-        }
+        const container = this.element('div', `textInputContainer_${UID}`, 'controlContainer');
+        const label = this.element('div', `label_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
+        const textInput = this.element('input', `textInput_${UID}`, 'textInput');
 
-        // Text Input Control Wrapper
-        const textInputControlWrapper = this.element('div', `textInputControlWrapper_${UID}`, 'controlWrapper');
-        const input = this.element('input', `input_${UID}`, 'textInput');
-        input.type = 'text';
-        input.placeholder = placeholder;
-        input.value = defaultValue;
-        
-        textInputControlWrapper.appendChild(input);
-        textInput.appendChild(textInputControlWrapper);
-        return textInput;
+        textInput.type = 'text';
+        textInput.placeholder = placeholder;
+        textInput.value = defaultValue;
+            
+        if (labelText)
+            container.appendChild(label);
+
+        controlWrapper.appendChild(textInput);
+        container.appendChild(controlWrapper);
+
+        return container;
     }
 
     dropdown = (labelText  = 'Dropdown', options = [], defaultOption = null) => {
         const UID = this.UID();
-        const dropdown = this.element('div', `dropdownContainer_${UID}`, 'dropdownContainer');
-        
-        // Configurations
-        if (labelText) {
-            const labelElement = this.element('label', `dropdownLabel_${UID}`, 'dropdownLabel', labelText);
-            dropdown.appendChild(labelElement);
-        }
-
-        // Dropdown Control Wrapper
-        const dropdownControlWrapper = this.element('div', `dropdownControlWrapper_${UID}`, 'controlWrapper');
+        const container = this.element('div', `dropdownContainer_${UID}`, 'controlContainer');
+        const label = this.element('div', `label_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
         const select = this.element('select', `dropdown_${UID}`, 'dropdown');
-        options.forEach(option => {
-            let optionElement = this.element('option', null, null, option.label);
+
+        options.forEach((option, index) => {
+            let optionElement = this.element('option', `option_${index}_${UID}`, 'option', option.label);
             optionElement.value = option.value;
-            if (defaultOption && option.value === defaultOption) {
+            if (defaultOption && option.value === defaultOption)
                 optionElement.selected = true;
-            }
             select.appendChild(optionElement);
         });
+
+        if (labelText)
+            container.appendChild(label);
         
-        dropdownControlWrapper.appendChild(select);
-        dropdown.appendChild(dropdownControlWrapper);
-        return dropdown;
+        controlWrapper.appendChild(select);
+        container.appendChild(controlWrapper);
+        return container;
     }
 
     // ----------------------------------------
-    // Advanced Controls
+    // Advanced Controls 1
     // ----------------------------------------
 
     checkboxGroup = (labelText = null, options) => {
         const UID = this.UID();
+        const container = this.element('div', `checkboxGroupContainer_${UID}`, 'controlContainer');
+        const label = this.element('div', `label_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
         const checkboxGroup = this.element('div', `checkboxGroup_${UID}`, 'checkboxGroup');
         
-        if (labelText) {
-            const groupLabel = this.element('label', `checkboxGroupLabel_${UID}`, 'checkboxGroupLabel', labelText);
-            checkboxGroup.appendChild(groupLabel);
-        }
-
-        const checkBoxControlWrapper = this.element('div', `checkboxGroupControlWrapper_${UID}`, 'controlWrapper');
         options.forEach(option => {
             const checkboxContainer = this.element('div', `checkboxContainer_${UID}`, 'checkboxContainer');
-            const checkbox = this.element('input', `checkbox_${UID}_${option.value}`, 'checkbox');
+            const checkbox = this.element('input', `checkbox_${option.value}_${UID}`, 'checkbox');
             const checkboxLabel = this.element('label', null, 'checkboxLabel', option.label);
             checkbox.type = 'checkbox';
             checkbox.checked = option.checked || false;
             checkboxContainer.appendChild(checkbox);
             checkboxContainer.appendChild(checkboxLabel);
-            checkBoxControlWrapper.appendChild(checkboxContainer);
+            checkboxGroup.appendChild(checkboxContainer);
         });
 
-        checkboxGroup.appendChild(checkBoxControlWrapper);
-        return checkboxGroup;
+        if (labelText)
+            container.appendChild(label);
+
+        controlWrapper.appendChild(checkboxGroup);
+        container.appendChild(controlWrapper);
+
+        return container;
     }
 
     colorPicker = (labelText = 'Color Picker', defaultColor = '#000000') => {
         const UID = this.UID();
-        const colorPicker = this.element('div', `colorContainer_${UID}`, 'colorContainer');
-        
-        // Configurations
-        if (labelText) {
-            const labelElement = this.element('label', `colorLabel_${UID}`, 'colorLabel', labelText);
-            colorPicker.appendChild(labelElement);
-        }
+        const container = this.element('div', `colorPickerContainer_${UID}`, 'controlContainer');
+        const label = this.element('div', `label_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
 
-        // Color Picker Control Wrapper
-        const colorPickerControlWrapper = this.element('div', `colorPickerControlWrapper_${UID}`, 'controlWrapper');
-        const colorInput = this.element('input', `colorPicker_${UID}`, 'colorPicker');
+        const colorPicker = this.element('input', `colorPicker_${UID}`, 'colorPicker');
         const valueContainer = this.element('div', `valueContainer_${UID}`, 'colorValueContainer');
         const valueDisplay = this.element('input', `colorValue_${UID}`, 'colorValue');
         const formatToggle = this.element('button', `formatToggle_${UID}`, 'colorFormatToggle', 'HEX');
-        colorInput.type = 'color';
-        colorInput.value = defaultColor;        
+
+        colorPicker.type = 'color';
+        colorPicker.value = defaultColor;        
         valueDisplay.type = 'text';
         valueDisplay.readOnly = true;
         valueDisplay.value = defaultColor;
 
         let currentFormat = 'hex';
-        
+
         // Function to convert color to different formats
         const updateColorValue = () => {
-            const hex = colorInput.value;
+            const hex = colorPicker.value;
             const r = parseInt(hex.slice(1, 3), 16);
             const g = parseInt(hex.slice(3, 5), 16);
             const b = parseInt(hex.slice(5, 7), 16);
@@ -470,7 +570,7 @@ class StickyUI {
         };
 
         // Event listeners
-        colorInput.addEventListener('input', updateColorValue);
+        colorPicker.addEventListener('input', updateColorValue);
         
         formatToggle.addEventListener('click', () => {
             switch(currentFormat) {
@@ -493,28 +593,26 @@ class StickyUI {
         // Initial value update
         updateColorValue();
 
+        if (labelText) 
+            container.appendChild(label);
+
         valueContainer.appendChild(valueDisplay);
         valueContainer.appendChild(formatToggle);
-        colorPickerControlWrapper.appendChild(colorInput);
-        colorPickerControlWrapper.appendChild(valueContainer);
-        colorPicker.appendChild(colorPickerControlWrapper);
+        controlWrapper.appendChild(colorPicker);
+        controlWrapper.appendChild(valueContainer);
+        container.appendChild(controlWrapper);
         
-        return colorPicker;
+        return container;
     }
 
     sliderRange = (labelText = 'Slider Range', min = 0, max = 100, step = 1, defaultValue = 0) => {
         const UID = this.UID();
-        const sliderRange = this.element('div', `sliderContainer_${UID}`, 'sliderContainer');
-        
-        // Configurations
-        if (labelText) {
-            const labelElement = this.element('label', `sliderLabel_${UID}`, 'sliderLabel', labelText);
-            sliderRange.appendChild(labelElement);
-        }
-
-        const sliderControlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
+        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer');
+        const label = this.element('label', `sliderLabel_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
         const sliderInput = this.element('input', `sliderInput_${UID}`, 'sliderRange');
         const sliderValueDisplay = this.element('span', `sliderValue_${UID}`, 'sliderValue');
+
         sliderInput.type = 'range';
         sliderInput.min = min;
         sliderInput.max = max;
@@ -537,34 +635,33 @@ class StickyUI {
         // Initial value update
         updateSliderValue();
 
-        sliderControlWrapper.appendChild(sliderInput);
-        sliderControlWrapper.appendChild(sliderValueDisplay);
-        sliderRange.appendChild(sliderControlWrapper);
-        return sliderRange;
+        if (labelText)
+            container.appendChild(label)
+
+        controlWrapper.appendChild(sliderInput);
+        controlWrapper.appendChild(sliderValueDisplay);
+        container.appendChild(controlWrapper);
+
+        return container;
     }
 
     sliderStepper = (labelText = 'Slider Stepper', min = 0, max = 100, step = 1, defaultValue = 0) => {
         const UID = this.UID();
-        const sliderStepper = this.element('div', `sliderContainer_${UID}`, 'sliderContainer');
-        
-        // Configurations
-        if (labelText) {
-            const labelElement = this.element('label', `sliderLabel_${UID}`, 'sliderLabel', labelText);
-            sliderStepper.appendChild(labelElement);
-        }
-
-        const sliderControlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
+        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer');
+        const label = this.element('label', `sliderLabel_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
         const sliderInput = this.element('input', `sliderInput_${UID}`, 'sliderStepper');
         const sliderValueDisplay = this.element('span', `sliderValue_${UID}`, 'sliderValue');
         const decrementBtn = this.element('button', `sliderButtonDecrement_${UID}`, 'sliderStepperButton', '-');
         const incrementBtn = this.element('button', `sliderButtonIncrement_${UID}`, 'sliderStepperButton', '+');
-        
+
         sliderInput.type = 'range';
         sliderInput.min = min;
         sliderInput.max = max;
         sliderInput.step = step;
         sliderInput.value = defaultValue;
         sliderValueDisplay.textContent = defaultValue;
+
 
         // Method to update the slider value
         const updateSliderValue = () => {
@@ -594,26 +691,23 @@ class StickyUI {
         // Initial value update
         updateSliderValue();
 
-        sliderControlWrapper.appendChild(decrementBtn);
-        sliderControlWrapper.appendChild(sliderInput);
-        sliderControlWrapper.appendChild(incrementBtn);
-        sliderControlWrapper.appendChild(sliderValueDisplay);
-        
-        sliderStepper.appendChild(sliderControlWrapper);
-        return sliderStepper;
+        if (labelText) 
+            container.appendChild(label);
+
+        controlWrapper.appendChild(decrementBtn);
+        controlWrapper.appendChild(sliderInput);
+        controlWrapper.appendChild(incrementBtn);
+        controlWrapper.appendChild(sliderValueDisplay);
+        container.appendChild(controlWrapper);
+
+        return container;
     }
 
     sliderInterval = (labelText = 'Slider Interval', min = 0, max = 100, step = 1, defaultValue = 25, defaultValueEnd = 75) => {
         const UID = this.UID();
-        const sliderInterval = this.element('div', `sliderContainer_${UID}`, 'sliderContainer');
-        
-        // Configurations
-        if (labelText) {
-            const labelElement = this.element('label', `sliderLabel_${UID}`, 'sliderLabel', labelText);
-            sliderInterval.appendChild(labelElement);
-        }
-
-        const sliderControlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
+        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer');
+        const label = this.element('label', `sliderLabel_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
         const valueDisplayStart = this.element('span', `sliderValueStart_${UID}`, 'sliderValue', defaultValue);
         const sliderContainer = this.element('div', null, 'sliderInterval');
         const valueDisplayEnd = this.element('span', `sliderValueEnd_${UID}`, 'sliderValue', defaultValueEnd);
@@ -667,15 +761,233 @@ class StickyUI {
             updateGradient();
         });
 
+        if (labelText) 
+            container.appendChild(label);
 
         sliderContainer.appendChild(sliderStart);
         sliderContainer.appendChild(sliderEnd);
-        sliderControlWrapper.appendChild(valueDisplayStart);
-        sliderControlWrapper.appendChild(sliderContainer);
-        sliderControlWrapper.appendChild(valueDisplayEnd);
-        sliderInterval.appendChild(sliderControlWrapper);
+        controlWrapper.appendChild(valueDisplayStart);
+        controlWrapper.appendChild(sliderContainer);
+        controlWrapper.appendChild(valueDisplayEnd);
+        container.appendChild(controlWrapper);
 
-        return sliderInterval;
+        return container;
+    }
+
+    // ----------------------------------------
+    // Advanced Controls 2
+    // ----------------------------------------
+    
+    vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
+        const UID = this.UID();
+        const container = this.element('div', `vector2Container_${UID}`, 'controlContainer');
+        const label = this.element('div', `vector2Label_${UID}`, 'label', labelText);
+        const controlWrapper = this.element('div', `vector2ControlWrapper_${UID}`, 'controlWrapper');
+        const area = this.element('div', `vector2Area_${UID}`, 'vector2Area');
+        const grid = this.element('div', `vector2Grid_${UID}`, 'vector2Grid');
+        const point = this.element('div', `vector2Point_${UID}`, 'vector2Point');
+        const values = this.element('div', `vector2Values_${UID}`, 'vector2Values');
+        const valueX = this.element('div', `vector2ValueX_${UID}`, 'vector2Value');
+        const valueY = this.element('div', `vector2ValueY_${UID}`, 'vector2Value');
+        const labelX = this.element('span', `vector2LabelX_${UID}`, 'vector2ValueLabel', 'X:');
+        const labelY = this.element('span', `vector2LabelY_${UID}`, 'vector2ValueLabel', 'Y:');
+        const valueXText = this.element('span', `vector2ValueXText_${UID}`);
+        const valueYText = this.element('span', `vector2ValueYText_${UID}`);
+        
+        grid.style.setProperty('--grid-size', `${gridSize}px`);
+        
+        // Method to update Position
+        const updatePosition = (x, y, updatePoint = true) => {
+            const normalizedX = (x - minX) / (maxX - minX);
+            const normalizedY = 1 - (y - minY) / (maxY - minY);
+            
+            if (updatePoint) {
+                point.style.left = `${normalizedX * 100}%`;
+                point.style.top = `${normalizedY * 100}%`;
+            }
+            
+            valueXText.textContent = x.toFixed(2);
+            valueYText.textContent = y.toFixed(2);
+            
+            if (onChange) onChange(x, y);
+        };
+
+        // Method to handle Drag
+        let isDragging = false;
+
+        const handleDrag = (e) => {
+            if (!isDragging) return;
+
+            const rect = area.getBoundingClientRect();
+            const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+            
+            const valueX = minX + x * (maxX - minX);
+            const valueY = maxY - y * (maxY - minY);
+            
+            updatePosition(valueX, valueY);
+        };
+
+        const startDragging = (e) => {
+            isDragging = true;
+            const rect = area.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            
+            const valueX = minX + x * (maxX - minX);
+            const valueY = maxY - y * (maxY - minY);
+            
+            updatePosition(valueX, valueY);
+        };
+
+        // Initial value update
+        updatePosition(defaultX, defaultY);
+
+        // Event listeners
+        area.addEventListener('mousedown', startDragging);
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        if (labelText) 
+            container.appendChild(label);
+        
+        // Add Labels and Values
+        valueX.appendChild(labelX);
+        valueX.appendChild(valueXText);
+        valueY.appendChild(labelY);
+        valueY.appendChild(valueYText);
+        // Add Grid and Point
+        area.appendChild(grid);
+        area.appendChild(point);
+        values.appendChild(valueX);
+        values.appendChild(valueY);
+        // Add Area and Values to Control Wrapper
+        controlWrapper.appendChild(area);
+        controlWrapper.appendChild(values);
+        // Add Control Wrapper to Container
+        container.appendChild(controlWrapper);
+        
+        return container;
+    }
+    
+    joystick = (labelText = 'Joystick', showDetails = false, size = null, onChange = null) => {
+        const UID = this.UID();
+        const container = this.element('div', `joystickContainer_${UID}`, 'joystickContainer');
+        const label = this.element('div', `joystickLabel_${UID}`, 'label', labelText);
+        const joystickArea = this.element('div', `joystickArea_${UID}`, 'joystickArea');
+        const joystick = this.element('div', `joystick_${UID}`, 'joystick');
+        const valueDisplay = this.element('div', `joystickValue_${UID}`, 'joystickValue');
+        
+        // Method to get dimensions
+        const setDimensions = () => {
+            const parentElement = container.parentElement;
+            if (parentElement) {
+                const parentRect = parentElement.getBoundingClientRect();
+                const areaSize = size || Math.min(parentRect.width, parentRect.height);
+                joystickArea.style.width = `${areaSize}px`;
+                joystickArea.style.height = `${areaSize}px`;
+                joystick.style.width = `${areaSize * 0.3}px`;
+                joystick.style.height = `${areaSize * 0.3}px`;
+                return areaSize;
+            }
+            return size || 200;
+        };
+
+        // Method to update Display
+        const setUpdateDisplay = (deltaY, deltaX, distance, radius) => {
+            let direction = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+                
+            // Calculate normalized X/Y coordinates (-1 to +1)
+            const normalizedCoordX = Math.cos(direction * Math.PI / 180);
+            const normalizedCoordY = Math.sin(direction * Math.PI / 180);
+            
+            // Calculate magnitude (0-1)
+            const magnitude = Math.min(distance / radius, 1);
+            
+            valueDisplay.textContent = `Direction: ${Math.round(direction)}°, Speed: ${magnitude.toFixed(2)}, X: ${(normalizedCoordX * magnitude).toFixed(2)}, Y: ${(normalizedCoordY * magnitude).toFixed(2)}`;
+            
+            if (onChange) {
+                onChange(direction, magnitude, normalizedCoordX * magnitude, normalizedCoordY * magnitude);
+            }            
+        }
+
+        // Method to update Position
+        const updateStickPosition = (x, y, updateDisplay = true) => {
+            const areaRect = joystickArea.getBoundingClientRect();
+            const centerX = areaRect.width / 2;
+            const centerY = areaRect.height / 2;
+            
+            // Calculate distance from center
+            const deltaX = x - centerX;
+            const deltaY = centerY - y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const radius = areaRect.width / 2 - 20;
+            
+            // Normalize if outside bounds
+            let normalizedX = x;
+            let normalizedY = y;
+            if (distance > radius) {
+                const angle = Math.atan2(deltaY, deltaX);
+                normalizedX = centerX + Math.cos(angle) * radius;
+                normalizedY = centerY - Math.sin(angle) * radius;
+            }
+            
+            // Update stick position
+            joystick.style.left = `${normalizedX}px`;
+            joystick.style.top = `${normalizedY}px`;
+            
+            if (updateDisplay) 
+                setUpdateDisplay(deltaY, deltaX, distance, radius);
+        };
+
+        // Method to handle Drag
+        let isDragging = false;
+
+        const handleDrag = (e) => {
+            if (!isDragging) return;
+            
+            const rect = joystickArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            updateStickPosition(x, y);
+        };
+
+        // Event listeners
+        joystickArea.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = joystickArea.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            updateStickPosition(x, y);
+        });
+
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                const rect = joystickArea.getBoundingClientRect();
+                updateStickPosition(rect.width / 2, rect.height / 2);
+            }
+        });
+
+        // Initial value update
+        setUpdateDisplay(0, 0, 0, 1);
+
+        if (labelText) 
+            container.appendChild(label);
+        joystickArea.appendChild(joystick);
+        container.appendChild(joystickArea);
+        if (showDetails)
+            container.appendChild(valueDisplay);
+
+        // Update position after adding to DOM
+        requestAnimationFrame(() => {
+            const areaSize = setDimensions();
+            updateStickPosition(areaSize / 2, areaSize / 2, false);
+        });
+
+        return container;
     }
 
     // ----------------------------------------
@@ -691,21 +1003,16 @@ class StickyUI {
         const folderToggleButton = this.element('div', `folderToggleButton_${UID}`, 'folderToggleButton');
         const contentContainer = this.element('div', `folderContent_${UID}`, 'folderContent');
 
-        // Configurations
         if (bgColor) {
             folderHeader.style.backgroundColor = bgColor;
         }
+
         if (bgColorHover) {
             folderHeader.dataset.hoverColor = bgColorHover;
             folderHeader.addEventListener('mouseenter', e => e.target.style.backgroundColor = bgColorHover);
             folderHeader.addEventListener('mouseleave', e => e.target.style.backgroundColor = bgColor || '');
         }
 
-        folderHeader.appendChild(folderIcon);
-        folderHeader.appendChild(folderTitle);
-        folderHeader.appendChild(folderToggleButton);
-
-        // Default Status
         if (defaultClosed) {
             contentContainer.classList.add('collapsed');
             folderToggleButton.innerHTML = '<div class="icon icon-chevron-up"></div>';
@@ -742,6 +1049,9 @@ class StickyUI {
             }
         });
         
+        folderHeader.appendChild(folderIcon);
+        folderHeader.appendChild(folderTitle);
+        folderHeader.appendChild(folderToggleButton);
         folder.appendChild(folderHeader);
         folder.appendChild(contentContainer);
         return folder;
@@ -751,8 +1061,10 @@ class StickyUI {
         const UID = this.UID();
         const tabPage = this.element('div', `tabPage_${UID}`, 'tabPage');
         const tabPageButton = this.element('button', `tabPageButton_${UID}`, 'tabPageButton');
+        
         if (titleText)
             tabPageButton.textContent = titleText;
+
         if (icon) {
             const tabPageIcon = this.element('div', `tabPageIcon_${UID}`, 'icon');
             tabPageIcon.classList.add(icon);
@@ -765,8 +1077,7 @@ class StickyUI {
             tabPageControls.appendChild(control);
         });
 
-        tabPage.appendChild(tabPageControls);
-        
+        tabPage.appendChild(tabPageControls);    
         return { tabPage, tabPageButton };
     }
 
@@ -804,10 +1115,33 @@ class StickyUI {
     }
 
     // ----------------------------------------
+    // Faceplate
+    // ----------------------------------------
+
+    faceplate = (controls = [], width = null, height = null, positionX = null, positionY = null) => {
+        const UID = this.UID();
+        const faceplate = this.element('div', `faceplate_${UID}`, 'faceplate');
+
+        // Configurations
+        if (width)      faceplate.style.width = `${width}px`;
+        if (height)     faceplate.style.height = `${height}px`;
+        if (positionX > 0)  faceplate.style.left = `${positionX}px`;
+        if (positionY > 0)  faceplate.style.top = `${positionY}px`;      
+        if (positionX < 0)  faceplate.style.right = `${positionX*-1}px`;
+        if (positionY < 0)  faceplate.style.bottom = `${positionY*-1}px`;
+        
+        // Add Controls
+        controls.forEach(control => {
+            faceplate.appendChild(control);
+        });
+        
+        return faceplate;
+    }
+
+    // ----------------------------------------
     // Draggable and Resizable
     // ----------------------------------------
 
-    // Draggable
     setDraggable = (element, handle = null) => {
         let isDragging = false;
         let currentX, currentY, initialX, initialY;
@@ -864,8 +1198,7 @@ class StickyUI {
         });
     }
 
-    // Resize
-    setResize = (element) => {
+    setResizable = (element) => {
         let isResizing = false;
         let initialWidth, initialHeight, initialX, initialY;
 
@@ -903,301 +1236,4 @@ class StickyUI {
         document.head.appendChild(styleSheet)
     }*/
 
-    vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
-        const UID = this.UID();
-        const vector2 = this.element('div', `vector2Container_${UID}`, 'vector2Container');
-        
-        if (labelText) {
-            const label = this.element('label', `vector2Label_${UID}`, 'sliderLabel', labelText);
-            vector2.appendChild(label);
-        }
-
-        const controlWrapper = this.element('div', `vector2ControlWrapper_${UID}`, 'vector2ControlWrapper');
-        const area = this.element('div', `vector2Area_${UID}`, 'vector2Area');
-        const grid = this.element('div', `vector2Grid_${UID}`, 'vector2Grid');
-        const point = this.element('div', `vector2Point_${UID}`, 'vector2Point');
-        const values = this.element('div', `vector2Values_${UID}`, 'vector2Values');
-        
-        // Crear contenedores de valor con etiquetas
-        const valueX = this.element('div', `vector2ValueX_${UID}`, 'vector2Value');
-        const valueY = this.element('div', `vector2ValueY_${UID}`, 'vector2Value');
-        const labelX = this.element('span', `vector2LabelX_${UID}`, 'vector2ValueLabel', 'X:');
-        const labelY = this.element('span', `vector2LabelY_${UID}`, 'vector2ValueLabel', 'Y:');
-        const valueXText = this.element('span', `vector2ValueXText_${UID}`);
-        const valueYText = this.element('span', `vector2ValueYText_${UID}`);
-        
-        valueX.appendChild(labelX);
-        valueX.appendChild(valueXText);
-        valueY.appendChild(labelY);
-        valueY.appendChild(valueYText);
-
-        // Configurar el tamaño de la cuadrícula
-        grid.style.setProperty('--grid-size', `${gridSize}px`);
-        
-        area.appendChild(grid);
-        area.appendChild(point);
-        values.appendChild(valueX);
-        values.appendChild(valueY);
-
-        const updatePosition = (x, y, updatePoint = true) => {
-            const normalizedX = (x - minX) / (maxX - minX);
-            const normalizedY = 1 - (y - minY) / (maxY - minY);
-            
-            if (updatePoint) {
-                point.style.left = `${normalizedX * 100}%`;
-                point.style.top = `${normalizedY * 100}%`;
-            }
-            
-            valueXText.textContent = x.toFixed(2);
-            valueYText.textContent = y.toFixed(2);
-            
-            if (onChange) onChange(x, y);
-        };
-
-        // Establecer posición inicial
-        updatePosition(defaultX, defaultY);
-
-        // Eventos de arrastre
-        let isDragging = false;
-
-        const handleDrag = (e) => {
-            if (!isDragging) return;
-
-            const rect = area.getBoundingClientRect();
-            const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-            
-            const valueX = minX + x * (maxX - minX);
-            const valueY = maxY - y * (maxY - minY);
-            
-            updatePosition(valueX, valueY);
-        };
-
-        const startDragging = (e) => {
-            isDragging = true;
-            const rect = area.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = (e.clientY - rect.top) / rect.height;
-            
-            const valueX = minX + x * (maxX - minX);
-            const valueY = maxY - y * (maxY - minY);
-            
-            updatePosition(valueX, valueY);
-        };
-
-        // Click y arrastre en el área
-        area.addEventListener('mousedown', startDragging);
-        window.addEventListener('mousemove', handleDrag);
-        window.addEventListener('mouseup', () => isDragging = false);
-
-        controlWrapper.appendChild(area);
-        controlWrapper.appendChild(values);
-        vector2.appendChild(controlWrapper);
-        
-        return vector2;
-    }
-
-    statusBar = () => {
-        const statusBar = this.element('div', null, 'statusBar');
-        return statusBar;
-    }
-
-    statusBarItem = (text = '', icon = null) => {
-        const statusBarItem = this.element('div', null, 'statusBarItem');
-        
-        if (icon) {
-            const iconElement = this.element('div', null, 'icon');
-            iconElement.classList.add(icon);
-            statusBarItem.appendChild(iconElement);
-        }
-        
-        if (text) {
-            const textElement = this.element('span', null, null, text);
-            statusBarItem.appendChild(textElement);
-        }
-        
-        return statusBarItem;
-    }
-
-    tooltip = (element, text, position = 'top') => {
-        const tooltip = this.element('div', null, 'tooltip', text);
-        document.body.appendChild(tooltip);
-
-        const showTooltip = (e) => {
-            tooltip.classList.add('show');
-            
-            // Calcular posición
-            const elementRect = element.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            
-            let left, top;
-            let preferredPosition = position;
-            
-            // Verificar espacio disponible y ajustar posición si es necesario
-            const spaceTop = elementRect.top;
-            const spaceBottom = window.innerHeight - elementRect.bottom;
-            const spaceLeft = elementRect.left;
-            const spaceRight = window.innerWidth - elementRect.right;
-            
-            // Ajustar posición basado en el espacio disponible
-            if (preferredPosition === 'top' && spaceTop < tooltipRect.height) {
-                preferredPosition = 'bottom';
-            } else if (preferredPosition === 'bottom' && spaceBottom < tooltipRect.height) {
-                preferredPosition = 'top';
-            } else if (preferredPosition === 'left' && spaceLeft < tooltipRect.width) {
-                preferredPosition = 'right';
-            } else if (preferredPosition === 'right' && spaceRight < tooltipRect.width) {
-                preferredPosition = 'left';
-            }
-            
-            // Aplicar posición
-            switch (preferredPosition) {
-                case 'top':
-                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
-                    top = elementRect.top - tooltipRect.height - 8;
-                    break;
-                case 'bottom':
-                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
-                    top = elementRect.bottom + 8;
-                    break;
-                case 'left':
-                    left = elementRect.left - tooltipRect.width - 8;
-                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
-                    break;
-                case 'right':
-                    left = elementRect.right + 8;
-                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
-                    break;
-            }
-            
-            // Asegurar que el tooltip no se salga de la ventana
-            left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
-            top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
-            
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
-            
-            // Actualizar clase de posición
-            tooltip.className = `tooltip show ${preferredPosition}`;
-        };
-
-        const hideTooltip = () => {
-            tooltip.classList.remove('show');
-        };
-
-        element.addEventListener('mouseenter', showTooltip);
-        element.addEventListener('mouseleave', hideTooltip);
-        
-        return tooltip;
-    }
-
-    faceplate = (controls = []) => {
-        const UID = this.UID();
-        const faceplate = this.element('div', `faceplate_${UID}`, 'faceplate');
-        
-        // Add Controls
-        controls.forEach(control => {
-            faceplate.appendChild(control);
-        });
-        
-        return faceplate;
-    }
-
-    joystick = (labelText = 'Joystick', size = 200, onChange = null) => {
-        const UID = this.UID();
-        const joystickContainer = this.element('div', `joystickContainer_${UID}`, 'joystickContainer');
-        
-        if (labelText) {
-            const label = this.element('label', `joystickLabel_${UID}`, 'sliderLabel', labelText);
-            joystickContainer.appendChild(label);
-        }
-
-        const joystickArea = this.element('div', `joystickArea_${UID}`, 'joystickArea');
-        const stick = this.element('div', `joystick_${UID}`, 'joystick');
-        const valueDisplay = this.element('div', `joystickValue_${UID}`, 'joystickValue');
-        
-        // Set size
-        joystickArea.style.width = `${size}px`;
-        joystickArea.style.height = `${size}px`;
-        
-        let isDragging = false;
-        let centerX = size / 2;
-        let centerY = size / 2;
-        let currentX = centerX;
-        let currentY = centerY;
-        
-        const updateStickPosition = (x, y, updateDisplay = true) => {
-            // Calculate distance from center
-            const deltaX = x - centerX;
-            const deltaY = centerY - y; // Invertimos Y para que arriba sea positivo
-            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-            const radius = size / 2 - 20;
-            
-            // Normalize if outside bounds
-            let normalizedX = x;
-            let normalizedY = y;
-            if (distance > radius) {
-                const angle = Math.atan2(deltaY, deltaX);
-                normalizedX = centerX + Math.cos(angle) * radius;
-                normalizedY = centerY - Math.sin(angle) * radius; // Invertimos Y
-            }
-            
-            // Update stick position
-            stick.style.left = `${normalizedX}px`;
-            stick.style.top = `${normalizedY}px`;
-            
-            if (updateDisplay) {
-                // Calculate direction (-180 to +180)
-                let direction = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-                
-                // Calculate normalized X/Y coordinates (-1 to +1)
-                const normalizedCoordX = Math.cos(direction * Math.PI / 180);
-                const normalizedCoordY = Math.sin(direction * Math.PI / 180);
-                
-                // Calculate magnitude (0-1)
-                const magnitude = Math.min(distance / radius, 1);
-                
-                valueDisplay.textContent = `Direction: ${Math.round(direction)}°, Speed: ${magnitude.toFixed(2)}, X: ${(normalizedCoordX * magnitude).toFixed(2)}, Y: ${(normalizedCoordY * magnitude).toFixed(2)}`;
-                
-                if (onChange) {
-                    onChange(direction, magnitude, normalizedCoordX * magnitude, normalizedCoordY * magnitude);
-                }
-            }
-        };
-
-        const handleDrag = (e) => {
-            if (!isDragging) return;
-            
-            const rect = joystickArea.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            updateStickPosition(x, y);
-        };
-
-        joystickArea.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            const rect = joystickArea.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            updateStickPosition(x, y);
-        });
-
-        window.addEventListener('mousemove', handleDrag);
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                updateStickPosition(centerX, centerY);
-            }
-        });
-
-        // Initial position
-        updateStickPosition(centerX, centerY);
-        
-        joystickArea.appendChild(stick);
-        joystickContainer.appendChild(joystickArea);
-        joystickContainer.appendChild(valueDisplay);
-        
-        return joystickContainer;
-    }
 }

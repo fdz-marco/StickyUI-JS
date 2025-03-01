@@ -12,10 +12,14 @@
     <script>
         // --------------------------------------
         // Main Library - StickyUI
+        // --------------------------------------
+
         let ui = new StickyUI();
             
         // --------------------------------------
         // Menu Bar
+        // --------------------------------------
+
         let menu1contextMenuItem1 = ui.contextMenuItem('New', 'icon-new', () => console.log('New clicked'));
         let menu1contextMenuItem2 = ui.contextMenuItem('Open', 'icon-open', () => console.log('Open clicked'));
         let menu1contextMenuItem3 = ui.contextMenuItem('Save', 'icon-save', () => console.log('Save clicked'));
@@ -42,6 +46,8 @@
 
         // --------------------------------------
         // Icon Bars
+        // --------------------------------------
+
         let iconBarHorizontal = ui.iconBarHorizontal();
         let iconBarButton1 = ui.iconBarButton();
         let iconBarButton2 = ui.iconBarButton();
@@ -54,7 +60,9 @@
 
         // --------------------------------------
         // Panel 1
-        let panel = ui.panel('Panel 1', null, null, 10, 10);
+        // --------------------------------------
+
+        let panel = ui.panel('Panel 1', null, null, 10, 200);
         
         // Buttons
         let separator1 = ui.separator('Buttons', '#06f3b1');
@@ -76,47 +84,50 @@
         panel.addContent(switch2);
         panel.addContent(switch3);
 
-        // Dropdown / Color Picker / Text Input
-        let separator3 = ui.separator('Dropdown / Color Picker / Text Input', '#06f3b1');
+        // Text Input / Dropdown / Color Picker / 
+        let separator3 = ui.separator(' Text Input / Dropdown', '#06f3b1');
+        let textInput = ui.textInput('Text Input 1', 'Write here...', '');
         let dropdownOptions = [
             { value: 'option1', label: 'Option 1' },
             { value: 'option2', label: 'Option 2' }
         ];
         let dropdown = ui.dropdown('Dropdown List', dropdownOptions, 'option1');
-        let colorPicker = ui.colorPicker('Select Color', '#06f3b1');
-        let textInput = ui.textInput('Text Input 1', 'Write here...', '');
         panel.addContent(separator3);
-        panel.addContent(dropdown);
-        panel.addContent(colorPicker);
         panel.addContent(textInput);
+        panel.addContent(dropdown);
 
+        // Color Picker / Checkbox Group
+        let separator4 = ui.separator('Color Picker / Checkbox Group', '#06f3b1');
+        let checkboxOptions = [
+            { value: 'option1', label: 'Option 1', checked: true },
+            { value: 'option2', label: 'Option 2', checked: false },
+            { value: 'option3', label: 'Option 3', checked: false },
+        ];
+        let checkboxGroup = ui.checkboxGroup('Select Multiple Options', checkboxOptions);
+        let colorPicker = ui.colorPicker('Select Color', '#06f3b1');
+        panel.addContent(separator4);
+        panel.addContent(checkboxGroup);
+        panel.addContent(colorPicker);
+                
         // Sliders
-        let separator4 = ui.separator('Sliders', '#06f3b1');
+        let separator5 = ui.separator('Sliders', '#06f3b1');
         let rangeSlider = ui.sliderRange('Range Slider 1', 0, 100, 1, 50);
         let stepperSlider = ui.sliderStepper('Stepper Slider 2', 0, 100, 5, 50);
         let intervalSlider = ui.sliderInterval('Interval Slider 3', 0, 100, 1, 25, 75);
-        panel.addContent(separator4);
+        panel.addContent(separator5);
         panel.addContent(rangeSlider);
         panel.addContent(stepperSlider);
         panel.addContent(intervalSlider);
-
-        // Checkbox Group
-        let separator5 = ui.separator('Checkbox Group', '#06f3b1');
-        let checkboxOptions = [
-            { value: 'option1', label: 'Opción 1', checked: true },
-            { value: 'option2', label: 'Opción 2', checked: false }
-        ];
-        let checkboxGroup = ui.checkboxGroup('Select Multiple Options', checkboxOptions);
-        panel.addContent(separator5);
-        panel.addContent(checkboxGroup);
 
         // Add panel to body
         document.body.appendChild(panel);
 
         // --------------------------------------
         // Panel 2
-        //let panel2 = ui.panel('Panel 2', null, null, 300, 500);
-        let panel2 = panel;
+        // --------------------------------------
+
+        let panel2 = ui.panel('Panel 2', null, null, -10, 200);
+        //let panel2 = panel;
     
         // Folder
         let separator6 = ui.separator('Folder', '#06f3b1');
@@ -155,18 +166,26 @@
         panel2.addContent(separator8);
         panel2.addContent(vector2Control);
         
+        // Joystick
+        let separator9 = ui.separator('Joystick', '#06f3b1');
+        let joystick1 = ui.joystick('Joystick Name', true, 100, (direction, speed, x, y) => {
+            console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+        });
+        panel2.addContent(separator9);
+        panel2.addContent(joystick1);
 
         // Add panel to body
-       // document.body.appendChild(panel2);
+       document.body.appendChild(panel2);
 
+        // --------------------------------------
+        // Status Bar
+        // --------------------------------------
 
-
-        // Crear status bar
         const statusBar = ui.statusBar();
 
-        // Agregar items al status bar
+        // Add items to status bar
         const statusItem1 = ui.statusBarItem('Ready', 'icon-check');
-        const statusItem2 = ui.statusBarItem('Line 1, Column 1', 'icon-cursor');
+        const statusItem2 = ui.statusBarItem('Line 1, Column 1', 'icon-hash');
         const statusItem3 = ui.statusBarItem('UTF-8', 'icon-file');
 
         statusBar.appendChild(statusItem1);
@@ -175,25 +194,40 @@
 
         document.body.appendChild(statusBar);
 
-        // Crear un botón con tooltip
-        const button = ui.button('Hover me');
-        ui.tooltip(button, 'This is a tooltip that will adjust its position automatically!', 'top');
-        document.body.appendChild(button);
+        // --------------------------------------
+        // Tooltip + Faceplate
+        // --------------------------------------
 
-        // Crear un faceplate
-        const faceplate = ui.faceplate([
+        const buttonTop = ui.button('Hover me : Top');
+        const buttonBottom = ui.button('Hover me : Bottom');
+        const buttonLeft = ui.button('Hover me : Left');
+        const buttonRight = ui.button('Hover me : Right');
 
-            ui.joystick(null, 140, (direction, speed, x, y) => {
-                    console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
-            })
-        ]);
+        const tooltipTop = ui.tooltip(buttonTop, 'This is a tooltip that will adjust its position automatically!', 'top');
+        const tooltipBottom = ui.tooltip(buttonBottom, 'This is a tooltip that will adjust its position automatically!', 'bottom');
+        const tooltipLeft = ui.tooltip(buttonLeft, 'This is a tooltip that will adjust its position automatically!', 'left');
+        const tooltipRight = ui.tooltip(buttonRight, 'This is a tooltip that will adjust its position automatically!', 'right');
 
-        // Hacer el faceplate draggable
-       // ui.setDraggable(faceplate);
+        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 190, 80, 400, -150);
 
-        // Agregar el faceplate al documento
+        // Add faceplate to body
+        document.body.appendChild(tooltipTop);
+        document.body.appendChild(tooltipBottom);
+        document.body.appendChild(tooltipLeft);
+        document.body.appendChild(tooltipRight);
+        document.body.appendChild(faceplate1);
+
+        // --------------------------------------
+        // Faceplate
+        // --------------------------------------
+
+        const joystick2 = ui.joystick(null, false, null, (direction, speed, x, y) => {
+            console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+        });
+        const faceplate = ui.faceplate([joystick2], 80, 80, 100, -150);
+
+        // Add faceplate to body
         document.body.appendChild(faceplate);
-
 
     </script>
 </body>
