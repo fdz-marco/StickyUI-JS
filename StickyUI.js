@@ -94,28 +94,84 @@ class StickyUI {
         });
 
         // Methods to show and hide the context menu externally
-        contextMenu.showContextMenu = (x, y) => {
-            const menuRect = contextMenu.getBoundingClientRect();
+        contextMenu.showContextMenu = (x, y, preferredDirection = 'right-bottom') => {
+            // Make the menu visible temporarily outside of the viewport to measure
+            contextMenu.style.visibility = 'hidden';
+            contextMenu.style.display = 'block';
+            contextMenu.style.position = 'fixed';
+            contextMenu.style.top = '-9999px';
+            contextMenu.style.left = '-9999px';
+            // Add the menu to the DOM if it's not already there
+            const isInDOM = document.body.contains(contextMenu);
+            if (!isInDOM) {
+                document.body.appendChild(contextMenu);
+            }
+            // Get the actual dimensions of the menu
+            const rect = contextMenu.getBoundingClientRect();
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
-        
-            if (x + menuRect.width > viewportWidth) {
-                x = viewportWidth - menuRect.width;
+            const padding = 0;
+            // Calculate available space in each direction
+            const spaceRight = viewportWidth - x;
+            const spaceLeft = x;
+            const spaceBottom = viewportHeight - y;
+            const spaceTop = y;
+            // Determine best position based on available space
+            let finalX = x;
+            let finalY = y;
+            let direction = preferredDirection;
+
+            // Check horizontal space
+            if (direction.includes('right') && spaceRight < rect.width + padding) {
+                direction = direction.replace('right', 'left');
+            } else if (direction.includes('left') && spaceLeft < rect.width + padding) {
+                direction = direction.replace('left', 'right');
             }
-            
-            if (y + menuRect.height > viewportHeight) {
-                y = y - menuRect.height;
+
+            // Check vertical space
+            if (direction.includes('bottom') && spaceBottom < rect.height + padding) {
+                direction = direction.replace('bottom', 'top');
+            } else if (direction.includes('top') && spaceTop < rect.height + padding) {
+                direction = direction.replace('top', 'bottom');
             }
-        
-            contextMenu.style.left = `${x}px`;
-            contextMenu.style.top = `${y}px`;
+
+            // Apply position based on final direction
+            switch (direction) {
+                case 'right-bottom':
+                    finalX = x;
+                    finalY = y;
+                    break;
+                case 'right-top':
+                    finalX = x;
+                    finalY = y - rect.height;
+                    break;
+                case 'left-bottom':
+                    finalX = x - rect.width;
+                    finalY = y;
+                    break;
+                case 'left-top':
+                    finalX = x - rect.width;
+                    finalY = y - rect.height;
+                    break;
+            }
+
+            // Ensure menu stays within viewport bounds
+            finalX = Math.max(padding, Math.min(finalX, viewportWidth - rect.width - padding));
+            finalY = Math.max(padding, Math.min(finalY, viewportHeight - rect.height - padding));
+
+            // Apply final position and show menu
+            contextMenu.style.visibility = 'visible';
+            contextMenu.style.left = `${finalX}px`;
+            contextMenu.style.top = `${finalY}px`;
             contextMenu.classList.add('show');
+            contextMenu.setAttribute('data-direction', direction);
         }
 
         contextMenu.hideContextMenu = () => {
             contextMenu.classList.remove('show');
+            contextMenu.style.visibility = 'hidden';
         }
-        
+
         return contextMenu;
     }
 
@@ -143,10 +199,9 @@ class StickyUI {
                     activeContextMenu.hideContextMenu();
                 }
                 const rect = menuBarItem.getBoundingClientRect();
-                const menuBarItemPadding = menuBarItem.style.padding;
-                const parentPadding = menuBarItem.parentElement.style.paddingBottom;
-                const x = rect.left;
-                const y = rect.bottom + parentPadding + menuBarItemPadding;
+                const parentMenuBar = menuBarItem.closest('.menuBar').getBoundingClientRect();
+                const x = parseFloat(rect.left);
+                const y = parseFloat(parentMenuBar.height);
                 contextMenu.showContextMenu(x, y);
             });
             document.body.appendChild(contextMenu);
@@ -280,7 +335,7 @@ class StickyUI {
     // ----------------------------------------
         
     // Panel Title Bar
-    panelTitleBar = (titleText = 'Panel') => {
+    panelTitleBar = (titleText = 'Panel', panel = null, content = null) => {
         const UID = this.UID();
         const titleBarContainer = this.element('div',`titleBarContainer_${UID}`, 'titleBarContainer');
         const titleBarTitle = this.element('div',`titleBarTitle_${UID}`, 'titleBarTitle', titleText);
@@ -289,6 +344,48 @@ class StickyUI {
         const btnScale = this.element('div',`btnScale_${UID}`, 'titleBarButton', `<div class="icon icon-scale"></div>`);
         const btnStack = this.element('div',`btnStack_${UID}`, 'titleBarButton', `<div class="icon icon-stack"></div>`);
         const btnClose = this.element('div',`btnClose_${UID}`, 'titleBarButton', `<div class="icon icon-close"></div>`);
+        btnMaximize.style.display = 'none';
+        
+        // Scale Menu
+        const menuScaleSlider = ui.sliderRange('', 75, 100, 1, 100);
+        const menuScaleResetBtn = ui.button('Reset');
+        const contextMenu = ui.contextMenu([menuScaleSlider, menuScaleResetBtn]);
+        contextMenu.style.padding = '4px';
+        document.body.appendChild(contextMenu);
+
+        // Event listeners
+        btnMinimize.addEventListener('click', () => {
+            content.style.display = 'none';
+            btnMinimize.style.display = 'none';
+            btnMaximize.style.display = 'block';
+            panel.classList.add('minimized');
+        });
+
+        btnMaximize.addEventListener('click', () => {
+            content.style.display = 'block';
+            btnMaximize.style.display = 'none';
+            btnMinimize.style.display = 'block';
+            panel.classList.remove('minimized');
+        });
+
+       btnScale.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = btnScale.getBoundingClientRect();
+            const x = parseFloat(rect.left);
+            const y = parseFloat(rect.bottom);
+            contextMenu.showContextMenu(x, y, 'right-top');
+        });
+
+        menuScaleSlider.addEvent('input', () => {
+            const scale = parseInt(menuScaleSlider.getValue()) / 100;
+            panel.style.transform = `scale(${scale})`;
+            panel.style.transformOrigin = 'top right';
+        });
+
+        menuScaleResetBtn.addEvent('click', () => {
+            panel.style.transform = `scale(1)`;
+        });
 
         titleBarContainer.appendChild(titleBarTitle);
         titleBarContainer.appendChild(btnMinimize);
@@ -296,7 +393,6 @@ class StickyUI {
         titleBarContainer.appendChild(btnScale);
         titleBarContainer.appendChild(btnStack);
         titleBarContainer.appendChild(btnClose);
-
         return titleBarContainer;
     }
 
@@ -304,8 +400,8 @@ class StickyUI {
     panel = (titleText = 'Panel', width = null, height = null, positionX = null, positionY = null) => {
         const UID = this.UID();
         const panel = this.element('div',`panel_${UID}`, 'panel');
-        const titleBar = this.panelTitleBar(titleText);
         const content = this.element('div',`panelContent_${UID}`, 'panelContent');
+        const titleBar = this.panelTitleBar(titleText, panel, content);
 
         panel.appendChild(titleBar);
         panel.appendChild(content);
@@ -322,36 +418,6 @@ class StickyUI {
         panel.addContent = (element) => {
             content.appendChild(element);
         };
-
-        // Buttons actions
-        const btnMinimize = titleBar.querySelector('.icon-minimize').parentElement;
-        const btnMaximize = titleBar.querySelector('.icon-maximize').parentElement;
-        const btnScale = titleBar.querySelector('.icon-scale').parentElement;
-        const btnStack = titleBar.querySelector('.icon-stack').parentElement;
-        const btnClose = titleBar.querySelector('.icon-close').parentElement;
-        btnMaximize.style.display = 'none';
-
-        btnMinimize.addEventListener('click', () => {
-            content.style.display = 'none';
-            btnMinimize.style.display = 'none';
-            btnMaximize.style.display = 'block';
-            panel.classList.add('minimized');
-        });
-
-        btnMaximize.addEventListener('click', () => {
-            content.style.display = 'block';
-            btnMaximize.style.display = 'none';
-            btnMinimize.style.display = 'block';
-            panel.classList.remove('minimized');
-        });
-
-        let isScaled = false;
-        btnScale.addEventListener('click', () => {
-            isScaled = !isScaled;
-            panel.style.transform = isScaled ? 'scale(0.5)' : 'scale(1)';
-            panel.style.transformOrigin = 'top right';
-            btnScale.classList.toggle('active');
-        });
 
         // Add Drag and Resize
         this.setDraggable(panel, titleBar);
@@ -400,6 +466,12 @@ class StickyUI {
                 container.style.background = bgColor || ''; 
             });
         }
+
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            container.addEventListener(eventType, functionCallback);
+        }
+
         return container;
     }
 
@@ -430,6 +502,15 @@ class StickyUI {
                 switchSlider.style.backgroundColor = switchInput.checked ? colorActive : (colorInactive || '');
             });
 
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            switchInput.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return switchInput.checked;
+        }
+
         return container;
     }
     
@@ -443,7 +524,16 @@ class StickyUI {
         textInput.type = 'text';
         textInput.placeholder = placeholder;
         textInput.value = defaultValue;
-            
+    
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            textInput.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return textInput.value;
+        }
+
         if (labelText)
             container.appendChild(label);
 
@@ -467,6 +557,15 @@ class StickyUI {
                 optionElement.selected = true;
             select.appendChild(optionElement);
         });
+
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            select.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return select.value;
+        }
 
         if (labelText)
             container.appendChild(label);
@@ -593,6 +692,15 @@ class StickyUI {
         // Initial value update
         updateColorValue();
 
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            colorPicker.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return colorPicker.value;
+        }
+
         if (labelText) 
             container.appendChild(label);
 
@@ -635,6 +743,15 @@ class StickyUI {
         // Initial value update
         updateSliderValue();
 
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            sliderInput.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return sliderInput.value;
+        }
+
         if (labelText)
             container.appendChild(label)
 
@@ -661,7 +778,6 @@ class StickyUI {
         sliderInput.step = step;
         sliderInput.value = defaultValue;
         sliderValueDisplay.textContent = defaultValue;
-
 
         // Method to update the slider value
         const updateSliderValue = () => {
@@ -690,6 +806,15 @@ class StickyUI {
 
         // Initial value update
         updateSliderValue();
+
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            sliderInput.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return sliderInput.value;
+        }
 
         if (labelText) 
             container.appendChild(label);
@@ -760,6 +885,16 @@ class StickyUI {
             }
             updateGradient();
         });
+
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            sliderStart.addEventListener(eventType, functionCallback);
+            sliderEnd.addEventListener(eventType, functionCallback);
+        }
+        
+        container.getValue = () => {
+            return { start: sliderStart.value, end: sliderEnd.value };
+        }
 
         if (labelText) 
             container.appendChild(label);
@@ -848,6 +983,15 @@ class StickyUI {
         window.addEventListener('mousemove', handleDrag);
         window.addEventListener('mouseup', () => isDragging = false);
 
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            area.addEventListener(eventType, functionCallback);
+        }
+
+        container.getValue = () => {
+            return { x: valueX.textContent, y: valueY.textContent };
+        }
+        
         if (labelText) 
             container.appendChild(label);
         
@@ -1218,8 +1362,8 @@ class StickyUI {
             if (isResizing) {
                 const width = initialWidth + (e.clientX - initialX);
                 const height = initialHeight + (e.clientY - initialY);
-                element.style.width = `${Math.max(200, width)}px`;
-                element.style.height = `${Math.max(100, height)}px`;
+                element.style.width = `${Math.max(250, width)}px`;
+                element.style.height = `${Math.max(200, height)}px`;
             }
         });
 

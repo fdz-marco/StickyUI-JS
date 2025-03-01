@@ -253,6 +253,7 @@ body {
     transition: height 0.3s ease;
     scroll-behavior: smooth;
     overflow: hidden;
+    user-select: none;
 }
 
 .panel.minimized {
@@ -330,6 +331,54 @@ body {
 .titleBarButton:hover {
     background: var(--hover-color);
 }
+
+/* ---------------------- Title Bar / Menu Scale ---------------------- */
+
+.menuScale {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    /*display: none;*/
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    z-index: 1001;
+    min-width: 200px;
+    box-shadow: var(--shadow-md);
+}
+
+.position.show {
+    display: flex;
+}
+
+.menuScaleSlider {
+    width: 100%;
+    margin: var(--spacing-xs) 0;
+}
+
+.menuScaleValue {
+    text-align: center;
+    font-family: monospace;
+    color: var(--text-color);
+}
+
+.menuScaleResetBtn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--primary-color);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.menuScaleResetBtn:hover {
+    background: var(--primary-color-dark);
+}
+
 
 /* ---------------------- Resizer ---------------------- */
 
@@ -442,6 +491,7 @@ body {
     text-align: center;
     background: var(--primary-color);
     transition: background 0.3s, transform 0.2s;
+    user-select: none;
 }
 
 .button:hover {
@@ -983,6 +1033,7 @@ input:checked + .switchSlider:before {
     opacity: 0;
     transition: opacity 0.2s;
     pointer-events: none;
+    user-select: none;
 }
 
 .tooltip.show {

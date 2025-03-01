@@ -40,7 +40,6 @@
         let menuBarItem1 = ui.menuBarItem('File', 'icon-file', contextMenu1);
         let menuBarItem2 = ui.menuBarItem('View', 'icon-view', contextMenu2);
         let menuBarItem3 = ui.menuBarItem('Help', 'icon-help', contextMenu3);
-       
         let menuBar = ui.menuBar([menuBarItem1, menuBarItem2, menuBarItem3]);
         document.body.appendChild(menuBar);
 
@@ -161,7 +160,7 @@
         // Vector2
         let separator8 = ui.separator('Vector2', '#06f3b1');
         let vector2Control = ui.vector2('Position', -10, 10, -10, 10, 0, 0, 15,
-            (x, y) => console.log(`Position changed: x=${x}, y=${y}`)
+            //(x, y) => console.log(`Position changed: x=${x}, y=${y}`)
         );
         panel2.addContent(separator8);
         panel2.addContent(vector2Control);
@@ -169,7 +168,7 @@
         // Joystick
         let separator9 = ui.separator('Joystick', '#06f3b1');
         let joystick1 = ui.joystick('Joystick Name', true, 100, (direction, speed, x, y) => {
-            console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+            //console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
         panel2.addContent(separator9);
         panel2.addContent(joystick1);
@@ -222,7 +221,7 @@
         // --------------------------------------
 
         const joystick2 = ui.joystick(null, false, null, (direction, speed, x, y) => {
-            console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+           //console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
         const faceplate = ui.faceplate([joystick2], 80, 80, 100, -150);
 
