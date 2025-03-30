@@ -2,7 +2,7 @@
 
 A lightweight JavaScript library for creating dynamic, draggable UI elements and controls for web applications. Particularly useful for canvas-based applications or HMIs (Human Machine Interfaces).
 
-<img src="https://raw.github.com/fdz-marco/StickyUI-JS/master/demo2.png" width="650" />
+<img src="https://raw.github.com/fdz-marco/StickyUI-JS/master/demo3.png" width="800" />
 
 ## Features
 

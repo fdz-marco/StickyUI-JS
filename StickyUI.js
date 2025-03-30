@@ -4,7 +4,7 @@
 /* Description: A simple class to create user interfaces over the browser DOM
 /* specially useful for canvas-based applications or HMIs.
 /* Author: Marco Fernandez (marcofdz.com)
-/* Version: 1.0.1
+/* Version: 1.0.2
 /* License: MIT
 /* Repository: https://github.com/fdz-marco/StickyUI-JS
 /* File: StickyUI.js
@@ -12,6 +12,7 @@
 */
 
 class StickyUI {
+    #classBase = 'stickyUI';
 
     // ----------------------------------------
     // Constructor
@@ -28,19 +29,67 @@ class StickyUI {
     
     // Create an element 
     element = (type, id = null, className = null, content = null) => {
+        // Create the element
         let element = document.createElement(type);
         if (id !== null) 
             element.id = id;
-        if (className !== null) {
-            if(typeof className === 'string')
-                element.className += className;
-            if(typeof className === 'array') 
-                className.forEach(name => { element.classList.add(name); });
-        }
-        if (content !== null && typeof content === 'string')
-            element.innerHTML = content;
-        if (content !== null && typeof content === 'object')
-            element.appendChild(content);
+        // Methods: Alias for appendChild, addEventListener, removeEventListener, addClass, removeClass
+        element.addContent = (content) => {
+            if (content !== null && typeof content === 'string') {
+                element.innerHTML = content;
+            }
+            else if (content !== null && typeof content === 'object') {
+                if (content instanceof Array) {
+                    content.forEach(item => {
+                        element.appendChild(item);
+                    });
+                } else {
+                    element.appendChild(content);
+                }
+            }
+        };
+        element.addEvent = (event, callback) => {
+            element.addEventListener(event, callback);
+        };
+        element.removeEvent = (event, callback) => {
+            element.removeEventListener(event, callback);
+        };
+        element.addClass = (className) => {
+            if (className !== null) {
+                if(typeof className === 'string') 
+                    className.split(" ").forEach(name => { element.classList.add(name); });
+                if(className instanceof Array) 
+                    className.forEach(name => { element.classList.add(name); });
+            }  
+        };
+        element.removeClass = (className) => {
+            if (className !== null) {
+                if(typeof className === 'string') 
+                    className.split(" ").forEach(name => { element.classList.remove(name); });
+                if(className instanceof Array) 
+                    className.forEach(name => { element.classList.remove(name); });
+            }
+        };
+        element.toggleClass = (className) => {
+            if (className !== null) {
+                if(typeof className === 'string') 
+                    element.classList.toggle(className);
+                if(className instanceof Array) 
+                    className.forEach(name => { element.classList.toggle(name); });
+            }
+        };
+        element.hasClass = (className) => {
+            if (className !== null) {
+                if(typeof className === 'string') 
+                    return element.classList.contains(className);
+                if(className instanceof Array) 
+                    return className.some(name => element.classList.contains(name));
+            }   
+        };
+        // Add the class and content (Invoked after methods)
+        element.addClass(this.#classBase);
+        element.addClass(className);
+        element.addContent(content);
         return element;
     }
 
@@ -55,30 +104,104 @@ class StickyUI {
     }
 
     // ----------------------------------------
-    // Context Menu & Menu Bar
+    // Single Icon
+    // ----------------------------------------
+
+    icon = (iconName = null) => {
+        const UID = this.UID();
+        let _currentIcon = iconName;
+        const iconElement = this.element('div',`icon_${UID}`, 'icon');
+        if (iconName)
+            iconElement.addClass(iconName)
+
+        iconElement.changeIcon = (iconName) => {
+            iconElement.removeClass(_currentIcon);
+            iconElement.addClass(iconName);
+            _currentIcon = iconName;
+        }
+
+        return iconElement;
+    }
+
+    // ----------------------------------------
+    // Menu Bar
     // ----------------------------------------
  
-    // Context Menu 
-    contextMenuItem = (labelText = null, icon = null, onClick = null) => {
+    menuBarItem = (labelText = null, icon = null, contextMenu = null) => {
+        const UID = this.UID();
+        const menuBarItem = this.element('div', `menuBarItem_${UID}`, 'menuBarItem');
+        const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText);
+        menuBarItem.addContent(menuBarItemLabel);
+
+        if (icon) {
+            const menuBarItemIconContainer = this.element('div', `menuBarItemIconContainer_${UID}`, 'menuBarItemIconContainer');
+            const menuBarItemIcon = this.icon(icon);
+            menuBarItemIconContainer.addContent(menuBarItemIcon);
+            menuBarItem.addContent(menuBarItemIconContainer);
+        }
+
+        if (contextMenu) {
+            menuBarItem.addEvent('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const activeContextMenu = document.querySelector(`.${this.#classBase}.contextMenu.show`);
+                if (activeContextMenu) {
+                    activeContextMenu.hideContextMenu();
+                }
+                const rect = menuBarItem.getBoundingClientRect();
+                const parentMenuBar = menuBarItem.closest('.menuBar').getBoundingClientRect();
+                const x = parseFloat(rect.left);
+                const y = parseFloat(parentMenuBar.height);
+                contextMenu.showContextMenu(x, y);
+            });
+            document.body.appendChild(contextMenu);
+        }
+        
+        return menuBarItem;
+    }
+
+    menuBar = (menuBarItems) => {
+        const UID = this.UID();
+        const menuBar = this.element('div', `menuBar_${UID}`, 'menuBar');
+        if (menuBarItems !== null && menuBarItems instanceof Array) 
+            menuBar.addContent(menuBarItems);
+
+        // Hide context menu when clicking outside
+        document.addEventListener('click', () => {
+            const activeContextMenu = document.querySelector(`.${this.#classBase}.contextMenu.show`);
+            if (activeContextMenu) {
+                activeContextMenu.hideContextMenu();
+            }
+        });
+
+        return menuBar;
+    }
+
+    // ----------------------------------------
+    // Context Menu
+    // ----------------------------------------
+
+    contextMenuItem = (labelText = null, icon = null, onClick = null, closeOnClick = true) => {
         const UID = this.UID();
         const contextMenuItem = this.element('div', `contextMenuItem_${UID}`, 'contextMenuItem');
         const contextMenuItemLabel = this.element('div', `contextMenuItemLabel_${UID}`, 'contextMenuItemLabel', labelText);
         
         if (icon) {
             const contextMenuItemIconContainer = this.element('div', `contextMenuItemIconContainer_${UID}`, 'contextMenuItemIconContainer');
-            const contextMenuItemIcon = this.element('div', `contextMenuItemIcon_${UID}`, `icon ${icon}`);
-            contextMenuItemIconContainer.appendChild(contextMenuItemIcon);
-            contextMenuItem.appendChild(contextMenuItemIconContainer);
+            const contextMenuItemIcon = this.icon(icon);
+            contextMenuItemIconContainer.addContent(contextMenuItemIcon);
+            contextMenuItem.addContent(contextMenuItemIconContainer);
         }
         
-        contextMenuItem.appendChild(contextMenuItemLabel);
+        contextMenuItem.addContent(contextMenuItemLabel);
 
         if (onClick) {
             contextMenuItem.onClick = onClick;
-            contextMenuItem.addEventListener('click', (e) => {
+            contextMenuItem.addEvent('click', (e) => {
                 e.stopPropagation();
                 contextMenuItem.onClick();
-                contextMenuItem.closest(".contextMenu").hideContextMenu();
+                if (closeOnClick) 
+                    contextMenuItem.closest(".contextMenu").hideContextMenu();
             });
         }
         
@@ -88,10 +211,8 @@ class StickyUI {
     contextMenu = (contextMenuItems) => {
         const UID = this.UID();
         const contextMenu = this.element('div', `contextMenu_${this.UID()}`, 'contextMenu');
-        
-        contextMenuItems.forEach(item => {
-            contextMenu.appendChild(item);
-        });
+        if (contextMenuItems !== null && contextMenuItems instanceof Array) 
+            contextMenu.addContent(contextMenuItems);
 
         // Methods to show and hide the context menu externally
         contextMenu.showContextMenu = (x, y, preferredDirection = 'right-bottom') => {
@@ -163,95 +284,45 @@ class StickyUI {
             contextMenu.style.visibility = 'visible';
             contextMenu.style.left = `${finalX}px`;
             contextMenu.style.top = `${finalY}px`;
-            contextMenu.classList.add('show');
+            contextMenu.addClass('show');
             contextMenu.setAttribute('data-direction', direction);
         }
 
         contextMenu.hideContextMenu = () => {
-            contextMenu.classList.remove('show');
+            contextMenu.removeClass('show');
             contextMenu.style.visibility = 'hidden';
         }
 
         return contextMenu;
     }
 
-    // Menu Bar
-    menuBarItem = (labelText = null, icon = null, contextMenu = null) => {
-        const UID = this.UID();
-        const menuBarItem = this.element('div', `menuBarItem_${UID}`, 'menuBarItem');
-        const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText);
-        
-        if (icon) {
-            const menuBarItemIconContainer = this.element('div', `menuBarItemIconContainer_${UID}`, 'menuBarItemIconContainer');
-            const menuBarItemIcon = this.element('div', `menuBarItemIcon_${UID}`, `icon ${icon}`);
-            menuBarItemIconContainer.appendChild(menuBarItemIcon);
-            menuBarItem.appendChild(menuBarItemIconContainer);
-        }
-
-        menuBarItem.appendChild(menuBarItemLabel);
-        
-        if (contextMenu) {
-            menuBarItem.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const activeContextMenu = document.querySelector('.contextMenu.show');
-                if (activeContextMenu) {
-                    activeContextMenu.hideContextMenu();
-                }
-                const rect = menuBarItem.getBoundingClientRect();
-                const parentMenuBar = menuBarItem.closest('.menuBar').getBoundingClientRect();
-                const x = parseFloat(rect.left);
-                const y = parseFloat(parentMenuBar.height);
-                contextMenu.showContextMenu(x, y);
-            });
-            document.body.appendChild(contextMenu);
-        }
-        return menuBarItem;
-    }
-
-    menuBar = (menuBarItems) => {
-        const UID = this.UID();
-        const menuBar = this.element('div', `menuBar_${UID}`, 'menuBar');
-
-        // Add menu items to the menu bar
-        menuBarItems.forEach(item => {
-            menuBar.appendChild(item);
-        });
-
-        // Hide context menu when clicking outside
-        document.addEventListener('click', () => {
-            const activeContextMenu = document.querySelector('.contextMenu.show');
-            if (activeContextMenu) {
-                activeContextMenu.hideContextMenu();
-            }
-        });
-
-        return menuBar;
-    }
-
     // ----------------------------------------
     // Status Bar
     // ----------------------------------------
     
-    statusBar = () => {
-        const container = this.element('div', null, 'statusBar');
-        return container;
-    }
-
     statusBarItem = (text = '', icon = null) => {
-        const container = this.element('div', null, 'statusBarItem');
+        const UID = this.UID();
+        const container = this.element('div', `statusBarItem_${UID}`, 'statusBarItem');
         
         if (icon) {
-            const iconElement = this.element('div', null, 'icon');
-            iconElement.classList.add(icon);
-            container.appendChild(iconElement);
+            const iconElement = this.icon(icon);
+            container.addContent(iconElement);
         }
         
         if (text) {
-            const textElement = this.element('span', null, null, text);
-            container.appendChild(textElement);
+            const textElement = this.element('span', `statusBarItemText_${UID}`, null, text);
+            container.addContent(textElement);
         }
         
+        return container;
+    }
+
+    statusBar = (statusBarItems) => {
+        const UID = this.UID();
+        const container = this.element('div', `statusBar_${UID}`, 'statusBar');
+        if (statusBarItems !== null && statusBarItems instanceof Array) 
+            container.addContent(statusBarItems);
+
         return container;
     }
 
@@ -260,10 +331,11 @@ class StickyUI {
     // ----------------------------------------
 
     tooltip = (element, text, position = 'top') => {
-        const tooltip = this.element('div', null, 'tooltip', text);
+        const UID = this.UID();
+        const tooltip = this.element('div', `tooltip_${UID}`, 'tooltip', text);
 
         const showTooltip = (e) => {
-            tooltip.classList.add('show');
+            tooltip.addClass('show');
             
             // Calculate position
             const elementRect = element.getBoundingClientRect();
@@ -317,33 +389,33 @@ class StickyUI {
             tooltip.style.top = `${top}px`;
             
             // Update position class
-            tooltip.className = `tooltip show ${preferredPosition}`;
+            tooltip.addClass(`show ${preferredPosition}`);
         };
 
         const hideTooltip = () => {
-            tooltip.classList.remove('show');
+            tooltip.removeClass('show');
         };
 
-        element.addEventListener('mouseenter', showTooltip);
-        element.addEventListener('mouseleave', hideTooltip);
+        element.addEvent('mouseenter', showTooltip);
+        element.addEvent('mouseleave', hideTooltip);
         
         return tooltip;
     }
 
     // ----------------------------------------
-    // Main Containers
+    // Floating Panel
     // ----------------------------------------
-        
-    // Panel Title Bar
-    panelTitleBar = (titleText = 'Panel', panel = null, content = null) => {
+     
+    // Floating Panel Title Bar
+    floatingPanelTitleBar = (titleText = 'Panel', floatingPanel = null, defaultOpen = true) => {
         const UID = this.UID();
-        const titleBarContainer = this.element('div',`titleBarContainer_${UID}`, 'titleBarContainer');
-        const titleBarTitle = this.element('div',`titleBarTitle_${UID}`, 'titleBarTitle', titleText);
-        const btnMinimize = this.element('div',`btnMinimize_${UID}`, 'titleBarButton', `<div class="icon icon-minimize"></div>`);
-        const btnMaximize = this.element('div',`btnMaximize_${UID}`, 'titleBarButton', `<div class="icon icon-maximize"></div>`);
-        const btnScale = this.element('div',`btnScale_${UID}`, 'titleBarButton', `<div class="icon icon-scale"></div>`);
-        const btnStack = this.element('div',`btnStack_${UID}`, 'titleBarButton', `<div class="icon icon-stack"></div>`);
-        const btnClose = this.element('div',`btnClose_${UID}`, 'titleBarButton', `<div class="icon icon-close"></div>`);
+        const titleBarContainer = this.element('div',`floatingPanelTitleBar_${UID}`, 'floatingPanelTitleBar');
+        const titleBarTitle = this.element('div',`floatingPanelTitleBarTitle_${UID}`, 'floatingPanelTitleBarTitle', titleText);
+        const btnMinimize = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-minimize'));
+        const btnMaximize = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-maximize'));
+        const btnScale = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-scale'));
+        const btnStack = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-stack'));
+        const btnClose = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-close'));
         btnMaximize.style.display = 'none';
         
         // Scale Menu
@@ -351,84 +423,579 @@ class StickyUI {
         const menuScaleResetBtn = ui.button('Reset');
         const contextMenu = ui.contextMenu([menuScaleSlider, menuScaleResetBtn]);
         contextMenu.style.padding = '4px';
-        document.body.appendChild(contextMenu);
 
-        // Event listeners
-        btnMinimize.addEventListener('click', () => {
-            content.style.display = 'none';
+        // Set initial state
+        if (!defaultOpen) {
             btnMinimize.style.display = 'none';
             btnMaximize.style.display = 'block';
-            panel.classList.add('minimized');
+            floatingPanel.addClass('minimized');
+        }
+
+        // Event listeners
+        btnClose.addEvent('click', () => {
+            floatingPanel.style.display = 'none';
         });
 
-        btnMaximize.addEventListener('click', () => {
-            content.style.display = 'block';
+        btnMinimize.addEvent('click', () => {
+            btnMinimize.style.display = 'none';
+            btnMaximize.style.display = 'block';
+            floatingPanel.addClass('minimized');
+        });
+
+        btnMaximize.addEvent('click', () => {
             btnMaximize.style.display = 'none';
             btnMinimize.style.display = 'block';
-            panel.classList.remove('minimized');
+            floatingPanel.removeClass('minimized');
         });
 
-       btnScale.addEventListener('click', (e) => {
+        btnScale.addEvent('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             const rect = btnScale.getBoundingClientRect();
             const x = parseFloat(rect.left);
-            const y = parseFloat(rect.bottom);
+            const y = parseFloat(rect.top);
             contextMenu.showContextMenu(x, y, 'right-top');
         });
 
         menuScaleSlider.addEvent('input', () => {
             const scale = parseInt(menuScaleSlider.getValue()) / 100;
-            panel.style.transform = `scale(${scale})`;
-            panel.style.transformOrigin = 'top right';
+            floatingPanel.style.transform = `scale(${scale})`;
+            floatingPanel.style.transformOrigin = 'top right';
         });
 
         menuScaleResetBtn.addEvent('click', () => {
-            panel.style.transform = `scale(1)`;
+            floatingPanel.style.transform = `scale(1)`;
         });
 
-        titleBarContainer.appendChild(titleBarTitle);
-        titleBarContainer.appendChild(btnMinimize);
-        titleBarContainer.appendChild(btnMaximize);
-        titleBarContainer.appendChild(btnScale);
-        titleBarContainer.appendChild(btnStack);
-        titleBarContainer.appendChild(btnClose);
+        titleBarContainer.addContent([titleBarTitle, btnMinimize, btnMaximize, btnScale, btnStack, btnClose]);
         return titleBarContainer;
     }
 
-    // Panel
-    panel = (titleText = 'Panel', width = null, height = null, positionX = null, positionY = null) => {
+    // Floating Panel
+    floatingPanel = (titleText = 'Panel', width = null, height = null, positionX = null, positionY = null, defaultOpen = true) => {
         const UID = this.UID();
-        const panel = this.element('div',`panel_${UID}`, 'panel');
-        const content = this.element('div',`panelContent_${UID}`, 'panelContent');
-        const titleBar = this.panelTitleBar(titleText, panel, content);
-
-        panel.appendChild(titleBar);
-        panel.appendChild(content);
+        const floatingPanel = this.element('div',`floatingPanel_${UID}`, 'floatingPanel');
+        const contentWrapper = this.element('div',`floatingPanelContentWrapper_${UID}`, 'floatingPanelContentWrapper');
+        const titleBar = this.floatingPanelTitleBar(titleText, floatingPanel, defaultOpen);
+        floatingPanel.addContent([titleBar, contentWrapper]);
 
         // Configurations
-        if (width)      panel.style.width = `${width}px`;
-        if (height)     panel.style.height = `${height}px`;
-        if (positionX > 0)  panel.style.left = `${positionX}px`;
-        if (positionY > 0)  panel.style.top = `${positionY}px`;      
-        if (positionX < 0)  panel.style.right = `${positionX*-1}px`;
-        if (positionY < 0)  panel.style.bottom = `${positionY*-1}px`;
-
-        // Method to add content externally
-        panel.addContent = (element) => {
-            content.appendChild(element);
-        };
+        if (width) {
+            if (width === 'auto')
+                floatingPanel.style.width = 'auto';
+            else if (typeof width === 'number')
+                floatingPanel.style.width = `${width}px`;
+            else if (typeof width === 'string' && width.includes('%'))
+                floatingPanel.style.width = width;
+            else
+                floatingPanel.style.width = 'auto';
+        }
+        if (height) {
+            if (height === 'auto')
+                floatingPanel.style.height = 'auto';
+            else if (typeof height === 'number')
+                floatingPanel.style.height = `${height}px`;
+            else if (typeof height === 'string' && height.includes('%'))
+                floatingPanel.style.height = height;
+            else
+                floatingPanel.style.height = 'auto';
+        }
+        if (positionX) {
+            if (typeof positionX === 'number') {
+                if (positionX > 0)
+                    floatingPanel.style.left = `${positionX}px`;
+                else
+                    floatingPanel.style.right = `${positionX*-1}px`;
+            }
+            else if (typeof positionX === 'string' && positionX.includes('%'))
+                floatingPanel.style.left = positionX;
+            else
+                floatingPanel.style.left = 'auto';
+        }
+        if (positionY) {
+            if (typeof positionY === 'number') {
+                if (positionY > 0)
+                    floatingPanel.style.top = `${positionY}px`;
+                else
+                    floatingPanel.style.bottom = `${positionY*-1}px`;
+            }
+            else if (typeof positionY === 'string' && positionY.includes('%'))
+                floatingPanel.style.top = positionY;
+            else
+                floatingPanel.style.top = 'auto';
+        }
+        // Overwrite addContent method
+        // To allow add content from external sources in the contentWrapper directly
+        floatingPanel.addContent = (content) => {
+            contentWrapper.addContent(content);
+        }
 
         // Add Drag and Resize
-        this.setDraggable(panel, titleBar);
-        this.setResizable(panel);
+        this.setDraggable(floatingPanel, titleBar);
+        this.setResizable(floatingPanel);
 
-        return panel;
+        return floatingPanel;
     }
 
-    // Icon Bars
-    iconBarHorizontal = () => this.element('div','iconBarHorizontal_' + this.UID(), 'iconBarHorizontal');
-    iconBarButton = () => this.element('div','iconBarButton_' + this.UID(), 'iconBarButton');
+    // ----------------------------------------
+    // Toolbar
+    // ----------------------------------------
+
+    // Get the top offset of the toolbars, if toolbar is given, calculate the offset relative to it 
+    // Handle multiple toolbars at top (stack them)
+    __getToolbarTopOffset = (relativeTo = null) => {
+        let topOffset = 0;
+        // Add the offset of the menuBar if it exists
+        const menuBar = document.querySelector(`.${this.#classBase}.menuBar`);
+        if (menuBar)
+            topOffset += menuBar.offsetHeight;
+        // Add the offset of the toolbars at top
+        const topToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-top`);
+        if (topToolbars.length > 0) {
+            // If no relativeTo is given, add the height of all top toolbars    
+            if (relativeTo === null) {
+                topOffset += Array.from(topToolbars).reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+            }
+            // If a relativeTo is given, add the height of the top toolbars until the relativeTo toolbar
+            else {
+                const index = Array.from(topToolbars).indexOf(relativeTo);
+                const previousToolbars = Array.from(topToolbars).slice(0, index);
+                topOffset += previousToolbars.reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+            }
+        }
+        return topOffset;
+    }
+
+    // Get the bottom offset of the toolbars, if toolbar is given, calculate the offset relative to it 
+    // Handle multiple toolbars at bottom (stack them)
+    __getToolbarBottomOffset = (relativeTo = null) => {
+        let bottomOffset = 0;
+        // Add the offset of the statusBar if it exists
+        const statusBar = document.querySelector(`.${this.#classBase}.statusBar`);
+        if (statusBar)
+            bottomOffset += statusBar.offsetHeight;        
+        // Add the offset of the toolbars at bottom
+        const bottomToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-bottom`);
+        if (bottomToolbars.length > 0) {
+            // If no relativeTo is given, add the height of all bottom toolbars
+            if (relativeTo === null) {
+                bottomOffset += Array.from(bottomToolbars).reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+            }
+            // If a relativeTo is given, add the height of the bottom toolbars until the relativeTo toolbar
+            else {
+                const index = Array.from(bottomToolbars).indexOf(relativeTo);
+                const previousToolbars = Array.from(bottomToolbars).slice(0, index);
+                bottomOffset += previousToolbars.reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+            }
+        }
+        return bottomOffset;
+    }
+
+    // Get the left offset of the toolbars, if toolbar is given, calculate the offset relative to it 
+    // Handle multiple toolbars at left (stack them)
+    __getToolbarLeftOffset = (relativeTo = null) => {
+        let leftOffset = 0;
+        // Add the offset of the toolbars at left
+        const leftToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-left`);
+        if (leftToolbars.length > 0) {
+            // If no relativeTo is given, add the width of all left toolbars
+            if (relativeTo === null) {
+                leftOffset = Array.from(leftToolbars).reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
+            }
+            // If a relativeTo is given, add the width of the left toolbars until the relativeTo toolbar
+            else {
+                const index = Array.from(leftToolbars).indexOf(relativeTo);
+                const previousToolbars = Array.from(leftToolbars).slice(0, index);
+                leftOffset = previousToolbars.reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
+            }
+        }
+        return leftOffset;
+    }
+
+    // Get the right offset of the toolbars, if toolbar is given, calculate the offset relative to it 
+    // Handle multiple toolbars at right (stack them)
+    __getToolbarRightOffset = (relativeTo = null) => {
+        let rightOffset = 0;
+        // Add the offset of the toolbars at right
+        const rightToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-right`);
+        if (rightToolbars.length > 0) {
+            // If no relativeTo is given, add the width of all right toolbars
+            if (relativeTo === null) {
+                rightOffset = Array.from(rightToolbars).reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);   
+            }
+            // If a relativeTo is given, add the width of the right toolbars until the relativeTo toolbar
+            else {
+                const index = Array.from(rightToolbars).indexOf(relativeTo);
+                const previousToolbars = Array.from(rightToolbars).slice(0, index);
+                rightOffset = previousToolbars.reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
+            }
+        }
+        return rightOffset;
+    }
+
+    // Update position of all toolbars
+    __updatePositionToolbars = () => {
+        const toolbars = document.querySelectorAll(`.${this.#classBase}.toolbar`);
+        toolbars.forEach(toolbar => toolbar.updatePosition());
+    }
+
+    toolbar = (position = 'top', toolbarItems = null) => {
+        const UID = this.UID();
+        const toolbar = this.element('div', `toolbar_${UID}`, 'toolbar');
+        toolbar.addClass(`toolbar-${position}`);
+        if (toolbarItems)
+            toolbar.addContent(toolbarItems);
+        
+        // Update the position of the toolbar
+        toolbar.updatePosition = () => {
+            // Get the offsets and adjust the position of the toolbar
+            if (position === 'top' || position === 'bottom') {
+                toolbar.style.left = `0px`;
+                if (position === 'top') {
+                    // Get absolute position under menuBar and other top toolbars if they exist
+                    let topOffset = this.__getToolbarTopOffset(toolbar); 
+                    toolbar.style.top = `${topOffset}px`;
+                }
+                else if (position === 'bottom') {
+                    // Get absolute position over statusBar and other bottom toolbars if they exist
+                    let bottomOffset = this.__getToolbarBottomOffset(toolbar); 
+                    toolbar.style.bottom = `${bottomOffset}px`;
+                }
+            }
+            else if (position === 'left' || position === 'right') {
+                // Get absolute position under menuBar and ALL top toolbars if they exist
+                let topOffset = this.__getToolbarTopOffset(); 
+                // Get absolute position over statusBar and ALL bottom toolbars if they exist
+                let bottomOffset = this.__getToolbarBottomOffset(); 
+                // Adjust the height and vertical position of the toolbar
+                toolbar.style.top = `${topOffset}px`;
+                toolbar.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
+                // Adjust the horizontal position of the toolbar
+                if (position === 'left') {
+                    // Get absolute position to the left of other left toolbars if they exist
+                    let leftOffset = this.__getToolbarLeftOffset(toolbar); 
+                    toolbar.style.left = `${leftOffset}px`;
+                }
+                else if (position === 'right') {
+                    // Get absolute position to the right of other right toolbars if they exist
+                    let rightOffset = this.__getToolbarRightOffset(toolbar); 
+                    toolbar.style.right = `${rightOffset}px`;
+                }
+            }
+        }
+        requestAnimationFrame(toolbar.updatePosition);
+
+        // Update the position of toolbars when the window is resized
+        window.addEventListener('resize', this.__updatePositionToolbars);
+
+        // Toggle the toolbar
+        toolbar.toggle = (visible = null) => {         
+            // Check if the toolbar is hidden
+            const show = (visible === null) ? toolbar.hasClass('toolbar-hidden') : visible;
+            // Show or hide the toolbar
+            if (show) {
+                toolbar.removeClass('toolbar-hidden');
+            }
+            else {
+                toolbar.addClass('toolbar-hidden');
+            }
+            requestAnimationFrame(this.__updatePositionToolbars);
+            requestAnimationFrame(this.__updatePositionSidePanels);
+            requestAnimationFrame(this.__updatePositionWorkspace);
+        };
+        
+        // Show the toolbar
+        toolbar.show = () => {
+            return toolbar.toggle(true);
+        };
+        
+        // Hide the toolbar
+        toolbar.hide = () => {
+            return toolbar.toggle(false);
+        };
+
+        return toolbar;
+    }
+
+
+    toolbarButton = (icon = null, onClick = null, tooltipText = null) => {
+        const UID = this.UID();
+        const button = this.element('div', `toolbarButton_${UID}`, 'toolbarButton');
+        
+        if (icon) {
+            const iconElement = this.icon(icon);
+            button.appendChild(iconElement);
+        }
+        
+        if (onClick) {
+            button.addEventListener('click', onClick);
+        }
+        
+        if (tooltipText) {
+            const tooltipTop = this.tooltip(button, tooltipText, 'top');
+            document.body.appendChild(tooltipTop);
+        }
+        
+        return button;
+    }
+
+    toolbarDivider = () => {
+        const UID = this.UID();
+        return this.element('div', `toolbarDivider_${UID}`, 'toolbarDivider');
+    }
+
+    // ----------------------------------------
+    // Side Panel
+    // ----------------------------------------
+
+    // Update position of all side panels
+    __updatePositionSidePanels = () => {
+        const sidePanels = document.querySelectorAll(`.${this.#classBase}.sidePanel`);
+        sidePanels.forEach(sidePanel => sidePanel.updatePosition());
+    }
+
+    sidePanelSectionTitleBar = (titleText = 'Section', sidePanelSection = null, defaultOpen = true) => {
+        const UID = this.UID();
+        const titleBarContainer = this.element('div',`sidePanelSectionTitleBar_${UID}`, 'sidePanelSectionTitleBar');
+        const titleBarTitle = this.element('div',`sidePanelSectionTitleBarTitle_${UID}`, 'sidePanelSectionTitleBarTitle', titleText);
+        const iconMinimize = this.icon('icon-chevron-up');
+        const btnMinimize = this.element('div',`sidePanelSectionTitleBarButton_${UID}`, 'sidePanelSectionTitleBarButton', iconMinimize);
+        
+        // Set initial state
+        if (!defaultOpen) {
+            sidePanelSection.addClass('minimized');
+            iconMinimize.changeIcon('icon-chevron-down');
+        }
+
+         // Event listeners
+        btnMinimize.addEvent('click', () => {
+            sidePanelSection.toggleClass('minimized');
+            if (sidePanelSection.hasClass('minimized'))
+                iconMinimize.changeIcon('icon-chevron-down');
+            else
+                iconMinimize.changeIcon('icon-chevron-up');
+        });
+
+        titleBarContainer.addContent([titleBarTitle, btnMinimize]);
+        return titleBarContainer;
+    }
+
+    sidePanelSection = (titleText = 'Section', sidePanelItems = null, defaultOpen = true) => {
+        const UID = this.UID();
+        const sidePanelSection = this.element('div', `sidePanelSection_${UID}`, 'sidePanelSection');
+        const titleBar = this.sidePanelSectionTitleBar(titleText, sidePanelSection, defaultOpen);
+        const contentWrapper = this.element('div', `sidePanelSectionContentWrapper_${UID}`, 'sidePanelSectionContentWrapper');
+        
+        sidePanelSection.addContent([titleBar, contentWrapper]);
+        
+        if (sidePanelItems !== null) 
+            contentWrapper.addContent(sidePanelItems);
+        
+        return sidePanelSection;
+    }
+
+    sidePanel = (position = 'left', width = '280px') => {
+        const UID = this.UID();
+        const sidePanel = this.element('div', `sidePanel_${UID}`, 'sidePanel');
+        sidePanel.addClass(`sidePanel-${position}`);
+        sidePanel.style.width = width;
+        // Save the original width to restore it later (when hiding the sidePanel)
+        sidePanel._width = width; 
+        
+        // Update the position of the sidePanel
+        sidePanel.updatePosition = () => {
+            // Get the offsets and adjust the position of the sidePanel
+            let topOffset = this.__getToolbarTopOffset();
+            let bottomOffset = this.__getToolbarBottomOffset();
+            // Adjust the height and vertical position of the sidePanel
+            sidePanel.style.top = `${topOffset}px`;
+            sidePanel.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
+            // Adjust the horizontal position of the sidePanel
+            if (position === 'left') {
+                const leftOffset = this.__getToolbarLeftOffset();
+                sidePanel.style.left = `${leftOffset}px`;
+            } else if (position === 'right') {
+                const rightOffset = this.__getToolbarRightOffset();
+                sidePanel.style.right = `${rightOffset}px`;
+            }
+        };
+        requestAnimationFrame(sidePanel.updatePosition);
+
+        // Update the position of side panels when the window is resized
+        window.addEventListener('resize', this.__updatePositionSidePanels);
+
+        // Toggle the sidePanel
+        sidePanel.toggle = (visible = null) => {         
+            // Check if the sidePanel is hidden
+            const show = (visible === null) ? sidePanel.hasClass('sidePanel-hidden') : visible;
+            // Show or hide the sidePanel
+            if (show) {
+                // Show the sidePanel
+                sidePanel.style.width = sidePanel._width;
+                sidePanel.removeClass('sidePanel-hidden');
+                // Adjust related elements
+                if (position === 'left') {
+                    let leftOffset = this.__getToolbarLeftOffset();
+                    sidePanel.style.left = `${leftOffset}px`;
+                } else if (position === 'right') {
+                    let rightOffset = this.__getToolbarRightOffset();
+                    sidePanel.style.right = `${rightOffset}px`;     
+                }
+            } else {
+                // Hide the sidePanel
+                sidePanel._width = sidePanel.style.width; // Save the current width
+                sidePanel.addClass('sidePanel-hidden');
+                sidePanel.style.width = '0px';
+                sidePanel.style.overflow = 'hidden';
+            }
+            requestAnimationFrame(this.__updatePositionToolbars);
+            requestAnimationFrame(this.__updatePositionSidePanels);
+            requestAnimationFrame(this.__updatePositionWorkspace);
+        };
+        
+        // Show the sidePanel
+        sidePanel.show = () => {
+            return sidePanel.toggle(true);
+        };
+        
+        // Hide the sidePanel
+        sidePanel.hide = () => {
+            return sidePanel.toggle(false);
+        };
+
+        sidePanel.getWidth = () => {
+            return sidePanel._width;
+        }
+
+        // Add section to sidePanel from external sources
+        sidePanel.addSection = (titleText, sidePanelItems, defaultOpen = true) => {
+            const section = this.sidePanelSection(titleText, sidePanelItems, defaultOpen);
+            sidePanel.addContent(section);
+            return section;
+        };
+
+        return sidePanel;
+    }
+
+    // ----------------------------------------
+    // Workspace
+    // ----------------------------------------
+
+    // Update position of the workspace
+    __updatePositionWorkspace = () => {
+        const workspace = document.querySelector(`.${this.#classBase}.workspace`);
+        workspace.updatePosition();
+    }
+
+    // Workspace
+    workspace = (content = null, backgroundColor = null, backgroundImage = null) => {
+        const UID = this.UID();
+        const workspace = this.element('div', `workspace_${UID}`, 'workspace');
+        let _workspaceWidth = 0;
+        let _workspaceHeight = 0;
+        let _canvas = null;
+        
+        if (content) 
+            workspace.addContent(content);
+        
+        if (backgroundColor)
+            workspace.style.backgroundColor = backgroundColor;
+            
+        if (backgroundImage)
+            workspace.style.backgroundImage = `url("${backgroundImage}")`;
+        
+        // Update the position of the workspace
+        workspace.updatePosition = () => {
+             // Get the offsets of the toolbars
+             let topOffset = this.__getToolbarTopOffset();
+             let bottomOffset = this.__getToolbarBottomOffset();
+             let leftOffset = this.__getToolbarLeftOffset();
+             let rightOffset = this.__getToolbarRightOffset();
+             // Get the offsets of the side panels
+             const leftSidePanel = document.querySelector(`.${this.#classBase}.sidePanel.sidePanel-left:not(.sidePanel-hidden)`);
+             const rightSidePanel = document.querySelector(`.${this.#classBase}.sidePanel.sidePanel-right:not(.sidePanel-hidden)`);
+             if (leftSidePanel) {
+                 //leftOffset += leftSidePanel.offsetWidth;
+                 leftOffset += parseInt(leftSidePanel.getWidth());
+             }
+             if (rightSidePanel) {  
+                 //rightOffset += rightSidePanel.offsetWidth;
+                 rightOffset += parseInt(rightSidePanel.getWidth());
+             }
+            // Adjust the workspace height and vertical position
+            workspace.style.top = `${topOffset}px`;
+            workspace.style.bottom = `${bottomOffset}px`;
+            workspace.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
+            _workspaceHeight =  (document.documentElement.clientHeight - topOffset - bottomOffset);
+            // Adjust the workspace width and horizontal position
+            workspace.style.left = `${leftOffset}px`;
+            workspace.style.right = `${rightOffset}px`;
+            workspace.style.width = `calc(100% - ${leftOffset + rightOffset}px)`; 
+            _workspaceWidth = (document.documentElement.clientWidth - leftOffset - rightOffset);
+        }
+        requestAnimationFrame(workspace.updatePosition);
+        
+        // Listen for changes in the size of the window
+        window.addEventListener('resize', this.__updatePositionWorkspace);
+      
+        // Workspace set content
+        workspace.setContent = (content) => {
+            // Clear previous content
+            while (workspace.firstChild) {
+                workspace.removeChild(workspace.firstChild);
+            }
+            // Add new content
+            workspace.addContent(content);
+        }
+
+        // Workspace set Canvas
+        workspace.setCanvas = (autoResize = true) => {
+            workspace.updatePosition();
+            _canvas = document.createElement('canvas');
+            _canvas.style.width ='100%';
+            _canvas.style.height='100%';        
+            _canvas.width = _workspaceWidth;
+            _canvas.height = _workspaceHeight; 
+            workspace.setContent(_canvas);
+            if (autoResize) {
+                window.addEventListener('resize', () => {
+                    // Create a temporary canvas to store the original image
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    tempCtx.drawImage(canvas, 0, 0);
+
+                    // Resize the canvas to the new dimensions
+                    canvas.width  = workspace.getWidth();
+                    canvas.height = workspace.getHeight(); 
+                    // Restore the original image
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(tempCanvas, 0, 0);
+                });
+            }
+            return _canvas;
+        }
+        
+        workspace.getWidth = () => {
+            const rect = workspace.getBoundingClientRect();
+            return rect.width;
+            //return workspace.offsetWidth;
+        }
+
+        workspace.getHeight = () => {
+            const rect = workspace.getBoundingClientRect();
+            return rect.height;
+            //return workspace.offsetHeight;
+        }
+
+
+
+
+
+
+        return workspace;
+    }
 
     // ----------------------------------------
     // Basic Controls
@@ -915,7 +1482,7 @@ class StickyUI {
     
     vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
         const UID = this.UID();
-        const container = this.element('div', `vector2Container_${UID}`, 'controlContainer');
+        const container = this.element('div', `vector2Container_${UID}`, 'vector2Container');
         const label = this.element('div', `vector2Label_${UID}`, 'label', labelText);
         const controlWrapper = this.element('div', `vector2ControlWrapper_${UID}`, 'controlWrapper');
         const area = this.element('div', `vector2Area_${UID}`, 'vector2Area');
@@ -1372,12 +1939,28 @@ class StickyUI {
         });
     }
 
-    // Inject styles to the head (Not used, prefer to use the css file)
+    // ----------------------------------------
+    // Inject styles to the head (Not used, prefer to use the css file on development)
+    // ----------------------------------------
     /*addStyles = () => {
         var styles = ``;
         var styleSheet = document.createElement("style")
         styleSheet.innerText = styles
         document.head.appendChild(styleSheet)
     }*/
+
+
+    // ----------------------------------------
+    // Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
+    // ----------------------------------------
+
+    iconBarHorizontal = () => this.element('div','iconBarHorizontal_' + this.UID(), 'iconBarHorizontal');
+    iconBarButton = () => this.element('div','iconBarButton_' + this.UID(), 'iconBarButton');
+    iconBarVertical = (position = 'left') => {
+        const UID = this.UID();
+        const iconBar = this.element('div', `iconBarVertical_${UID}`, 'iconBarVertical');
+        iconBar.classList.add(`iconBarVertical-${position}`);
+        return iconBar;
+    }
 
 }

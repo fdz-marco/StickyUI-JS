@@ -16,6 +16,8 @@
     /* Colores de borde */
     --border-color: #ddd;
     --border-color-dark: #ccc;
+    --border-color-toolbar: #404040;
+    --border-size-toolbar: 1px;
     
     /* Colores de estado */
     --hover-color: #f0f0f0;
@@ -78,7 +80,7 @@ body {
 
 /* ---------------------- Menu Bar ---------------------- */
 
-.menuBar {
+.stickyUI.menuBar {
     display: flex;
     background-color: var(--bg-color-secondary);
     padding: var(--spacing-sm);
@@ -90,7 +92,7 @@ body {
     z-index: 1000;
 }
 
-.menuBarItem {
+.stickyUI.menuBarItem {
     display: flex;
     align-items: center;
     padding: var(--spacing-sm) var(--spacing-md);
@@ -101,13 +103,13 @@ body {
     gap: var(--spacing-sm);
 }
 
-.menuBarItemLabel {
+.stickyUI.menuBarItemLabel {
     font-size: 14px;
     font-weight: bold;
     color: var(--text-color);
 }
 
-.menuBarItemIconContainer {
+.stickyUI.menuBarItemIconContainer {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,13 +117,13 @@ body {
     height: 24px;
 }
 
-.menuBarItem:hover {
+.stickyUI.menuBarItem:hover {
     background-color: var(--hover-color);
 }
 
 /* ---------------------- Context Menu ---------------------- */
 
-.contextMenu {
+.stickyUI.contextMenu {
     position: absolute;
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
@@ -133,11 +135,11 @@ body {
     display: none;
 }
 
-.contextMenu.show {
+.stickyUI.contextMenu.show {
     display: block;
 }
 
-.contextMenuItem {
+.stickyUI.contextMenuItem {
     display: flex;
     align-items: center;
     padding: var(--spacing-sm) var(--spacing-md);
@@ -149,7 +151,7 @@ body {
     user-select: none;
 }
 
-.contextMenuItemIconContainer {
+.stickyUI.contextMenuItemIconContainer {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -158,18 +160,18 @@ body {
     color: var(--text-color);
 }
 
-.contextMenuItemLabel {
+.stickyUI.contextMenuItemLabel {
     flex: 1;
     color: var(--text-color);
 }
 
-.contextMenuItem:hover {
+.stickyUI.contextMenuItem:hover {
     background-color: var(--hover-color);
 }
 
 /* ---------------------- Status Bar ---------------------- */
 
-.statusBar {
+.stickyUI.statusBar {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -185,120 +187,93 @@ body {
     z-index: 1000;
 }
 
-.statusBarItem {
+.stickyUI.statusBarItem {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     padding: 0 var(--spacing-md);
     height: 100%;
     border-right: 1px solid var(--border-color);
+    user-select: none;
 }
 
-.statusBarItem:last-child {
+.stickyUI.statusBarItem:hover {
+    background-color: var(--hover-color);
+}
+
+.stickyUI.statusBarItem:last-child {
     border-right: none;
 }
 
-.statusBarItem .icon {
+.stickyUI.statusBarItem .icon {
     transform-origin: center;
     transform: scale(0.75, 0.75);
 }
 
-/* ---------------------- Icon Bars (WIP) ---------------------- */
+/* ---------------------- Tooltip ---------------------- */
 
-.iconBarHorizontal {
-    position: fixed;
-    top: 50px;
-    right: 50px;
-    background: var(--bg-color-secondary);
-    padding: var(--spacing-xs);
-    border-radius: var(--border-radius-md);
-    border: none;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    z-index: 1000;
-}
-
-.iconBarButton {
-    min-width: 20px;
-    min-height: 20px;
-    padding: var(--spacing-xs);
-    border: none;
-    background: var(--bg-color-secondary);
-    color: var(--text-color);
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.iconBarButton:hover {
-    background: var(--hover-color);
-}
-
-/* ---------------------- Panel ---------------------- */
-
-.panel {
-    position: fixed;
-    /*top: 50px;
-    right: 250px;*/
+.stickyUI.tooltip {
+    position: absolute;
     background: var(--bg-color);
-    padding: var(--spacing-xs);
-    border-radius: var(--border-radius-lg);
-    border: none;
-    box-shadow: var(--shadow-md);
-    z-index: 1000;
-    min-width: 200px;
-    min-height: 100px;
-    transition: height 0.3s ease;
-    scroll-behavior: smooth;
-    overflow: hidden;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 12px;
+    color: var(--text-color);
+    box-shadow: var(--shadow-sm);
+    z-index: 1002;
+    max-width: 200px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
     user-select: none;
 }
 
-.panel.minimized {
-    height: auto !important;
-    min-height: auto;
+.stickyUI.tooltip.show {
+    opacity: 1;
 }
 
-.panel.minimized .content {
-    display: none;
-}
-
-.panelContent {
-    min-width: 200px;
-    min-height: 200px;
-    padding: var(--spacing-sm);
-    background: var(--bg-color-secondary);
-    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-    max-height: calc(100% - 40px);
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-/* ---------------------- Scrollbar ---------------------- */
-
-.panelContent::-webkit-scrollbar {
+.stickyUI.tooltip::before {
+    content: '';
+    position: absolute;
     width: 8px;
+    height: 8px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    transform: rotate(45deg);
 }
 
-.panelContent::-webkit-scrollbar-track {
-    background: var(--bg-color-secondary);
-    border-radius: 4px;
+.stickyUI.tooltip.top::before {
+    bottom: -5px;
+    left: calc(50% - 4px);
+    border-top: none;
+    border-left: none;
 }
 
-.panelContent::-webkit-scrollbar-thumb {
-    background: var(--border-color-dark);
-    border-radius: 4px;
+.stickyUI.tooltip.bottom::before {
+    top: -5px;
+    left: calc(50% - 4px);
+    border-bottom: none;
+    border-right: none;
 }
 
-.panelContent::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-color);
+.stickyUI.tooltip.left::before {
+    right: -5px;
+    top: calc(50% - 4px);
+    border-right: none;
+    border-bottom: none;
 }
 
-/* ---------------------- Title Bar ---------------------- */
+.stickyUI.tooltip.right::before {
+    left: -5px;
+    top: calc(50% - 4px);
+    border-left: none;
+    border-top: none;
+}
 
-.titleBarContainer {
+/* ---------------------- Floating Panel: Title Bar ---------------------- */
+
+.stickyUI.floatingPanelTitleBar {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
@@ -309,14 +284,14 @@ body {
     user-select: none;
 }
 
-.titleBarTitle {
+.stickyUI.floatingPanelTitleBarTitle {
     flex: 1;
     font-size: 14px;
     font-weight: bold;
     color: var(--text-color);
 }
 
-.titleBarButton {
+.stickyUI.floatingPanelTitleBarButton {
     min-width: 20px;
     min-height: 20px;
     padding: var(--spacing-xs);
@@ -328,61 +303,325 @@ body {
     font-size: 14px;
 }
 
-.titleBarButton:hover {
+.stickyUI.floatingPanelTitleBarButton:hover {
     background: var(--hover-color);
 }
 
-/* ---------------------- Title Bar / Menu Scale ---------------------- */
+/* ---------------------- Floating Panel ---------------------- */
 
-.menuScale {
-    position: absolute;
-    top: 100%;
-    right: 0;
+.stickyUI.floatingPanel {
+    position: fixed;
+    /*top: 0px;
+    right: 0px;*/
     background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    padding: var(--spacing-md);
-    /*display: none;*/
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    z-index: 1001;
-    min-width: 200px;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-lg);
+    border: none;
     box-shadow: var(--shadow-md);
+    z-index: 1000;
+    min-width: 200px;
+    min-height: 100px;
+    transition: height 0.1s ease;
+    transition: width 0.1s ease;
+    scroll-behavior: smooth;
+    overflow: hidden;
+    user-select: none;
 }
 
-.position.show {
+.stickyUI.floatingPanel.minimized {
+    height: auto;
+    min-height: auto !important;
+    width: auto;
+    min-width: 300px;
+}
+
+.stickyUI.floatingPanel.minimized .floatingPanelContentWrapper {
+    display: none;
+}
+
+.stickyUI.floatingPanelContentWrapper {
+    min-width: 200px;
+    width: auto;
+    min-height: 200px;
+    height: auto;
+    padding: var(--spacing-sm);
+    background: var(--bg-color-secondary);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    max-height: calc(100% - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* ---------------------- Floating Panel: Scrollbar ---------------------- */
+
+.stickyUI.floatingPanelContentWrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.stickyUI.floatingPanelContentWrapper::-webkit-scrollbar-track {
+    background: var(--bg-color-secondary);
+    border-radius: 4px;
+}
+
+.stickyUI.floatingPanelContentWrapper::-webkit-scrollbar-thumb {
+    background: var(--border-color-dark);
+    border-radius: 4px;
+}
+
+.stickyUI.floatingPanelContentWrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* ---------------------- Side Panel: Section Title Bar ---------------------- */
+
+.stickyUI.sidePanelSectionTitleBar {
     display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background: var(--bg-color-secondary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    border-bottom: 1px solid var(--border-color);
+    user-select: none;
 }
 
-.menuScaleSlider {
+.stickyUI.sidePanelSectionTitleBarTitle {
+    flex: 1;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stickyUI.sidePanelSectionTitleBarButton {
+    min-width: 20px;
+    min-height: 20px;
+    padding: var(--spacing-xs);
+    border: none;
+    background: var(--bg-color-secondary);
+    color: var(--text-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.stickyUI.sidePanelSectionTitleBarButton:hover {
+    background: var(--hover-color);
+}
+
+/* ---------------------- Side Panel: Section ---------------------- */
+
+.stickyUI.sidePanelSection {
     width: 100%;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stickyUI.sidePanelSectionContentWrapper {
+    padding: var(--spacing-md);
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    max-height: 2000px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.stickyUI.sidePanelSection.minimized .sidePanelSectionContentWrapper {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* ---------------------- Side Panel ---------------------- */
+
+.stickyUI.sidePanel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    background-color: var(--bg-color);
+    border-right: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    z-index: 900;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: var(--shadow-md);
+    transition: width 0.3s ease, opacity 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.stickyUI.sidePanel.sidePanel-hidden {
+    opacity: 0.3;
+}
+
+.stickyUI.sidePanel-left {
+    left: 0;
+    border-right: 1px solid var(--border-color);
+    border-left: none;
+}
+
+.stickyUI.sidePanel-right {
+    right: 0;
+    border-left: 1px solid var(--border-color);
+    border-right: none;
+}
+
+/* ---------------------- Side Panel: Scrollbar ---------------------- */
+
+.stickyUI.sidePanel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stickyUI.sidePanel::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+.stickyUI.sidePanel::-webkit-scrollbar-thumb {
+    background: var(--border-color-dark);
+    border-radius: 3px;
+}
+
+.stickyUI.sidePanel::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* ---------------------- Toolbar ---------------------- */
+
+.stickyUI.toolbar {
+    display: flex;
+    background-color: var(--bg-color-secondary);
+    padding: var(--spacing-xs);
+    z-index: 950;
+    box-shadow: var(--shadow-sm);
+    gap: var(--spacing-xs);
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    box-sizing: border-box; /* include border inside box */
+}
+
+.stickyUI.toolbar.toolbar-hidden {
+    display: none;
+    /*opacity: 0;
+    padding: 0;*/
+}
+
+.stickyUI.toolbar-top, .stickyUI.toolbar-bottom {
+    position: fixed;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    align-items: center;
+    height: 40px;
+}
+
+.stickyUI.toolbar-left, .stickyUI.toolbar-right {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+}
+
+.stickyUI.toolbar-top {
+    top: 0;
+    border-bottom: var(--border-size-toolbar) solid var(--border-color-toolbar);
+}
+
+.stickyUI.toolbar-bottom {
+    bottom: 0;
+    border-top: var(--border-size-toolbar) solid var(--border-color-toolbar);
+}
+
+.stickyUI.toolbar-left {
+    left: 0;
+    border-right: var(--border-size-toolbar) solid var(--border-color-toolbar);
+}
+
+.stickyUI.toolbar-right {
+    right: 0;
+    border-left: var(--border-size-toolbar) solid var(--border-color-toolbar);
+}
+
+.stickyUI.toolbarButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-color-primary);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.stickyUI.toolbarButton:hover {
+    background-color: var(--hover-color);
+}
+
+.stickyUI.toolbarButton:active {
+    background-color: var(--active-color);
+}
+
+.stickyUI.toolbarDivider {
+    background-color: var(--border-color);
+}
+
+.stickyUI.toolbar-top .toolbarDivider, .stickyUI.toolbar-bottom .toolbarDivider {
+    width: 1px;
+    height: 24px;
+    margin: 0 var(--spacing-xs);
+}
+
+.stickyUI.toolbar-left .toolbarDivider, .stickyUI.toolbar-right .toolbarDivider {
+    height: 1px;
+    width: 24px;
     margin: var(--spacing-xs) 0;
 }
 
-.menuScaleValue {
-    text-align: center;
-    font-family: monospace;
-    color: var(--text-color);
+/* ---------------------- Workspace ---------------------- */
+
+.stickyUI.workspace {
+    position: fixed;
+    background-color: white;
+    overflow: auto;
+    /* Transition when changing size/position */
+    transition: all 0.3s ease;
+    z-index: 100;
+    /* Show scrollbars only when necessary */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color-dark) var(--bg-color-secondary);
 }
 
-.menuScaleResetBtn {
-    padding: var(--spacing-xs) var(--spacing-sm);
+.stickyUI.workspace::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.stickyUI.workspace::-webkit-scrollbar-track {
+    background: var(--bg-color-secondary);
+    border-radius: 4px;
+}
+
+.stickyUI.workspace::-webkit-scrollbar-thumb {
+    background: var(--border-color-dark);
+    border-radius: 4px;
+}
+
+.stickyUI.workspace::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: background 0.2s ease;
 }
 
-.menuScaleResetBtn:hover {
-    background: var(--primary-color-dark);
+/* Styles for canvas inside workspace */
+.stickyUI.workspace canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
-
 
 /* ---------------------- Resizer ---------------------- */
 
-.resizer {
+.stickyUI.resizer {
     width: 15px;
     height: 15px;
     position: absolute;
@@ -392,7 +631,7 @@ body {
     border-radius: 0 0 var(--border-radius-lg) 0;
 }
 
-.resizer::after {
+.stickyUI.resizer::after {
     content: '';
     position: absolute;
     right: 4px;
@@ -403,9 +642,13 @@ body {
     border-bottom: 2px solid var(--text-color-light);
 }
 
+.stickyUI.minimized .stickyUI.resizer {
+    display: none;
+}
+
 /* ---------------------- Control Containers ---------------------- */
 
-.controlContainer {
+.stickyUI.controlContainer {
     display: flex;
     align-items: center;
     margin: var(--spacing-xs);
@@ -414,14 +657,14 @@ body {
     /*min-height: 32px;*/
 }
 
-.controlContainer .label {
+.stickyUI.controlContainer .label {
     flex: 0 0 120px;
     font-size: 14px;
     color: var(--text-color);
     text-align: right;
 }
 
-.controlContainer .controlWrapper {
+.stickyUI.controlContainer .controlWrapper {
     flex: 1;
     display: flex;
     align-items: center;
@@ -430,12 +673,12 @@ body {
 }
 
 @media (max-width: 480px) {
-    .controlContainer {
+    .stickyUI.controlContainer {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .controlContainer .label {
+    .stickyUI.controlContainer .label {
         text-align: left;
         flex: none;
     }
@@ -443,7 +686,7 @@ body {
 
 /* ---------------------- Separator ---------------------- */
 
-.separator {
+.stickyUI.separator {
     width: 100%;
     height: 1px;
     background-color: var(--separator-color);
@@ -451,7 +694,7 @@ body {
     position: relative;
 }
 
-.separator-with-title {
+.stickyUI.separator-with-title {
     height: auto;
     text-align: center;
     background: none;
@@ -459,7 +702,7 @@ body {
     margin: var(--spacing-sm) 0;
 }
 
-.separator-with-title::before {
+.stickyUI.separator-with-title::before {
     content: '';
     position: absolute;
     left: 0;
@@ -470,7 +713,7 @@ body {
     z-index: 1;
 }
 
-.separator-title {
+.stickyUI.separator-title {
     position: relative;
     z-index: 2;
     background-color: var(--bg-color);
@@ -481,7 +724,7 @@ body {
 
 /* ---------------------- Button ---------------------- */
 
-.button {
+.stickyUI.button {
     width: auto;
     margin: var(--spacing-sm) auto;
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -494,18 +737,18 @@ body {
     user-select: none;
 }
 
-.button:hover {
+.stickyUI.button:hover {
     background: var(--primary-color-dark);
     transform: translateY(-1px);
 }
 
-.button:active {
+.stickyUI.button:active {
     transform: translateY(0);
 }
 
 /* ---------------------- Switch ---------------------- */
 
-.switchGroup {
+.stickyUI.switchGroup {
     padding: 0px;
     margin: 0px;
     display: flex;
@@ -513,7 +756,7 @@ body {
     justify-content: center;
 }
 
-.switchInput {
+.stickyUI.switchInput {
     width: 0px;
     height: 0px;
     margin: 0px;
@@ -521,7 +764,7 @@ body {
     opacity: 0;
 }
 
-.switchSlider {
+.stickyUI.switchSlider {
     height: 24px;
     width: 48px;
     position: relative;
@@ -532,7 +775,7 @@ body {
     display: inline-block;
 }
 
-.switchSlider:before {
+.stickyUI.switchSlider:before {
     position: absolute;
     content: "";
     height: 18px;
@@ -545,17 +788,17 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-input:checked + .switchSlider {
+input:checked + .stickyUI.switchSlider {
     background-color: var(--primary-color);
 }
 
-input:checked + .switchSlider:before {
+input:checked + .stickyUI.switchSlider:before {
     transform: translateX(24px);
 }
 
 /* ---------------------- Text Input ---------------------- */
 
-.textInput {
+.stickyUI.textInput {
     min-height: auto; 
     width: 100%;
     padding: 8px 12px;
@@ -567,16 +810,15 @@ input:checked + .switchSlider:before {
     color: var(--text-color);
 }
 
-.textInput:focus {
+.stickyUI.textInput:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-
 /* ---------------------- Dropdown ---------------------- */
 
-.dropdown {
+.stickyUI.dropdown {
     min-height: auto; 
     width: 100%;
     flex: 1;
@@ -588,13 +830,13 @@ input:checked + .switchSlider:before {
     color: var(--text-color);
 }
 
-.dropdown:focus {
+.stickyUI.dropdown:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-.dropdown .option {
+.stickyUI.dropdown .option {
     padding: var(--spacing-xs);
     border-radius: var(--border-radius-sm);
     background: var(--bg-color);
@@ -603,7 +845,7 @@ input:checked + .switchSlider:before {
 
 /* ---------------------- Checkbox Group ---------------------- */
 
-.checkboxGroup {
+.stickyUI.checkboxGroup {
     width: 100%;
     margin: 0px;
     padding: 0px;
@@ -612,21 +854,21 @@ input:checked + .switchSlider:before {
     gap: var(--spacing-md);
 }
 
-.checkboxGroup .checkboxContainer {
+.stickyUI.checkboxGroup .checkboxContainer {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-xs);
 }
 
-.checkboxGroup .checkboxLabel {
+.stickyUI.checkboxGroup .checkboxLabel {
     font-size: 14px;
     color: var(--text-color);
     user-select: none;
     cursor: pointer;
 }
 
-.checkboxGroup .checkbox {
+.stickyUI.checkboxGroup .checkbox {
     appearance: none;
     -webkit-appearance: none;
     width: 18px;
@@ -641,12 +883,12 @@ input:checked + .switchSlider:before {
     padding: 0px;
 }
 
-.checkboxGroup .checkbox:checked {
+.stickyUI.checkboxGroup .checkbox:checked {
     background: var(--primary-color);
     border-color: var(--primary-color);
 }
 
-.checkboxGroup .checkbox:checked::after {
+.stickyUI.checkboxGroup .checkbox:checked::after {
     content: '';
     position: absolute;
     left: 5px;
@@ -658,13 +900,13 @@ input:checked + .switchSlider:before {
     transform: rotate(45deg);
 }
 
-.checkboxGroup .checkbox:hover {
+.stickyUI.checkboxGroup .checkbox:hover {
     border-color: var(--primary-color);
 }
 
 /* ---------------------- Color Picker  ---------------------- */
 
-.colorPicker {
+.stickyUI.colorPicker {
     width: 30px;
     height: 30px;
     border: none;
@@ -673,14 +915,14 @@ input:checked + .switchSlider:before {
     cursor: pointer;
 }
 
-.colorValueContainer {
+.stickyUI.colorValueContainer {
     display: flex;
     gap: var(--spacing-md);
     align-items: center;
     flex: 1;
 }
 
-.colorValue {
+.stickyUI.colorValue {
     flex: 1;
     padding: var(--spacing-sm);
     border-radius: var(--border-radius-md);
@@ -692,13 +934,13 @@ input:checked + .switchSlider:before {
     cursor: default;
 }
 
-.colorValue:focus {
+.stickyUI.colorValue:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
-.colorFormatToggle {
+.stickyUI.colorFormatToggle {
     min-width: 50px;
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius-md);
@@ -710,14 +952,14 @@ input:checked + .switchSlider:before {
     transition: all 0.2s ease;
 }
 
-.colorFormatToggle:hover {
+.stickyUI.colorFormatToggle:hover {
     background: var(--hover-color);
     border-color: var(--border-color-dark);
 }
 
 /* ---------------------- Sliders ---------------------- */
 
-.sliderRange {
+.stickyUI.sliderRange {
     flex: 1;
     height: 4px;
     border-radius: 2px;
@@ -729,7 +971,7 @@ input:checked + .switchSlider:before {
     transition: background 450ms ease-in;
 }
 
-.sliderRange::-webkit-slider-thumb {
+.stickyUI.sliderRange::-webkit-slider-thumb {
     -webkit-appearance: none;
     pointer-events: auto;
     width: 16px;
@@ -741,7 +983,7 @@ input:checked + .switchSlider:before {
     box-shadow: var(--shadow-sm);
 }
 
-.sliderValue {
+.stickyUI.sliderValue {
     min-width: 50px;
     text-align: center;
     font-size: 14px;
@@ -752,7 +994,7 @@ input:checked + .switchSlider:before {
     padding: var(--spacing-xs) var(--spacing-sm);
 }
 
-.sliderStepper {
+.stickyUI.sliderStepper {
     flex: 1;
     height: 4px;
     border-radius: 2px;
@@ -764,7 +1006,7 @@ input:checked + .switchSlider:before {
     transition: background 450ms ease-in;
 }
 
-.sliderStepper::-webkit-slider-thumb {
+.stickyUI.sliderStepper::-webkit-slider-thumb {
     -webkit-appearance: none;
     pointer-events: auto;
     width: 16px;
@@ -776,7 +1018,7 @@ input:checked + .switchSlider:before {
     box-shadow: var(--shadow-sm);
 }
 
-.sliderStepperButton {
+.stickyUI.sliderStepperButton {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid var(--border-color-dark);
     background: var(--bg-color-secondary);
@@ -787,22 +1029,22 @@ input:checked + .switchSlider:before {
     min-width: 30px;
 }
 
-.sliderStepperButton:hover {
+.stickyUI.sliderStepperButton:hover {
     background: var(--hover-color);
 }
 
-.sliderStepperButton:active {
+.stickyUI.sliderStepperButton:active {
     background: var(--active-color);
 }
 
-.sliderInterval {
+.stickyUI.sliderInterval {
     flex: 1;
     position: relative;
     display: flex;
     align-items: center;
 }
 
-.sliderInterval input[type="range"] {
+.stickyUI.sliderInterval input[type="range"] {
     position: absolute;
     width: 100%;
     -webkit-appearance: none;
@@ -812,7 +1054,7 @@ input:checked + .switchSlider:before {
     background: var(--border-color);
 }
 
-.sliderInterval input[type="range"]::-webkit-slider-thumb {
+.stickyUI.sliderInterval input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     pointer-events: auto;
     width: 16px;
@@ -824,13 +1066,13 @@ input:checked + .switchSlider:before {
     box-shadow: var(--shadow-sm);
 }
 
-.sliderInterval input[type="range"]:nth-child(2) {
+.stickyUI.sliderInterval input[type="range"]:nth-child(2) {
     background: none;
 }
 
 /* ---------------------- Folder ---------------------- */
 
-.folder {
+.stickyUI.folder {
     background: var(--bg-color);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
@@ -838,7 +1080,7 @@ input:checked + .switchSlider:before {
     box-shadow: var(--shadow-sm);
 }
 
-.folderHeader {
+.stickyUI.folderHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -850,11 +1092,11 @@ input:checked + .switchSlider:before {
     transition: background-color 0.2s ease;
 }
 
-.folderHeader:hover {
+.stickyUI.folderHeader:hover {
     background: var(--hover-color);
 }
 
-.folderTitle {
+.stickyUI.folderTitle {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-color);
@@ -863,7 +1105,7 @@ input:checked + .switchSlider:before {
     gap: var(--spacing-sm);
 }
 
-.folderIcon {
+.stickyUI.folderIcon {
     display: inline-block;
     width: 24px;
     height: 24px;
@@ -872,7 +1114,7 @@ input:checked + .switchSlider:before {
     transition: transform 0.3s ease;
 }
 
-.folderToggleButton {
+.stickyUI.folderToggleButton {
     display: inline-block;
     width: 24px;
     height: 24px;
@@ -881,7 +1123,7 @@ input:checked + .switchSlider:before {
     transition: transform 0.3s ease;
 }
 
-.folderContent {
+.stickyUI.folderContent {
     padding: var(--spacing-sm) var(--spacing-sm);
     transition: all 0.3s ease;
     max-height: 1000px;
@@ -890,26 +1132,26 @@ input:checked + .switchSlider:before {
     border-top: 1px solid var(--border-color);
 }
 
-.folderContent.collapsed {
+.stickyUI.folderContent.collapsed {
     max-height: 0;
     padding: 0 var(--spacing-lg);
     border-top: none;
 }
 
-.folder .folderContent.collapsed + .folderToggle::before {
+.stickyUI.folder .folderContent.collapsed + .folderToggle::before {
     transform: rotate(-90deg);
 }
 
 /* ---------------------- Tabs ---------------------- */
 
-.tabContainer {
+.stickyUI.tabContainer {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0px;
 }
 
-.tabBar {
+.stickyUI.tabBar {
     width: auto;
     display: flex;
     background: var(--bg-color-secondary);
@@ -920,7 +1162,7 @@ input:checked + .switchSlider:before {
     margin-bottom: 0px;
 }
 
-.tabContentContainer {
+.stickyUI.tabContentContainer {
     width: auto;
     border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
     border: 1px solid var(--border-color);
@@ -928,7 +1170,7 @@ input:checked + .switchSlider:before {
     position: relative;
 }
 
-.tabPageButton {
+.stickyUI.tabPageButton {
     flex: 1;
     padding: var(--spacing-sm) var(--spacing-md);
     background: transparent;
@@ -945,16 +1187,16 @@ input:checked + .switchSlider:before {
     min-height: 36px;
 }
 
-.tabPageButton:hover {
+.stickyUI.tabPageButton:hover {
     background: var(--hover-color);
 }
 
-.tabPageButton.active {
+.stickyUI.tabPageButton.active {
     background: var(--primary-color);
     color: var(--text-color);
 }
 
-.tabContent {
+.stickyUI.tabContent {
     width: auto;
     display: none;
     padding: 0px;
@@ -963,21 +1205,21 @@ input:checked + .switchSlider:before {
     border: none;
 }
 
-.tabContent.active {
+.stickyUI.tabContent.active {
     display: block;
     animation: fadeIn 0.3s ease;
 }
 
-.tabContent > * {
+.stickyUI.tabContent > * {
     width: auto;
     margin-bottom: var(--spacing-md);
 }
 
-.tabContent > *:last-child {
+.stickyUI.tabContent > *:last-child {
     margin-bottom: 0;
 }
 
-.tabPage {
+.stickyUI.tabPage {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
@@ -1002,7 +1244,7 @@ input:checked + .switchSlider:before {
 
 /* ---------------------- Faceplate ---------------------- */
 
-.faceplate {
+.stickyUI.faceplate {
     position: fixed;
     background: transparent;
     padding: 0px;
@@ -1011,76 +1253,29 @@ input:checked + .switchSlider:before {
     border: none;
 }
 
-.faceplate .controlContainer, 
-.faceplate .joystickContainer{
+.stickyUI.faceplate .controlContainer, 
+.stickyUI.faceplate .joystickContainer{
     padding: 0px;
     margin: 0px;
 }
 
-/* ---------------------- Tooltip ---------------------- */
-
-.tooltip {
-    position: absolute;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: 12px;
-    color: var(--text-color);
-    box-shadow: var(--shadow-sm);
-    z-index: 1002;
-    max-width: 200px;
-    opacity: 0;
-    transition: opacity 0.2s;
-    pointer-events: none;
-    user-select: none;
-}
-
-.tooltip.show {
-    opacity: 1;
-}
-
-.tooltip::before {
-    content: '';
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    transform: rotate(45deg);
-}
-
-.tooltip.top::before {
-    bottom: -5px;
-    left: calc(50% - 4px);
-    border-top: none;
-    border-left: none;
-}
-
-.tooltip.bottom::before {
-    top: -5px;
-    left: calc(50% - 4px);
-    border-bottom: none;
-    border-right: none;
-}
-
-.tooltip.left::before {
-    right: -5px;
-    top: calc(50% - 4px);
-    border-right: none;
-    border-bottom: none;
-}
-
-.tooltip.right::before {
-    left: -5px;
-    top: calc(50% - 4px);
-    border-left: none;
-    border-top: none;
-}
-
 /* ---------------------- Vector2 ---------------------- */
 
-.vector2Area {
+.stickyUI.vector2Container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin: var(--spacing-xs);
+    padding: var(--spacing-xs);
+}
+
+.stickyUI.vector2Container .label {
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.stickyUI.vector2Area {
     position: relative;
     width: 150px;
     height: 150px;
@@ -1091,7 +1286,7 @@ input:checked + .switchSlider:before {
     overflow: hidden; 
 }
 
-.vector2Point {
+.stickyUI.vector2Point {
     position: absolute;
     width: 10px;
     height: 10px;
@@ -1101,17 +1296,17 @@ input:checked + .switchSlider:before {
     cursor: grab;
 }
 
-.vector2Point:active {
+.stickyUI.vector2Point:active {
     cursor: grabbing;
 }
 
-.vector2Values {
+.stickyUI.vector2Values {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
 }
 
-.vector2Value {
+.stickyUI.vector2Value {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1126,14 +1321,14 @@ input:checked + .switchSlider:before {
     box-sizing: border-box;
 }
 
-.vector2ValueLabel {
+.stickyUI.vector2ValueLabel {
     font-weight: bold;
     margin-right: var(--spacing-sm);
     color: var(--text-color-light);
 }
 
 /* Main Grid */
-.vector2Grid {
+.stickyUI.vector2Grid {
     position: absolute;
     top: 0;
     left: 0;
@@ -1148,7 +1343,7 @@ input:checked + .switchSlider:before {
 }
 
 /* Main Axis X and Axis Y */
-.vector2Grid::after {
+.stickyUI.vector2Grid::after {
     content: '';
     position: absolute;
     top: 0;
@@ -1166,7 +1361,7 @@ input:checked + .switchSlider:before {
 
 /* ---------------------- Joystick ---------------------- */
 
-.joystickContainer {
+.stickyUI.joystickContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1175,12 +1370,12 @@ input:checked + .switchSlider:before {
     padding: var(--spacing-xs);
 }
 
-.joystickContainer .label {
+.stickyUI.joystickContainer .label {
     font-size: 14px;
     color: var(--text-color);
 }
 
-.joystickArea {
+.stickyUI.joystickArea {
     position: relative;
     background: var(--bg-color);
     border: 1px solid var(--border-color);
@@ -1188,7 +1383,7 @@ input:checked + .switchSlider:before {
     cursor: pointer;
 }
 
-.joystickArea::after {
+.stickyUI.joystickArea::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -1200,7 +1395,7 @@ input:checked + .switchSlider:before {
     transform: translate(-50%, -50%);
 }
 
-.joystick {
+.stickyUI.joystick {
     z-index: 1;
     position: absolute;
     width: 40px;
@@ -1212,12 +1407,12 @@ input:checked + .switchSlider:before {
     box-shadow: var(--shadow-md);
 }
 
-.joystick:active {
+.stickyUI.joystick:active {
     cursor: grabbing;
     background: var(--primary-color-dark);
 }
 
-.joystickValue {
+.stickyUI.joystickValue {
     font-family: monospace;
     font-size: 14px;
     color: var(--text-color);
@@ -1340,4 +1535,96 @@ input:checked + .switchSlider:before {
 
 .icon-hash {
     mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 4V8H4V10H8V14H4V16H8V20H10V16H14V20H16V16H20V14H16V10H20V8H16V4H14V8H10V4H8ZM14 14V10H10V14H14Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-sidepanel-open {
+    mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 10 1.99994 1.9999-1.99994 2M11 5v14m-7 0h16c.5523 0 1-.4477 1-1V6c0-.55228-.4477-1-1-1H4c-.55228 0-1 .44772-1 1v12c0 .5523.44772 1 1 1Z'/%3E%3C/svg%3E%0A");
+}
+
+.icon-sidepanel-close {
+    mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M7.99994 10 6 11.9999l1.99994 2M11 5v14m-7 0h16c.5523 0 1-.4477 1-1V6c0-.55228-.4477-1-1-1H4c-.55228 0-1 .44772-1 1v12c0 .5523.44772 1 1 1Z'/%3E%3C/svg%3E%0A");
+}
+
+.icon-terminal {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M5.0333 14.8284L6.44751 16.2426L10.6902 12L6.44751 7.75733L5.0333 9.17155L7.86172 12L5.0333 14.8284Z' fill='currentColor' /%3E%3Cpath d='M15 14H11V16H15V14Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 2C0.895431 2 0 2.89543 0 4V20C0 21.1046 0.89543 22 2 22H22C23.1046 22 24 21.1046 24 20V4C24 2.89543 23.1046 2 22 2H2ZM22 4H2L2 20H22V4Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-toolbar-bottom {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M18 13H6V15H18V13Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 8C2 6.34315 3.34315 5 5 5H19C20.6569 5 22 6.34315 22 8V16C22 17.6569 20.6569 19 19 19H5C3.34315 19 2 17.6569 2 16V8ZM5 7H19C19.5523 7 20 7.44771 20 8V16C20 16.5523 19.5523 17 19 17H5C4.44772 17 4 16.5523 4 16V8C4 7.44772 4.44772 7 5 7Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-toolbar-top {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M18 11H6V9H18V11Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 16C2 17.6569 3.34315 19 5 19H19C20.6569 19 22 17.6569 22 16V8C22 6.34315 20.6569 5 19 5H5C3.34315 5 2 6.34315 2 8V16ZM5 17H19C19.5523 17 20 16.5523 20 16V8C20 7.44772 19.5523 7 19 7H5C4.44772 7 4 7.44771 4 8V16C4 16.5523 4.44772 17 5 17Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-toolbar-right {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M16 9H18V15H16V9Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M22 8C22 6.34315 20.6569 5 19 5H5C3.34315 5 2 6.34315 2 8V16C2 17.6569 3.34315 19 5 19H19C20.6569 19 22 17.6569 22 16V8ZM19 7H5C4.44772 7 4 7.44771 4 8V16C4 16.5523 4.44772 17 5 17H19C19.5523 17 20 16.5523 20 16V8C20 7.44772 19.5523 7 19 7Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-toolbar-left {
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M8 9H6V15H8V9Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 8C2 6.34315 3.34315 5 5 5H19C20.6569 5 22 6.34315 22 8V16C22 17.6569 20.6569 19 19 19H5C3.34315 19 2 17.6569 2 16V8ZM5 7H19C19.5523 7 20 7.44771 20 8V16C20 16.5523 19.5523 17 19 17H5C4.44772 17 4 16.5523 4 16V8C4 7.44772 4.44772 7 5 7Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
+.icon-robot {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' fill='none'/%3E%3Crect x='32' y='56' width='192' height='160' rx='24' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/%3E%3Crect x='72' y='144' width='112' height='40' rx='20' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/%3E%3Cline x1='148' y1='144' x2='148' y2='184' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/%3E%3Cline x1='108' y1='144' x2='108' y2='184' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/%3E%3Cline x1='128' y1='56' x2='128' y2='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/%3E%3Ccircle cx='84' cy='108' r='12'/%3E%3Ccircle cx='172' cy='108' r='12'/%3E%3C/svg%3E");
+}
+
+
+
+/* ---------------------- Icon Bars - Floating bars (WORK IN PROGRESS - WIP) --------------------- */
+
+.stickyUI.iconBarHorizontal {
+    position: fixed;
+    top: 50px;
+    right: 50px;
+    background: var(--bg-color-secondary);
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+    border: none;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    z-index: 1000;
+}
+
+.stickyUI.iconBarButton {
+    min-width: 20px;
+    min-height: 20px;
+    padding: var(--spacing-xs);
+    border: none;
+    background: var(--bg-color-secondary);
+    color: var(--text-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.stickyUI.iconBarButton:hover {
+    background: var(--hover-color);
+}
+
+/* Adjust icon bar vertical */
+.stickyUI.iconBarVertical {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-color-secondary);
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-md);
+    border: none;
+    box-shadow: var(--shadow-md);
+    align-items: center;
+    gap: var(--spacing-xs);
+    z-index: 1000;
+}
+
+.stickyUI.iconBarVertical-left {
+    left: 50px;
+    top: 50px;
+}
+
+.stickyUI.iconBarVertical-right {
+    right: 50px;
+    top: 50px;
 }

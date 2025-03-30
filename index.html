@@ -43,45 +43,152 @@
         let menuBar = ui.menuBar([menuBarItem1, menuBarItem2, menuBarItem3]);
         document.body.appendChild(menuBar);
 
+
         // --------------------------------------
-        // Icon Bars
+        // Side Panel - Left
         // --------------------------------------
 
-        let iconBarHorizontal = ui.iconBarHorizontal();
-        let iconBarButton1 = ui.iconBarButton();
-        let iconBarButton2 = ui.iconBarButton();
-        let iconBarButton3 = ui.iconBarButton();
-        iconBarHorizontal.appendChild(iconBarButton1);
-        iconBarHorizontal.appendChild(iconBarButton2);
-        iconBarHorizontal.appendChild(iconBarButton3);
-        ui.setDraggable(iconBarHorizontal);    
-        document.body.appendChild(iconBarHorizontal);
+        const leftPanel = ui.sidePanel('left', '300px');
+        const leftPanelSection1 = leftPanel.addSection('Settings', [
+            ui.textInput('Name', 'Enter your name'),
+            ui.textInput('Email', 'Enter your email'),
+            ui.textInput('Password', 'Enter your password'),
+            ui.button('Save'),
+        ]);
+        const leftPanelSection2 = leftPanel.addSection('Tools', [
+            ui.dropdown('Dropdown List', [
+                { value: 'option1', label: 'Option 1' },
+                { value: 'option2', label: 'Option 2' }
+            ], 'option1'),
+            ui.colorPicker('Color'),
+            ui.separator('Separator'),
+            ui.switch('Switch 1'),
+            ui.switch('Switch 3')
+
+        ], false); 
+        const leftPanelSection3 = leftPanel.addSection('Section 3', [
+            ui.textInput('Name', 'Enter your name'),
+            ui.textInput('Email', 'Enter your email'),
+            ui.textInput('Password', 'Enter your password'),
+            ui.button('Save'),
+        ]);
+        document.body.appendChild(leftPanel);
+
+        // --------------------------------------
+        // Side Panel - Right
+        // --------------------------------------
+        const rightPanel = ui.sidePanel('right', '300px');
+        const rightPanelSection1 = rightPanel.addSection('Settings', [
+            ui.textInput('Name', 'Enter your name'),
+            ui.textInput('Email', 'Enter your email'),
+            ui.textInput('Password', 'Enter your password'),
+            ui.button('Save'),
+        ]);
+        document.body.appendChild(rightPanel);
+
+        // --------------------------------------
+        // Toolbars - Right
+        // --------------------------------------
+        const rightToolbar01 = ui.toolbar('right');
+        const rightToolbar02 = ui.toolbar('right');
+        const rightToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 01 - Icon 01'), 'Right Toolbar 01 - Icon 01');
+        const rightToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 01 - Icon 02'), 'Right Toolbar 01 - Icon 02');
+        const rightToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 01'), 'Right Toolbar 02 - Icon 01');
+        const rightToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 02'), 'Right Toolbar 02 - Icon 02');
+        rightToolbar01.addContent([rightToolbar01icon01, rightToolbar01icon02]);
+        rightToolbar02.addContent([rightToolbar02icon01, rightToolbar02icon02]);
+        document.body.appendChild(rightToolbar01);
+        document.body.appendChild(rightToolbar02);
+
+        // --------------------------------------
+        // Toolbars - Left
+        // --------------------------------------
+        const leftToolbar01 = ui.toolbar('left');
+        const leftToolbar02 = ui.toolbar('left');
+        const leftToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 01 - Icon 01'), 'Left Toolbar 01 - Icon 01');
+        const leftToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 01 - Icon 02'), 'Left Toolbar 01 - Icon 02');
+        const leftToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 02 - Icon 01'), 'Left Toolbar 02 - Icon 01');
+        const leftToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 02 - Icon 02'), 'Left Toolbar 02 - Icon 02');
+        const leftToolbar01separator01 = ui.toolbarDivider();
+        const leftToolbar01separator02 = ui.toolbarDivider();
+        leftToolbar01.addContent([leftToolbar01icon01, leftToolbar01separator01, leftToolbar01icon02, leftToolbar01separator02]);
+        leftToolbar02.addContent([leftToolbar02icon01, leftToolbar02icon02]);
+        document.body.appendChild(leftToolbar01);
+        document.body.appendChild(leftToolbar02);
+
+        // --------------------------------------
+        // Toolbars - Bottom
+        // --------------------------------------
+        const bottomToolbar01 = ui.toolbar('bottom');
+        const bottomToolbar02 = ui.toolbar('bottom');
+        const bottomToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 01 - Icon 01'), 'Bottom Toolbar 01 - Icon 01');
+        const bottomToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 01 - Icon 02'), 'Bottom Toolbar 01 - Icon 02');
+        const bottomToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 01'), 'Bottom Toolbar 02 - Icon 01');
+        const bottomToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 02'), 'Bottom Toolbar 02 - Icon 02');
+        bottomToolbar01.addContent([bottomToolbar01icon01, bottomToolbar01icon02]);
+        bottomToolbar02.addContent([bottomToolbar02icon01, bottomToolbar02icon02]);
+        document.body.appendChild(bottomToolbar01);
+        document.body.appendChild(bottomToolbar02);
+
+        // --------------------------------------
+        // Toolbars - Top
+        // --------------------------------------
+        const topToolbar01 = ui.toolbar('top');
+        const topToolbar02 = ui.toolbar('top');
+        const topToolbar01icon01 = ui.toolbarButton('icon-toolbar-top', () => topToolbar02.toggle(), 'Top Toolbar 01 - Icon 01');
+        const topToolbar01icon02 = ui.toolbarButton('icon-toolbar-bottom', () => bottomToolbar02.toggle(), 'Top Toolbar 01 - Icon 02');
+        const topToolbar01icon03 = ui.toolbarButton('icon-toolbar-right', () => rightToolbar02.toggle(), 'Top Toolbar 01 - Icon 03');
+        const topToolbar01icon04 = ui.toolbarButton('icon-toolbar-left', () => leftToolbar02.toggle(), 'Top Toolbar 01 - Icon 04');
+        const topToolbar01icon05 = ui.toolbarButton('icon-sidepanel-close', () => leftPanel.toggle(), 'Top Toolbar 01 - Icon 05');
+        const topToolbar01icon06 = ui.toolbarButton('icon-sidepanel-open', () => rightPanel.toggle(), 'Top Toolbar 01 - Icon 06');
+        const topToolbar01separator01 = ui.toolbarDivider();
+        const topToolbar01separator02 = ui.toolbarDivider();
+        const topToolbar02icon01 = ui.toolbarButton('icon-robot', () => console.log('Top Toolbar 02 - Icon 01'), 'Top Toolbar 02 - Icon 01');
+        topToolbar01.addContent([topToolbar01icon01, topToolbar01icon02, topToolbar01separator01, topToolbar01icon03, topToolbar01icon04, topToolbar01separator02, topToolbar01icon05, topToolbar01icon06]);
+        topToolbar02.addContent([topToolbar02icon01]);
+        document.body.appendChild(topToolbar01);
+        document.body.appendChild(topToolbar02);
+
+        // --------------------------------------
+        // Workspace - Option Canvas
+        // --------------------------------------
+        const workspace01 = ui.workspace();
+        const canvas = workspace01.setCanvas();
+        canvas.style.backgroundColor = '#f0f0f0';
+        const ctx = canvas.getContext("2d");
+        ctx.font = "50px Arial";
+        ctx.fillText("Hello World",100,100);
+        //document.body.appendChild(workspace01);
+
+         // --------------------------------------
+        // Workspace - Option Content
+        // --------------------------------------
+        const workspace02 = ui.workspace();
+        const newContent = document.createElement('div');
+        newContent.style.backgroundColor = '#f0f0f0';
+        newContent.innerHTML = "<h1>Hello World</h1>";
+        workspace02.setContent(newContent);
+        document.body.appendChild(workspace02);
 
         // --------------------------------------
         // Panel 1
         // --------------------------------------
 
-        let panel = ui.panel('Panel 1', null, null, 10, 200);
+        let floatingPanel = ui.floatingPanel('Floating Panel 1', null, null, 400, 250);
         
         // Buttons
         let separator1 = ui.separator('Buttons', '#06f3b1');
         let button1 = ui.button('Random Button 1');
         let button2 = ui.button('Random Button 2', '#06f3b1');
         let button3 = ui.button('Random Button 3', '#06f3b1', '#cc0050');
-        panel.addContent(separator1);
-        panel.addContent(button1);
-        panel.addContent(button2);
-        panel.addContent(button3);
+        floatingPanel.addContent([separator1, button1, button2, button3]);
 
         // Switches
         let separator2 = ui.separator('Switches', '#06f3b1');
         let switch1 = ui.switch('Switch 1');
         let switch2 = ui.switch('Switch 2', '#06f3b1');
         let switch3 = ui.switch('Switch 3', '#06f3b1', '#F7227E');
-        panel.addContent(separator2);
-        panel.addContent(switch1);
-        panel.addContent(switch2);
-        panel.addContent(switch3);
+        floatingPanel.addContent([separator2, switch1, switch2, switch3]);
 
         // Text Input / Dropdown / Color Picker / 
         let separator3 = ui.separator(' Text Input / Dropdown', '#06f3b1');
@@ -91,9 +198,7 @@
             { value: 'option2', label: 'Option 2' }
         ];
         let dropdown = ui.dropdown('Dropdown List', dropdownOptions, 'option1');
-        panel.addContent(separator3);
-        panel.addContent(textInput);
-        panel.addContent(dropdown);
+        floatingPanel.addContent([separator3, textInput, dropdown]);
 
         // Color Picker / Checkbox Group
         let separator4 = ui.separator('Color Picker / Checkbox Group', '#06f3b1');
@@ -104,29 +209,23 @@
         ];
         let checkboxGroup = ui.checkboxGroup('Select Multiple Options', checkboxOptions);
         let colorPicker = ui.colorPicker('Select Color', '#06f3b1');
-        panel.addContent(separator4);
-        panel.addContent(checkboxGroup);
-        panel.addContent(colorPicker);
+        floatingPanel.addContent([separator4, checkboxGroup, colorPicker]);
                 
         // Sliders
         let separator5 = ui.separator('Sliders', '#06f3b1');
         let rangeSlider = ui.sliderRange('Range Slider 1', 0, 100, 1, 50);
         let stepperSlider = ui.sliderStepper('Stepper Slider 2', 0, 100, 5, 50);
         let intervalSlider = ui.sliderInterval('Interval Slider 3', 0, 100, 1, 25, 75);
-        panel.addContent(separator5);
-        panel.addContent(rangeSlider);
-        panel.addContent(stepperSlider);
-        panel.addContent(intervalSlider);
+        floatingPanel.addContent([separator5, rangeSlider, stepperSlider, intervalSlider]);
 
         // Add panel to body
-        document.body.appendChild(panel);
-
+        document.body.appendChild(floatingPanel);
+        
         // --------------------------------------
         // Panel 2
         // --------------------------------------
-
-        let panel2 = ui.panel('Panel 2', null, null, -10, 200);
-        //let panel2 = panel;
+        
+        let floatingPanel2 = ui.floatingPanel('Floating Panel 2', null, null, 830, 250);
     
         // Folder
         let separator6 = ui.separator('Folder', '#06f3b1');
@@ -134,8 +233,7 @@
         let folderButton1 = ui.button('Folder Button 1');
         let folderButton2 = ui.button('Folder Button 2');
         let folder = ui.folder('My Folder', 'icon-folder-close', 'icon-folder-open', '#06f3b1', '#F7227E', true, [folderButton1, folderButton2]);
-        panel2.addContent(separator6);
-        panel2.addContent(folder);
+        floatingPanel2.addContent([separator6, folder]);
 
         // Tabs
         let separator7 = ui.separator('Tabs', '#06f3b1');
@@ -154,27 +252,33 @@
         ], '1');
         let tabPage2 = ui.tabPage('Settings', 'icon-folder-close', [tabPage2Button1, tabPage2SliderRange, tabPage2Dropdown]);
         let tabs = ui.tabs([tabPage1, tabPage2], 0);
-        panel2.addContent(separator7);
-        panel2.addContent(tabs);
+        floatingPanel2.addContent([separator7, tabs]);
         
+        // Add panel to body
+        document.body.appendChild(floatingPanel2);
+
+       // --------------------------------------
+        // Panel 3
+        // --------------------------------------
+        
+        let floatingPanel3 = ui.floatingPanel('Floating Panel 3', null, null, 1230, 250, true);
+    
         // Vector2
         let separator8 = ui.separator('Vector2', '#06f3b1');
         let vector2Control = ui.vector2('Position', -10, 10, -10, 10, 0, 0, 15,
             //(x, y) => console.log(`Position changed: x=${x}, y=${y}`)
         );
-        panel2.addContent(separator8);
-        panel2.addContent(vector2Control);
+        floatingPanel3.addContent([separator8, vector2Control]);
         
         // Joystick
         let separator9 = ui.separator('Joystick', '#06f3b1');
         let joystick1 = ui.joystick('Joystick Name', true, 100, (direction, speed, x, y) => {
-            //console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+            console.log(`Panel 3 Joystick => Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
-        panel2.addContent(separator9);
-        panel2.addContent(joystick1);
+        floatingPanel3.addContent([separator9, joystick1]);
 
         // Add panel to body
-       document.body.appendChild(panel2);
+        document.body.appendChild(floatingPanel3);
 
         // --------------------------------------
         // Status Bar
@@ -196,7 +300,7 @@
         // --------------------------------------
         // Tooltip + Faceplate
         // --------------------------------------
-
+        
         const buttonTop = ui.button('Hover me : Top');
         const buttonBottom = ui.button('Hover me : Bottom');
         const buttonLeft = ui.button('Hover me : Left');
@@ -207,7 +311,7 @@
         const tooltipLeft = ui.tooltip(buttonLeft, 'This is a tooltip that will adjust its position automatically!', 'left');
         const tooltipRight = ui.tooltip(buttonRight, 'This is a tooltip that will adjust its position automatically!', 'right');
 
-        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 190, 80, 400, -150);
+        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 930, 650);
 
         // Add faceplate to body
         document.body.appendChild(tooltipTop);
@@ -221,12 +325,26 @@
         // --------------------------------------
 
         const joystick2 = ui.joystick(null, false, null, (direction, speed, x, y) => {
-           //console.log(`Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
+           console.log(`Floating Joystick => Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
-        const faceplate = ui.faceplate([joystick2], 80, 80, 100, -150);
+        const faceplate = ui.faceplate([joystick2], 80, 80, 1310, 770);
 
         // Add faceplate to body
         document.body.appendChild(faceplate);
+
+        // ----------------------------------------
+        // Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
+        // ----------------------------------------
+
+        let iconBarHorizontal = ui.iconBarHorizontal();
+        let iconBarButton1 = ui.iconBarButton();
+        let iconBarButton2 = ui.iconBarButton();
+        let iconBarButton3 = ui.iconBarButton();
+        iconBarHorizontal.appendChild(iconBarButton1);
+        iconBarHorizontal.appendChild(iconBarButton2);
+        iconBarHorizontal.appendChild(iconBarButton3);
+        ui.setDraggable(iconBarHorizontal);    
+        document.body.appendChild(iconBarHorizontal);
 
     </script>
 </body>
