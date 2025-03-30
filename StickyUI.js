@@ -21,6 +21,108 @@ class StickyUI {
     constructor() {
         // Inject styles to the head (Not used, prefer to use the css file)
         //this.addStyles();
+
+        // Init the theme according to the system preferences
+        this.applyStoredTheme();
+    }
+
+    // ----------------------------------------
+    // Aliases
+    // ----------------------------------------
+
+    // Alias for appendChild
+    add = (content) => {
+        if (content !== null && typeof content === 'string') {
+            document.body.innerHTML = content;
+        }
+        else if (content !== null && typeof content === 'object') {
+            if (content instanceof Array) {
+                content.forEach(item => {
+                    document.body.appendChild(item);
+                });
+            } else {
+                document.body.appendChild(content);
+            }
+        }
+    }
+
+    // Alias for removeChild
+    remove = (content) => {
+        if (content !== null && typeof content === 'object') {
+            if (content instanceof Array) {
+                content.forEach(item => {
+                    document.body.removeChild(item);
+                });
+            } else {
+                document.body.removeChild(content);
+            }
+        }
+    }
+
+    // ----------------------------------------
+    // Theme
+    // ----------------------------------------
+
+    // Switch theme
+    switchTheme = (theme = null) => {
+        // If no theme is provided, toggle between the themes
+        if (theme === null) {
+            theme = this._theme === 'dark' ? 'light' : 'dark';
+        }
+        
+        // Validate the theme
+        if (theme !== 'dark' && theme !== 'light') {
+            console.error('Invalid theme. Use "dark" or "light".');
+            return;
+        }
+        
+        // Save the current theme
+        this._theme = theme;
+        
+        // Apply the theme to the document
+        document.documentElement.setAttribute('data-theme', theme);
+        console.log('Theme applied:', theme);
+        
+        // Create and send a theme change event
+        const event = new CustomEvent('theme-change', {
+            detail: { theme: theme }
+        });
+        document.dispatchEvent(event);
+        
+        // Save preference in localStorage to keep it between sessions
+        try {
+            localStorage.setItem('stickyui-theme', theme);
+        } catch (e) {
+            console.warn('Could not save theme in localStorage.');
+        }
+        
+        return theme;
+    }
+
+    // Get the current theme
+    getTheme = () => {
+        return this._theme;
+    }
+
+    // Apply the stored theme
+    applyStoredTheme = () => {
+        let storedTheme = null;
+        
+        // Try to recover the saved theme
+        try {
+            storedTheme = localStorage.getItem('stickyui-theme');
+        } catch (e) {
+            console.warn('Could not recover theme from localStorage.');
+        }
+        
+        // If there is a saved theme, apply it
+        if (storedTheme) {
+            this.switchTheme(storedTheme);
+        } else {
+            // If there is no saved theme, use the system preference
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            this.switchTheme(prefersDark ? 'dark' : 'light');
+        }
     }
 
     // ----------------------------------------

@@ -41,7 +41,7 @@
         let menuBarItem2 = ui.menuBarItem('View', 'icon-view', contextMenu2);
         let menuBarItem3 = ui.menuBarItem('Help', 'icon-help', contextMenu3);
         let menuBar = ui.menuBar([menuBarItem1, menuBarItem2, menuBarItem3]);
-        document.body.appendChild(menuBar);
+        ui.add(menuBar);
 
 
         // --------------------------------------
@@ -72,7 +72,7 @@
             ui.textInput('Password', 'Enter your password'),
             ui.button('Save'),
         ]);
-        document.body.appendChild(leftPanel);
+        ui.add(leftPanel);
 
         // --------------------------------------
         // Side Panel - Right
@@ -84,7 +84,7 @@
             ui.textInput('Password', 'Enter your password'),
             ui.button('Save'),
         ]);
-        document.body.appendChild(rightPanel);
+        ui.add(rightPanel);
 
         // --------------------------------------
         // Toolbars - Right
@@ -97,8 +97,7 @@
         const rightToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 02'), 'Right Toolbar 02 - Icon 02');
         rightToolbar01.addContent([rightToolbar01icon01, rightToolbar01icon02]);
         rightToolbar02.addContent([rightToolbar02icon01, rightToolbar02icon02]);
-        document.body.appendChild(rightToolbar01);
-        document.body.appendChild(rightToolbar02);
+        ui.add([rightToolbar01, rightToolbar02]);
 
         // --------------------------------------
         // Toolbars - Left
@@ -113,8 +112,7 @@
         const leftToolbar01separator02 = ui.toolbarDivider();
         leftToolbar01.addContent([leftToolbar01icon01, leftToolbar01separator01, leftToolbar01icon02, leftToolbar01separator02]);
         leftToolbar02.addContent([leftToolbar02icon01, leftToolbar02icon02]);
-        document.body.appendChild(leftToolbar01);
-        document.body.appendChild(leftToolbar02);
+        ui.add([leftToolbar01, leftToolbar02]);
 
         // --------------------------------------
         // Toolbars - Bottom
@@ -127,8 +125,7 @@
         const bottomToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 02'), 'Bottom Toolbar 02 - Icon 02');
         bottomToolbar01.addContent([bottomToolbar01icon01, bottomToolbar01icon02]);
         bottomToolbar02.addContent([bottomToolbar02icon01, bottomToolbar02icon02]);
-        document.body.appendChild(bottomToolbar01);
-        document.body.appendChild(bottomToolbar02);
+        ui.add([bottomToolbar01, bottomToolbar02]);
 
         // --------------------------------------
         // Toolbars - Top
@@ -141,13 +138,16 @@
         const topToolbar01icon04 = ui.toolbarButton('icon-toolbar-left', () => leftToolbar02.toggle(), 'Top Toolbar 01 - Icon 04');
         const topToolbar01icon05 = ui.toolbarButton('icon-sidepanel-close', () => leftPanel.toggle(), 'Top Toolbar 01 - Icon 05');
         const topToolbar01icon06 = ui.toolbarButton('icon-sidepanel-open', () => rightPanel.toggle(), 'Top Toolbar 01 - Icon 06');
+        const topToolbar01icon07 = ui.toolbarButton('icon-moon', () => ui.switchTheme(), 'Top Toolbar 01 - Icon 07');
+       
+
         const topToolbar01separator01 = ui.toolbarDivider();
         const topToolbar01separator02 = ui.toolbarDivider();
+        const topToolbar01separator03 = ui.toolbarDivider();
         const topToolbar02icon01 = ui.toolbarButton('icon-robot', () => console.log('Top Toolbar 02 - Icon 01'), 'Top Toolbar 02 - Icon 01');
-        topToolbar01.addContent([topToolbar01icon01, topToolbar01icon02, topToolbar01separator01, topToolbar01icon03, topToolbar01icon04, topToolbar01separator02, topToolbar01icon05, topToolbar01icon06]);
+        topToolbar01.addContent([topToolbar01icon01, topToolbar01icon02, topToolbar01separator01, topToolbar01icon03, topToolbar01icon04, topToolbar01separator02, topToolbar01icon05, topToolbar01icon06, topToolbar01separator03, topToolbar01icon07]);
         topToolbar02.addContent([topToolbar02icon01]);
-        document.body.appendChild(topToolbar01);
-        document.body.appendChild(topToolbar02);
+        ui.add([topToolbar01, topToolbar02]);
 
         // --------------------------------------
         // Workspace - Option Canvas
@@ -168,7 +168,7 @@
         newContent.style.backgroundColor = '#f0f0f0';
         newContent.innerHTML = "<h1>Hello World</h1>";
         workspace02.setContent(newContent);
-        document.body.appendChild(workspace02);
+        ui.add(workspace02);
 
         // --------------------------------------
         // Panel 1
@@ -219,7 +219,7 @@
         floatingPanel.addContent([separator5, rangeSlider, stepperSlider, intervalSlider]);
 
         // Add panel to body
-        document.body.appendChild(floatingPanel);
+        ui.add(floatingPanel);
         
         // --------------------------------------
         // Panel 2
@@ -255,7 +255,7 @@
         floatingPanel2.addContent([separator7, tabs]);
         
         // Add panel to body
-        document.body.appendChild(floatingPanel2);
+        ui.add(floatingPanel2);
 
        // --------------------------------------
         // Panel 3
@@ -278,7 +278,7 @@
         floatingPanel3.addContent([separator9, joystick1]);
 
         // Add panel to body
-        document.body.appendChild(floatingPanel3);
+        ui.add(floatingPanel3);
 
         // --------------------------------------
         // Status Bar
@@ -295,7 +295,7 @@
         statusBar.appendChild(statusItem2);
         statusBar.appendChild(statusItem3);
 
-        document.body.appendChild(statusBar);
+        ui.add(statusBar);
 
         // --------------------------------------
         // Tooltip + Faceplate
@@ -313,12 +313,8 @@
 
         const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 930, 650);
 
-        // Add faceplate to body
-        document.body.appendChild(tooltipTop);
-        document.body.appendChild(tooltipBottom);
-        document.body.appendChild(tooltipLeft);
-        document.body.appendChild(tooltipRight);
-        document.body.appendChild(faceplate1);
+        // Add Tooltips Faceplate to body
+        ui.add([tooltipTop, tooltipBottom, tooltipLeft, tooltipRight, faceplate1]);
 
         // --------------------------------------
         // Faceplate
@@ -330,7 +326,7 @@
         const faceplate = ui.faceplate([joystick2], 80, 80, 1310, 770);
 
         // Add faceplate to body
-        document.body.appendChild(faceplate);
+        ui.add(faceplate);
 
         // ----------------------------------------
         // Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
@@ -340,11 +336,9 @@
         let iconBarButton1 = ui.iconBarButton();
         let iconBarButton2 = ui.iconBarButton();
         let iconBarButton3 = ui.iconBarButton();
-        iconBarHorizontal.appendChild(iconBarButton1);
-        iconBarHorizontal.appendChild(iconBarButton2);
-        iconBarHorizontal.appendChild(iconBarButton3);
+        iconBarHorizontal.addContent([iconBarButton1, iconBarButton2, iconBarButton3]);
         ui.setDraggable(iconBarHorizontal);    
-        document.body.appendChild(iconBarHorizontal);
+        ui.add(iconBarHorizontal);
 
     </script>
 </body>
