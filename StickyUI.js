@@ -10,14 +10,41 @@
 /* File: StickyUI.js
 /* ------------------------------------------------------------------------------
 */
+  
+/***
+ * 
+ * To Do:
+ * - Change the icon size in the alert message box
+ * - Context Menu multiple 
+ * - Context Menu submenu
+ * - Context Menu right click
+ * - Context Menu keyboard shortcuts
+ * - Control the progress bar
+ * - Big button with icon and text
+ * - Add a toast notification
+ * - Check add Event Listeners in all elements
+ * - You were adding wrappers: for tooltip, for context menu, for messageBox & alertBox
+ * - Some elements will be added to the body automatically: tooltip, context menu, messageBox & alertBox
+ *   
+*/
+
+
+
+
 
 class StickyUI {
     #classBase = 'stickyUI';
+    #theme = 'dark';
+    #customEvents = [];
+    #listeners = [];
 
     // ----------------------------------------
-    // Constructor
+    // #region Constructor
     // ----------------------------------------
 
+    /**
+     * Constructor
+     */
     constructor() {
         // Inject styles to the head (Not used, prefer to use the css file)
         //this.addStyles();
@@ -27,13 +54,20 @@ class StickyUI {
     }
 
     // ----------------------------------------
-    // Aliases
+    // #endregion
     // ----------------------------------------
 
-    // Alias for appendChild
+    // ----------------------------------------
+    // #region Aliases for window, document, document.body
+    // ----------------------------------------
+
+    /**
+     * Alias for document.body.appendChild
+     * @param {DOMElement | string | Array<DOMElement | string>} content the content to append to the document body
+     */
     add = (content) => {
-        if (content !== null && typeof content === 'string') {
-            document.body.innerHTML = content;
+    if (content !== null && typeof content === 'string') {
+        document.body.innerHTML = content;
         }
         else if (content !== null && typeof content === 'object') {
             if (content instanceof Array) {
@@ -46,7 +80,10 @@ class StickyUI {
         }
     }
 
-    // Alias for removeChild
+    /**
+     * Alias for document.body.removeChild
+     * @param {DOMElement | string | Array<DOMElement | string>} content the content to remove from the document body
+     */
     remove = (content) => {
         if (content !== null && typeof content === 'object') {
             if (content instanceof Array) {
@@ -59,58 +96,166 @@ class StickyUI {
         }
     }
 
+    /**
+     * Alias for document.querySelector
+     * @param {string} selector the selector to query
+     * @returns {DOMElement} the first element that matches the selector
+     */
+    query = (selector) => {
+        return document.querySelector(selector);
+    }
+
+    /**
+     * Alias for document.querySelectorAll
+     * @param {string} selector the selector to query
+     * @returns {Array<DOMElement>} all elements that match the selector
+     */
+    queryAll = (selector) => {
+        return document.querySelectorAll(selector);
+    }
+
+    /**
+     * Alias for document.addEventListener
+     * @param {string} event the event to listen to
+     * @param {function} callback the callback to call when the event is triggered
+     */
+    listenEvent = (event, callback) => {
+        document.addEventListener(event, callback);
+        this.#listeners.push({ listener: 'document', event, callback, element: null });
+    }
+
+    /**
+     * Alias for document.removeEventListener
+     * @param {string} event the event to remove
+     * @param {function} callback the callback to remove
+     */
+    unlistenEvent = (event, callback) => {
+        document.removeEventListener(event, callback);
+        this.#listeners = this.#listeners.filter(listener => listener.listener !== 'document' || listener.event !== event || listener.callback !== callback);
+    }
+
+    /**
+     * Alias for document.getElementById
+     * @param {string} id the id of the element to get
+     * @returns {DOMElement} the element with the given id
+     */
+    getById = (id) => {
+        return document.getElementById(id);
+    }
+
+    /**
+     * Alias for document.getElementsByClassName
+     * @param {string} className the class name to get
+     * @returns {DOMElement} the first element with the given class name
+     */
+    getByClass = (className) => {
+        const elements = document.getElementsByClassName(className);
+        return elements.length > 0 ? elements[0] : null;
+    }
+
+    /**
+     * Alias for document.getElementsByName
+     * @param {string} name the name of the element to get
+     * @returns {DOMElement} the first element with the given name
+     */
+    getByName = (name) => {
+        return document.getElementsByName(name);
+    } 
+
+    /**
+     * Alias for document.new CustomEvent
+     * @param {string} eventName the name of the event to create
+     * @param {object} data the data to pass to the event
+     * @returns {CustomEvent} the created event
+     */
+    createEvent = (eventName, data = null) => {
+        const event = new CustomEvent(eventName, { detail: data });
+        this.#customEvents.push(event);
+        return event;
+    }
+
+    /**
+     * Destroy a custom event
+     * @param {CustomEvent} event the event to destroy
+     */
+    destroyEvent = (event) => {
+        if (event instanceof CustomEvent) { 
+            this.#customEvents = this.#customEvents.filter(e => e !== event);
+        }
+    }
+    
+    /**
+     * Alias for document.dispatchEvent
+     * @param {CustomEvent} event the event to trigger
+     */
+    triggerEvent = (event) => {
+        document.dispatchEvent(event);
+    }
+
+    /**
+     * Check if an element is in the DOM
+     * @param {DOMElement} element the element to check
+     * @returns {boolean} true if the element is in the DOM, false otherwise
+     */ 
+    isInDOM = (element) => {
+        return document.body.contains(element);
+    }
+
     // ----------------------------------------
-    // Theme
+    // #endregion
     // ----------------------------------------
 
-    // Switch theme
+    // ----------------------------------------
+    // #region Theme
+    // ----------------------------------------
+
+    /**
+     * Switch theme
+     * @param {string} theme the theme's name to switch to
+     */
     switchTheme = (theme = null) => {
         // If no theme is provided, toggle between the themes
-        if (theme === null) {
-            theme = this._theme === 'dark' ? 'light' : 'dark';
-        }
-        
+        if (theme === null)
+            theme = this.#theme === 'dark' ? 'light' : 'dark';
         // Validate the theme
         if (theme !== 'dark' && theme !== 'light') {
             console.error('Invalid theme. Use "dark" or "light".');
             return;
         }
-        
         // Save the current theme
-        this._theme = theme;
-        
+        this.#theme = theme;
         // Apply the theme to the document
         document.documentElement.setAttribute('data-theme', theme);
         console.log('Theme applied:', theme);
-        
         // Create and send a theme change event
-        const event = new CustomEvent('theme-change', {
-            detail: { theme: theme }
-        });
-        document.dispatchEvent(event);
-        
+        const event = this.createEvent('theme-change', { theme: theme });
+        this.triggerEvent(event);
         // Save preference in localStorage to keep it between sessions
         try {
-            localStorage.setItem('stickyui-theme', theme);
+            localStorage.setItem(`${this.#classBase}-theme`, theme);
         } catch (e) {
             console.warn('Could not save theme in localStorage.');
         }
-        
         return theme;
     }
 
-    // Get the current theme
+    /**
+     * Get the current theme
+     * @returns {string} the current theme
+     */
     getTheme = () => {
-        return this._theme;
+        return this.#theme;
     }
 
-    // Apply the stored theme
+    /**
+     * Apply the stored theme
+     */
     applyStoredTheme = () => {
         let storedTheme = null;
         
         // Try to recover the saved theme
         try {
-            storedTheme = localStorage.getItem('stickyui-theme');
+            storedTheme = localStorage.getItem(`${this.#classBase}-theme`);
         } catch (e) {
             console.warn('Could not recover theme from localStorage.');
         }
@@ -126,17 +271,52 @@ class StickyUI {
     }
 
     // ----------------------------------------
-    // Basic methods
+    // #endregion
+    // ----------------------------------------
+
+    // ----------------------------------------
+    // #region Basic Components & Methods
     // ----------------------------------------
     
-    // Create an element 
-    element = (type, id = null, className = null, content = null) => {
+    /**
+     * @typedef {Element} DOMElement DOM Element alias for Element
+     */
+
+    /**
+     * @typedef {Object} UIElementBase (Base) UI Element with custom methods
+     * @property {function(string|DOMElement|Array<DOMElement>): void} add - Add content to the element, alias for appendChild (content)
+     * @property {function(string|DOMElement|Array<DOMElement>): void} replace - Replace the content of the element, alias for innerHTML (content)
+     * @property {function(string|DOMElement|Array<DOMElement>): void} listenEvent - Listen to an event, alias for addEventListener (event, callback)
+     * @property {function(string|DOMElement|Array<DOMElement>): void} unlistenEvent - Unlisten to an event, alias for removeEventListener (event, callback) 
+     * @property {function(string): void} triggerEvent - Trigger an event, alias for dispatchEvent (event)
+     * @property {function(string|Array<string>): void} addClass - Add a class to the element, alias for classList.add (className)
+     * @property {function(string|Array<string>): void} removeClass - Remove a class from the element, alias for classList.remove (className)
+     * @property {function(string|Array<string>): void} toggleClass - Toggle a class to the element, alias for classList.toggle (className)
+     * @property {function(string|Array<string>): boolean} hasClass - Check if the element has a class, alias for classList.contains (className)
+     * @property {function(string): DOMElement} query - Query a child element, alias for querySelector (selector)
+     * @property {function(string): NodeList} queryAll - Query all child elements, alias for querySelectorAll (selector)
+     */
+
+    /**
+     * @typedef {DOMElement & UIElementBase} UIElement UI Element with custom methods
+     */
+
+    /**
+     * Creates a DOM Element (UIElement)
+     * @param {string} type type of the element to create
+     * @param {string} id id of the element to create
+     * @param {string} className class name of the element to create
+     * @param {string} content content of the element to create
+     * @returns {UIElement} created element
+     */
+    element(type, id = null, className = null, content = null) {
         // Create the element
         let element = document.createElement(type);
         if (id !== null) 
             element.id = id;
-        // Methods: Alias for appendChild, addEventListener, removeEventListener, addClass, removeClass
-        element.addContent = (content) => {
+
+        // External methods
+        element.add = (content) => {
             if (content !== null && typeof content === 'string') {
                 element.innerHTML = content;
             }
@@ -149,12 +329,21 @@ class StickyUI {
                     element.appendChild(content);
                 }
             }
+        };     
+        element.replace = (content) => {
+            element.innerHTML = '';
+            element.add(content);
         };
-        element.addEvent = (event, callback) => {
+        element.listenEvent = (event, callback) => {
             element.addEventListener(event, callback);
-        };
-        element.removeEvent = (event, callback) => {
+            this.#listeners.push({ listener: `${type}#${element.id}`, event, callback, element });
+        };     
+        element.unlistenEvent = (event, callback) => {
             element.removeEventListener(event, callback);
+            this.#listeners = this.#listeners.filter(listener => listener.listener !== `${type}#${element.id}` || listener.event !== event || listener.callback !== callback);
+        };
+        element.triggerEvent = (event) => {
+            element.dispatchEvent(event);
         };
         element.addClass = (className) => {
             if (className !== null) {
@@ -188,14 +377,27 @@ class StickyUI {
                     return className.some(name => element.classList.contains(name));
             }   
         };
+        element.query = (selector) => {
+            return element.querySelector(selector);
+        }
+        element.queryAll = (selector) => {
+            return element.querySelectorAll(selector);
+        }
+
         // Add the class and content (Invoked after methods)
         element.addClass(this.#classBase);
         element.addClass(className);
-        element.addContent(content);
+        element.add(content);
+
+        // Return the element
         return element;
     }
 
-    // Generate a random UID (to avoid duplicate IDs)
+    /**
+     * Generate a random UID (to avoid duplicate IDs)
+     * @param {number} length the length of the UID
+     * @returns {string} the generated UID
+     */
     UID = (length = 5) => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
@@ -206,57 +408,112 @@ class StickyUI {
     }
 
     // ----------------------------------------
-    // Single Icon
+    // #endregion
     // ----------------------------------------
+
+    // ----------------------------------------
+    // #region Icon
+    // ----------------------------------------
+
+    /**
+     * @typedef {Object} UIIconBase (Base) Icon Element with custom methods
+     * @property {function(string): void} changeIcon - Change the icon of the element (iconName)
+     * @property {function(number, string): void} setWidth - Set the width of the element (width, unit)
+     * @property {function(number, string): void} setHeight - Set the height of the element (height, unit)
+     * @property {function(number, string): void} setSize - Set the size of the element (size, unit)
+     * @property {function(string): void} setColor - Set the color of the element (color)
+     */
+
+    /**
+     * @typedef {UIElement & UIIconBase} UIIcon Icon Element with custom methods
+     */
+
+    /**
+     * Creates an icon element
+     * @param {string} iconName the name of the icon to create
+     * @returns {UIIcon} the created icon element
+     */
 
     icon = (iconName = null) => {
         const UID = this.UID();
         let _currentIcon = iconName;
         const iconElement = this.element('div',`icon_${UID}`, 'icon');
+
         if (iconName)
             iconElement.addClass(iconName)
-
+            
+        // External methods
         iconElement.changeIcon = (iconName) => {
             iconElement.removeClass(_currentIcon);
             iconElement.addClass(iconName);
             _currentIcon = iconName;
         }
+        iconElement.setWidth = (width, unit = 'px') => {
+            if (width !== null && typeof width === 'number')
+                iconElement.style.width = `${width}${unit}`;
+        }
+        iconElement.setHeight = (height, unit = 'px') => {
+            if (height !== null && typeof height === 'number')
+                iconElement.style.height = `${height}${unit}`;
+        }
+        iconElement.setSize = (size = null, unit = 'px') => {
+            if (size !== null && typeof size === 'number') {
+                iconElement.style.width = `${size}${unit}`;
+                iconElement.style.height = `${size}${unit}`;
+            }
+        } 
+        iconElement.setColor = (color) => {
+            if (color !== null && typeof color === 'string')
+                iconElement.style.color = color;
+        }
 
+        // Return the element
         return iconElement;
     }
 
     // ----------------------------------------
-    // Menu Bar
+    // #endregion
+    // ----------------------------------------
+
+    // ----------------------------------------
+    // #region Menu Bar
     // ----------------------------------------
  
     menuBarItem = (labelText = null, icon = null, contextMenu = null) => {
         const UID = this.UID();
         const menuBarItem = this.element('div', `menuBarItem_${UID}`, 'menuBarItem');
-        const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText);
-        menuBarItem.addContent(menuBarItemLabel);
 
+        // Add the icon
         if (icon) {
             const menuBarItemIconContainer = this.element('div', `menuBarItemIconContainer_${UID}`, 'menuBarItemIconContainer');
             const menuBarItemIcon = this.icon(icon);
-            menuBarItemIconContainer.addContent(menuBarItemIcon);
-            menuBarItem.addContent(menuBarItemIconContainer);
+            menuBarItemIconContainer.add(menuBarItemIcon);
+            menuBarItem.add(menuBarItemIconContainer);
+            menuBarItemIcon.setSize(16);
+            menuBarItemIcon.setColor('var(--color-primary)');
         }
 
+        // Add the label
+        const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText);
+        menuBarItem.add(menuBarItemLabel);
+
+        // Add the context menu (if provided) on click
         if (contextMenu) {
-            menuBarItem.addEvent('click', (e) => {
+            menuBarItem.listenEvent('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                const activeContextMenu = document.querySelector(`.${this.#classBase}.contextMenu.show`);
+                // Close other context menus    
+                const activeContextMenu = this.query(`.${this.#classBase}.contextMenu.show`);
                 if (activeContextMenu) {
                     activeContextMenu.hideContextMenu();
                 }
-                const rect = menuBarItem.getBoundingClientRect();
-                const parentMenuBar = menuBarItem.closest('.menuBar').getBoundingClientRect();
-                const x = parseFloat(rect.left);
-                const y = parseFloat(parentMenuBar.height);
-                contextMenu.showContextMenu(x, y);
+                // Get position and show the context menu
+                
+                const parentMenuBar = menuBarItem.closest('.menuBarItem');
+                console.log(">>>", parentMenuBar);
+                contextMenu.showContextMenu(parentMenuBar, 'bottom-left', 'top-left');
             });
-            document.body.appendChild(contextMenu);
+            this.add(contextMenu); // DOM Insertion ***
         }
         
         return menuBarItem;
@@ -266,11 +523,11 @@ class StickyUI {
         const UID = this.UID();
         const menuBar = this.element('div', `menuBar_${UID}`, 'menuBar');
         if (menuBarItems !== null && menuBarItems instanceof Array) 
-            menuBar.addContent(menuBarItems);
+            menuBar.add(menuBarItems);
 
         // Hide context menu when clicking outside
-        document.addEventListener('click', () => {
-            const activeContextMenu = document.querySelector(`.${this.#classBase}.contextMenu.show`);
+        this.listenEvent('click', () => {
+            const activeContextMenu = this.query(`.${this.#classBase}.contextMenu.show`);
             if (activeContextMenu) {
                 activeContextMenu.hideContextMenu();
             }
@@ -280,28 +537,190 @@ class StickyUI {
     }
 
     // ----------------------------------------
-    // Context Menu
+    // #endregion
     // ----------------------------------------
 
+    // ----------------------------------------
+    // #region Context Menu
+    // ----------------------------------------
+
+    // Get element position and dimensions
+    __getElemPosDim = (element) => {
+        const rect = element.getBoundingClientRect();
+        const width = parseFloat(rect.width);
+        const height = parseFloat(rect.height);
+        const xLeft = parseFloat(rect.left);
+        const xCenter = xLeft + (width / 2);
+        const xRight = xLeft + width;
+        const yTop = parseFloat(rect.top);
+        const yCenter = yTop + (height / 2);
+        const yBottom = yTop + height;
+        return { width, height, xLeft, xCenter, xRight, yTop, yCenter, yBottom }
+    }
+
+    // Make the target element visible temporarily outside of the viewport to measure
+    __getElemDim_Hidden = (element) => {
+        // Save the original style
+        const _style = {
+            visibility: element.style.visibility ?? null,
+            display: element.style.display ?? null,
+            position: element.style.position ?? null,
+            top: element.style.top ?? null,
+            left: element.style.left ?? null
+        };
+        // Make the target element visible temporarily outside of the viewport to measure
+        element.style.visibility = 'hidden';
+        element.style.display = 'block';
+        element.style.position = 'fixed';
+        element.style.top = '-9999px';
+        element.style.left = '-9999px';
+        // Get the dimensions
+        const rect = element.getBoundingClientRect();
+        const width = parseFloat(rect.width);
+        const height = parseFloat(rect.height);
+        // Restore the original style
+        if (_style.visibility !== null) element.style.visibility = _style.visibility;
+        if (_style.display !== null) element.style.display = _style.display;
+        if (_style.position !== null) element.style.position = _style.position;
+        if (_style.top !== null) element.style.top = _style.top;
+        if (_style.left !== null) element.style.left = _style.left;
+        return { width, height };
+    }
+
+    // Get the position of the target element relative to the reference element
+    // refAnchor: the anchor point of the reference element
+    // targetAnchor: the anchor point of the target element
+    // offset: the offset of the target element relative to the reference element
+    // viewportMargin: the margin of the viewport
+    // Anchors: 
+    // top-left, top-center, top-right,
+    // bottom-left, bottom-center, bottom-right,
+    // left-top, left-center, left-bottom,
+    // right-top, right-center, right-bottom
+    __getElemPosDisplay = (referenceElement, targetElement, refAnchor = 'right-bottom', targetAnchor = 'top-left',  offset = { x: 0, y: 0 }, viewportMargin = 0) => {        
+        // Get the reference element dimensions and position
+        const { 
+            width: refWidth, height: refHeight, 
+            xLeft: refXLeft, xCenter: refXCenter, xRight: refXRight, 
+            yTop: refYTop, yCenter: refYCenter, yBottom: refYBottom 
+        } = this.__getElemPosDim(referenceElement);
+        // Get the target element dimensions and position
+        const { width: targetWidth, height: targetHeight } = this.__getElemDim_Hidden(targetElement);
+        // Get the viewport dimensions
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        // Get offset object
+        if (typeof offset === 'number') {
+            offset = { x: offset, y: offset };
+        }
+        // Calculate available space in each direction from the reference element
+        const spaceRight = viewportWidth - refXRight;
+        const spaceLeft = refXLeft;
+        const spaceBottom = viewportHeight - refYBottom;
+        const spaceTop = refYTop;
+        // Determine best position based on available space
+        const _refAnchorMain = refAnchor.split('-')[0];
+        // Check horizontal space and adjust if necessary
+        if (_refAnchorMain.includes('right') && spaceRight < targetWidth + viewportMargin) {
+            refAnchor = refAnchor.replace('right', 'left');
+            targetAnchor = targetAnchor.replace('left', 'right');
+            offset.x = -offset.x;
+        } else if (_refAnchorMain.includes('left') && spaceLeft < targetWidth + viewportMargin) {
+            refAnchor = refAnchor.replace('left', 'right');
+            targetAnchor = targetAnchor.replace('right', 'left');
+            offset.x = -offset.x;
+        }
+        // Determine best position based on available space
+        // Check vertical space and adjust if necessary
+        if (_refAnchorMain.includes('bottom') && spaceBottom < targetHeight + viewportMargin) {
+            refAnchor = refAnchor.replace('bottom', 'top');
+            targetAnchor = targetAnchor.replace('top', 'bottom');
+            offset.y = -offset.y;
+        } else if (_refAnchorMain.includes('top') && spaceTop < targetHeight + viewportMargin) {
+            refAnchor = refAnchor.replace('top', 'bottom');
+            targetAnchor = targetAnchor.replace('bottom', 'top');
+            offset.y = -offset.y;
+        }
+        // Determine the base position relative to the reference element
+        let baseX, baseY;
+        const [refAnchorMain, refAnchorSub] = refAnchor.split('-');
+        if (refAnchorMain === 'top') {
+            baseY = refYTop;
+            if (refAnchorSub === 'left') baseX = refXLeft; // top-left
+            else if (refAnchorSub === 'right') baseX = refXRight; // top-right
+            else baseX = refXCenter; // top-center
+        } 
+        else if (refAnchorMain === 'bottom') {
+            baseY = refYBottom;
+            if (refAnchorSub === 'left') baseX = refXLeft; // bottom-left
+            else if (refAnchorSub === 'right') baseX = refXRight; // bottom-right
+            else baseX = refXCenter; // bottom-center
+        }
+        else if (refAnchorMain === 'left') {
+            baseX = refXLeft;
+            if (refAnchorSub === 'top') baseY = refYTop; // left-top
+            else if (refAnchorSub === 'bottom') baseY = refYBottom;
+            else baseY = refYCenter; // center
+        }
+        else if (refAnchorMain === 'right') {
+            baseX = refXRight;
+            if (refAnchorSub === 'top') baseY = refYTop; // right-top
+            else if (refAnchorSub === 'bottom') baseY = refYBottom; // right-bottom
+            else baseY = refYCenter; // right-center
+        }
+        // Adjust position based on the targetAnchor 
+        // (which part of the target element should be placed at the base position)
+        let finalX = baseX, finalY = baseY;
+        const [targetAnchorMain, targetAnchorSub] = targetAnchor.split('-');        
+        // Adjust X position based on targetAnchor
+        if (targetAnchorMain === 'left' || targetAnchorSub === 'left') { // left-top, left-center, left-bottom || top-left, center-left, bottom-left
+            // No adjustment needed for left alignment
+        } else if (targetAnchorMain === 'right' || targetAnchorSub === 'right') { // right-top, right-center, right-bottom || top-right, center-right, bottom-right
+            finalX -= targetWidth;
+        } else if (targetAnchorMain === 'center' || targetAnchorSub === 'center') { // top-center, bottom-center, left-center, right-center
+            finalX -= targetWidth / 2;
+        }
+        // Adjust Y position based on targetAnchor
+        if (targetAnchorMain === 'top' || targetAnchorSub === 'top') { // top-left, top-center, top-right || left-top, center-top, right-top  
+            // No adjustment needed for top alignment
+        } else if (targetAnchorMain === 'bottom' || targetAnchorSub === 'bottom') { // bottom-left, bottom-center, bottom-right || left-bottom, center-bottom, right-bottom
+            finalY -= targetHeight;
+        } else if (targetAnchorMain === 'center' || targetAnchorSub === 'center') { // top-center, bottom-center, left-center, right-center
+            finalY -= targetHeight / 2;
+        }
+        // Apply additional offset
+        finalX += offset.x;
+        finalY += offset.y;
+        // Ensure menu stays within viewport bounds
+        finalX = Math.max(viewportMargin, Math.min(finalX, viewportWidth - targetWidth - viewportMargin));
+        finalY = Math.max(viewportMargin, Math.min(finalY, viewportHeight - targetHeight - viewportMargin));
+        return { x: finalX, y: finalY, refAnchor, targetAnchor };
+    }
+    
+    
     contextMenuItem = (labelText = null, icon = null, onClick = null, closeOnClick = true) => {
         const UID = this.UID();
         const contextMenuItem = this.element('div', `contextMenuItem_${UID}`, 'contextMenuItem');
-        const contextMenuItemLabel = this.element('div', `contextMenuItemLabel_${UID}`, 'contextMenuItemLabel', labelText);
         
+        // Add the icon
         if (icon) {
             const contextMenuItemIconContainer = this.element('div', `contextMenuItemIconContainer_${UID}`, 'contextMenuItemIconContainer');
             const contextMenuItemIcon = this.icon(icon);
-            contextMenuItemIconContainer.addContent(contextMenuItemIcon);
-            contextMenuItem.addContent(contextMenuItemIconContainer);
+            contextMenuItemIconContainer.add(contextMenuItemIcon);
+            contextMenuItem.add(contextMenuItemIconContainer);
         }
         
-        contextMenuItem.addContent(contextMenuItemLabel);
+        // Add the label
+        const contextMenuItemLabel = this.element('div', `contextMenuItemLabel_${UID}`, 'contextMenuItemLabel', labelText);
+        contextMenuItem.add(contextMenuItemLabel);
 
+        // Add the on click event (if provided)
         if (onClick) {
             contextMenuItem.onClick = onClick;
-            contextMenuItem.addEvent('click', (e) => {
+            contextMenuItem.listenEvent('click', (e) => {
                 e.stopPropagation();
                 contextMenuItem.onClick();
+                // Close the context menu if the option is set
                 if (closeOnClick) 
                     contextMenuItem.closest(".contextMenu").hideContextMenu();
             });
@@ -313,107 +732,62 @@ class StickyUI {
     contextMenu = (contextMenuItems) => {
         const UID = this.UID();
         const contextMenu = this.element('div', `contextMenu_${this.UID()}`, 'contextMenu');
+
+        // Add the context menu items
         if (contextMenuItems !== null && contextMenuItems instanceof Array) 
-            contextMenu.addContent(contextMenuItems);
+            contextMenu.add(contextMenuItems);
 
         // Methods to show and hide the context menu externally
-        contextMenu.showContextMenu = (x, y, preferredDirection = 'right-bottom') => {
-            // Make the menu visible temporarily outside of the viewport to measure
-            contextMenu.style.visibility = 'hidden';
-            contextMenu.style.display = 'block';
-            contextMenu.style.position = 'fixed';
-            contextMenu.style.top = '-9999px';
-            contextMenu.style.left = '-9999px';
+        contextMenu.showContextMenu = (referenceElement, refAnchor = 'bottom-right', targetAnchor = 'top-left', offset = { x: 0, y: 0 }) => {
             // Add the menu to the DOM if it's not already there
-            const isInDOM = document.body.contains(contextMenu);
+            const isInDOM = this.isInDOM(contextMenu);
             if (!isInDOM) {
-                document.body.appendChild(contextMenu);
+                this.add(contextMenu); // DOM Insertion ***
             }
-            // Get the actual dimensions of the menu
-            const rect = contextMenu.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const padding = 0;
-            // Calculate available space in each direction
-            const spaceRight = viewportWidth - x;
-            const spaceLeft = x;
-            const spaceBottom = viewportHeight - y;
-            const spaceTop = y;
-            // Determine best position based on available space
-            let finalX = x;
-            let finalY = y;
-            let direction = preferredDirection;
-
-            // Check horizontal space
-            if (direction.includes('right') && spaceRight < rect.width + padding) {
-                direction = direction.replace('right', 'left');
-            } else if (direction.includes('left') && spaceLeft < rect.width + padding) {
-                direction = direction.replace('left', 'right');
-            }
-
-            // Check vertical space
-            if (direction.includes('bottom') && spaceBottom < rect.height + padding) {
-                direction = direction.replace('bottom', 'top');
-            } else if (direction.includes('top') && spaceTop < rect.height + padding) {
-                direction = direction.replace('top', 'bottom');
-            }
-
-            // Apply position based on final direction
-            switch (direction) {
-                case 'right-bottom':
-                    finalX = x;
-                    finalY = y;
-                    break;
-                case 'right-top':
-                    finalX = x;
-                    finalY = y - rect.height;
-                    break;
-                case 'left-bottom':
-                    finalX = x - rect.width;
-                    finalY = y;
-                    break;
-                case 'left-top':
-                    finalX = x - rect.width;
-                    finalY = y - rect.height;
-                    break;
-            }
-
-            // Ensure menu stays within viewport bounds
-            finalX = Math.max(padding, Math.min(finalX, viewportWidth - rect.width - padding));
-            finalY = Math.max(padding, Math.min(finalY, viewportHeight - rect.height - padding));
-
-            // Apply final position and show menu
-            contextMenu.style.visibility = 'visible';
-            contextMenu.style.left = `${finalX}px`;
-            contextMenu.style.top = `${finalY}px`;
+            // Get the final position
+            const { x, y, refAnchor: _refAnchor, targetAnchor: _targetAnchor } = this.__getElemPosDisplay(referenceElement, contextMenu, refAnchor, targetAnchor, offset, 0);
+            // Apply final position and show menu    
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
             contextMenu.addClass('show');
-            contextMenu.setAttribute('data-direction', direction);
+            contextMenu.removeClass('hidden');
+            console.log(">>>", refAnchor, targetAnchor);
+            console.log(">>>", _refAnchor, _targetAnchor);
         }
 
         contextMenu.hideContextMenu = () => {
             contextMenu.removeClass('show');
-            contextMenu.style.visibility = 'hidden';
+            contextMenu.addClass('hidden');
+            
         }
 
         return contextMenu;
     }
 
     // ----------------------------------------
-    // Status Bar
+    // #endregion
+    // ----------------------------------------
+
+    // ----------------------------------------
+    // #region Status Bar
     // ----------------------------------------
     
-    statusBarItem = (text = '', icon = null) => {
+    statusBarItem = (labelText = null, icon = null, onClick = null) => {
         const UID = this.UID();
         const container = this.element('div', `statusBarItem_${UID}`, 'statusBarItem');
         
         if (icon) {
             const iconElement = this.icon(icon);
-            container.addContent(iconElement);
+            container.add(iconElement);
         }
         
-        if (text) {
-            const textElement = this.element('span', `statusBarItemText_${UID}`, null, text);
-            container.addContent(textElement);
+        if (labelText) {
+            const labelElement = this.element('span', `statusBarItemLabel_${UID}`, 'statusBarItemLabel', labelText);
+            container.add(labelElement);
+        }
+
+        if (onClick) {
+            container.listenEvent('click', onClick);
         }
         
         return container;
@@ -423,86 +797,88 @@ class StickyUI {
         const UID = this.UID();
         const container = this.element('div', `statusBar_${UID}`, 'statusBar');
         if (statusBarItems !== null && statusBarItems instanceof Array) 
-            container.addContent(statusBarItems);
+            container.add(statusBarItems);
 
         return container;
     }
 
     // ----------------------------------------
-    // Tooltip
+    // #endregion
     // ----------------------------------------
 
+    // ----------------------------------------
+    // #region Tooltip
+    // ----------------------------------------
+
+    /**
+     * Create a tooltip for an element (Self-DOM Insertion ***)
+     * @param {DOMElement} element the element to create the tooltip for
+     * @param {string} text the text to display in the tooltip
+     * @param {string} position the position of the tooltip (top, bottom, left, right)
+     * @returns {DOMElement} the tooltip element
+     */
     tooltip = (element, text, position = 'top') => {
         const UID = this.UID();
-        const tooltip = this.element('div', `tooltip_${UID}`, 'tooltip', text);
 
-        const showTooltip = (e) => {
-            tooltip.addClass('show');
-            
-            // Calculate position
-            const elementRect = element.getBoundingClientRect();
-            const tooltipRect = tooltip.getBoundingClientRect();
-            
-            let left, top;
-            let preferredPosition = position;
-            
-            // Check available space
-            const spaceTop = elementRect.top;
-            const spaceBottom = window.innerHeight - elementRect.bottom;
-            const spaceLeft = elementRect.left;
-            const spaceRight = window.innerWidth - elementRect.right;
-            
-            // Adjust position based on available space
-            if (preferredPosition === 'top' && spaceTop < tooltipRect.height) {
-                preferredPosition = 'bottom';
-            } else if (preferredPosition === 'bottom' && spaceBottom < tooltipRect.height) {
-                preferredPosition = 'top';
-            } else if (preferredPosition === 'left' && spaceLeft < tooltipRect.width) {
-                preferredPosition = 'right';
-            } else if (preferredPosition === 'right' && spaceRight < tooltipRect.width) {
-                preferredPosition = 'left';
-            }
-            
-            // Apply position
-            switch (preferredPosition) {
+        // Create tooltip wrapper
+        let tooltipWrapper = this.getByClass('tooltipWrapper');
+        if (!tooltipWrapper) {
+            tooltipWrapper = this.element('div', `tooltipWrapper_${UID}`, 'tooltipWrapper');
+            this.add(tooltipWrapper); // Self-DOM Insertion ***
+        }
+
+        // Create tooltip
+        const tooltip = this.element('div', `tooltip_${UID}`, 'tooltip', text);
+        tooltipWrapper.add(tooltip);
+
+        tooltip.showTooltip = (e) => {
+            let refAnchor, targetAnchor, paddingOffset;
+            switch (position) {
                 case 'top':
-                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
-                    top = elementRect.top - tooltipRect.height - 8;
+                    refAnchor = 'top-center';
+                    targetAnchor = 'bottom-center';
+                    paddingOffset = { x: 0, y: -8 };
                     break;
                 case 'bottom':
-                    left = elementRect.left + (elementRect.width / 2) - (tooltipRect.width / 2);
-                    top = elementRect.bottom + 8;
+                    refAnchor = 'bottom-center';
+                    targetAnchor = 'top-center';
+                    paddingOffset = { x: 0, y: 8 };
                     break;
                 case 'left':
-                    left = elementRect.left - tooltipRect.width - 8;
-                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
+                    refAnchor = 'left-center';
+                    targetAnchor = 'right-center';
+                    paddingOffset = { x: -8, y: 0 };
                     break;
                 case 'right':
-                    left = elementRect.right + 8;
-                    top = elementRect.top + (elementRect.height / 2) - (tooltipRect.height / 2);
+                    refAnchor = 'right-center';
+                    targetAnchor = 'left-center';
+                    paddingOffset = { x: 8, y: 0 };
                     break;
             }
-            
-            // Ensure the tooltip does not go out of the window
-            left = Math.max(8, Math.min(left, window.innerWidth - tooltipRect.width - 8));
-            top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
-            
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
-            
+
+            // Get the position of the tooltip
+            const { x, y, refAnchor: _refAnchor } = this.__getElemPosDisplay(element, tooltip, refAnchor, targetAnchor, paddingOffset, 0);
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+            const _position = _refAnchor.split("-")[0];
+
             // Update position class
-            tooltip.addClass(`show ${preferredPosition}`);
+            tooltip.addClass(`show ${_position}`);
         };
 
-        const hideTooltip = () => {
-            tooltip.removeClass('show');
+        tooltip.hideTooltip = () => {
+            tooltip.removeClass('show top bottom left right');
         };
 
-        element.addEvent('mouseenter', showTooltip);
-        element.addEvent('mouseleave', hideTooltip);
+        element.listenEvent('mouseenter', tooltip.showTooltip);
+        element.listenEvent('mouseleave', tooltip.hideTooltip);
         
         return tooltip;
     }
+
+    // ----------------------------------------
+    // #endregion
+    // ----------------------------------------
 
     // ----------------------------------------
     // Floating Panel
@@ -534,42 +910,39 @@ class StickyUI {
         }
 
         // Event listeners
-        btnClose.addEvent('click', () => {
+        btnClose.listenEvent('click', () => {
             floatingPanel.style.display = 'none';
         });
 
-        btnMinimize.addEvent('click', () => {
+        btnMinimize.listenEvent('click', () => {
             btnMinimize.style.display = 'none';
             btnMaximize.style.display = 'block';
             floatingPanel.addClass('minimized');
         });
 
-        btnMaximize.addEvent('click', () => {
+        btnMaximize.listenEvent('click', () => {
             btnMaximize.style.display = 'none';
             btnMinimize.style.display = 'block';
             floatingPanel.removeClass('minimized');
         });
 
-        btnScale.addEvent('click', (e) => {
+        btnScale.listenEvent('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const rect = btnScale.getBoundingClientRect();
-            const x = parseFloat(rect.left);
-            const y = parseFloat(rect.top);
-            contextMenu.showContextMenu(x, y, 'right-top');
+            contextMenu.showContextMenu(btnScale, 'top-left', 'bottom-left', { x: 0, y: -6 });
         });
 
-        menuScaleSlider.addEvent('input', () => {
+        menuScaleSlider.listenEvent('input', () => {
             const scale = parseInt(menuScaleSlider.getValue()) / 100;
             floatingPanel.style.transform = `scale(${scale})`;
             floatingPanel.style.transformOrigin = 'top right';
         });
 
-        menuScaleResetBtn.addEvent('click', () => {
+        menuScaleResetBtn.listenEvent('click', () => {
             floatingPanel.style.transform = `scale(1)`;
         });
 
-        titleBarContainer.addContent([titleBarTitle, btnMinimize, btnMaximize, btnScale, btnStack, btnClose]);
+        titleBarContainer.add([titleBarTitle, btnMinimize, btnMaximize, btnScale, btnStack, btnClose]);
         return titleBarContainer;
     }
 
@@ -579,7 +952,7 @@ class StickyUI {
         const floatingPanel = this.element('div',`floatingPanel_${UID}`, 'floatingPanel');
         const contentWrapper = this.element('div',`floatingPanelContentWrapper_${UID}`, 'floatingPanelContentWrapper');
         const titleBar = this.floatingPanelTitleBar(titleText, floatingPanel, defaultOpen);
-        floatingPanel.addContent([titleBar, contentWrapper]);
+        floatingPanel.add([titleBar, contentWrapper]);
 
         // Configurations
         if (width) {
@@ -626,10 +999,10 @@ class StickyUI {
             else
                 floatingPanel.style.top = 'auto';
         }
-        // Overwrite addContent method
+        // Overwrite add method
         // To allow add content from external sources in the contentWrapper directly
-        floatingPanel.addContent = (content) => {
-            contentWrapper.addContent(content);
+        floatingPanel.add = (content) => {
+            contentWrapper.add(content);
         }
 
         // Add Drag and Resize
@@ -746,7 +1119,7 @@ class StickyUI {
         const toolbar = this.element('div', `toolbar_${UID}`, 'toolbar');
         toolbar.addClass(`toolbar-${position}`);
         if (toolbarItems)
-            toolbar.addContent(toolbarItems);
+            toolbar.add(toolbarItems);
         
         // Update the position of the toolbar
         toolbar.updatePosition = () => {
@@ -820,7 +1193,7 @@ class StickyUI {
     }
 
 
-    toolbarButton = (icon = null, onClick = null, tooltipText = null) => {
+    toolbarButton = (icon = null, onClick = null, tooltipText = null, tooltipPosition = 'top') => {
         const UID = this.UID();
         const button = this.element('div', `toolbarButton_${UID}`, 'toolbarButton');
         
@@ -834,8 +1207,7 @@ class StickyUI {
         }
         
         if (tooltipText) {
-            const tooltipTop = this.tooltip(button, tooltipText, 'top');
-            document.body.appendChild(tooltipTop);
+            const tooltip = this.tooltip(button, tooltipText, tooltipPosition);
         }
         
         return button;
@@ -870,7 +1242,7 @@ class StickyUI {
         }
 
          // Event listeners
-        btnMinimize.addEvent('click', () => {
+        btnMinimize.listenEvent('click', () => {
             sidePanelSection.toggleClass('minimized');
             if (sidePanelSection.hasClass('minimized'))
                 iconMinimize.changeIcon('icon-chevron-down');
@@ -878,7 +1250,7 @@ class StickyUI {
                 iconMinimize.changeIcon('icon-chevron-up');
         });
 
-        titleBarContainer.addContent([titleBarTitle, btnMinimize]);
+        titleBarContainer.add([titleBarTitle, btnMinimize]);
         return titleBarContainer;
     }
 
@@ -888,10 +1260,10 @@ class StickyUI {
         const titleBar = this.sidePanelSectionTitleBar(titleText, sidePanelSection, defaultOpen);
         const contentWrapper = this.element('div', `sidePanelSectionContentWrapper_${UID}`, 'sidePanelSectionContentWrapper');
         
-        sidePanelSection.addContent([titleBar, contentWrapper]);
+        sidePanelSection.add([titleBar, contentWrapper]);
         
         if (sidePanelItems !== null) 
-            contentWrapper.addContent(sidePanelItems);
+            contentWrapper.add(sidePanelItems);
         
         return sidePanelSection;
     }
@@ -972,7 +1344,7 @@ class StickyUI {
         // Add section to sidePanel from external sources
         sidePanel.addSection = (titleText, sidePanelItems, defaultOpen = true) => {
             const section = this.sidePanelSection(titleText, sidePanelItems, defaultOpen);
-            sidePanel.addContent(section);
+            sidePanel.add(section);
             return section;
         };
 
@@ -998,7 +1370,7 @@ class StickyUI {
         let _canvas = null;
         
         if (content) 
-            workspace.addContent(content);
+            workspace.add(content);
         
         if (backgroundColor)
             workspace.style.backgroundColor = backgroundColor;
@@ -1047,7 +1419,7 @@ class StickyUI {
                 workspace.removeChild(workspace.firstChild);
             }
             // Add new content
-            workspace.addContent(content);
+            workspace.add(content);
         }
 
         // Workspace set Canvas
@@ -2065,4 +2437,117 @@ class StickyUI {
         return iconBar;
     }
 
+    messageBox = (title = 'Message Box', content = null, buttons = [], blurBackground = true) => {
+        const UID = this.UID();
+        
+        // Create messageBox wrapper if needed
+        let messageBoxWrapper = this.query('.messageBoxWrapper');
+        if (!messageBoxWrapper) {
+            messageBoxWrapper = this.element('div', `messageBoxWrapper_${UID}`, 'messageBoxWrapper');
+            this.add(messageBoxWrapper);
+        }
+
+        // Create or get overlay
+        let overlay = messageBoxWrapper.query('.overlay');
+        if (blurBackground) {
+            if (!overlay) {
+                overlay = this.element('div', `overlay_${UID}`, 'overlay');
+                messageBoxWrapper.add(overlay);
+            }
+        }
+
+        // Create messageBox
+        const messageBox = this.element('div', `messageBox_${UID}`, 'messageBox');
+
+        // Create title bar
+        const titleBar = this.element('div', `messageBoxTitleBar_${UID}`, 'messageBoxTitleBar');
+        const titleText = this.element('div', `messageBoxTitle_${UID}`, 'messageBoxTitle', title);
+        const closeButton = this.element('div', `messageBoxCloseButton_${UID}`, 'messageBoxCloseButton');
+        closeButton.add(this.icon('icon-close'));
+        titleBar.add([titleText, closeButton]);
+        messageBox.add(titleBar);
+
+
+        
+        closeButton.onclick = () => {
+            messageBox.hide();
+            if (overlay) overlay.addClass('overlay-hidden');
+        };
+
+
+        // Create content area
+        const contentArea = this.element('div', `messageBoxContent_${UID}`, 'messageBoxContent');
+        if (content) {
+            contentArea.add(content);
+            messageBox.add(contentArea);
+        }
+
+        // Create footer with buttons
+        const footer = this.element('div', `messageBoxFooter_${UID}`, 'messageBoxFooter');
+        if (Array.isArray(buttons)) {
+            buttons.forEach(button => {
+                const btn = this.element('button', `messageBoxButton_${UID}`, 'messageBoxButton');
+                btn.textContent = button.text;
+                btn.onclick = () => {
+                    if (button.action) button.action();
+                    messageBox.remove();
+                    if (overlay) overlay.remove();
+                };
+                footer.add(btn);
+            });
+        } else if (buttons) {
+            const btn = this.element('button', `messageBoxButton_${UID}`, 'messageBoxButton');
+            btn.textContent = buttons.text;
+            btn.onclick = () => {
+                if (buttons.action) buttons.action();
+                messageBox.remove();
+                if (overlay) overlay.remove();
+            };
+            footer.add(btn);
+        }
+        messageBox.add(footer);
+
+        messageBoxWrapper.add(messageBox);
+
+
+        messageBox.show = () => {
+            messageBoxWrapper.removeClass('messageBoxWrapper-hidden');
+        }
+
+        messageBox.hide = () => {
+            messageBoxWrapper.addClass('messageBoxWrapper-hidden');
+        }
+
+
+
+
+
+
+
+        return messageBox;
+    }
+
+    alertBox = (title = 'Alert', message = 'Alert Message', icon = 'icon-robot', onOk = null, onCancel = null) => {
+        const alertContent = this.element('div', `alertBoxContent_${this.UID()}`, 'alertBoxContent');
+        
+        // Create icon container
+        const iconContainer = this.element('div', `alertBoxIcon_${this.UID()}`, 'alertBoxIcon');
+        const iconElement = this.icon(icon);
+        iconElement.setSize(64, 64);
+        iconContainer.add(iconElement);
+        alertContent.add(iconContainer);
+
+        // Create message container
+        const messageContainer = this.element('div', `alertBoxMessage_${this.UID()}`, 'alertBoxMessage');
+        messageContainer.textContent = message;
+        alertContent.add(messageContainer);
+
+        // Create buttons
+        const buttons = [
+            { text: 'Cancel', action: onCancel },
+            { text: 'OK', action: onOk }
+        ];
+
+        return this.messageBox(title, alertContent, buttons, true);
+    }
 }

@@ -157,6 +157,12 @@ body {
 
 .stickyUI.contextMenu.show {
     display: block;
+    visibility: visible;
+}
+
+.stickyUI.contextMenu.hidden {
+    display: none;
+    visibility: hidden;
 }
 
 .stickyUI.contextMenuItem {
@@ -1597,6 +1603,14 @@ input:checked + .stickyUI.switchSlider:before {
     mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M11.675 2.015a.998.998 0 0 0-.403.011C6.09 2.4 2 6.722 2 12c0 5.523 4.477 10 10 10 4.356 0 8.058-2.784 9.43-6.667a1 1 0 0 0-1.02-1.33c-.08.006-.105.005-.127.005h-.001l-.028-.002A5.227 5.227 0 0 0 20 14a8 8 0 0 1-8-8c0-.952.121-1.752.404-2.558a.996.996 0 0 0 .096-.428V3a1 1 0 0 0-.825-.985Z' clip-rule='evenodd'/%3E%3C/svg%3E%0A");
 }
 
+.icon-message {
+    mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M16 10.5h.01m-4.01 0h.01M8 10.5h.01M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-6.6a1 1 0 0 0-.69.275l-2.866 2.723A.5.5 0 0 1 8 18.635V17a1 1 0 0 0-1-1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z'/%3E%3C/svg%3E%0A");
+}
+
+.icon-alert {
+    background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M12 6C12.5523 6 13 6.44772 13 7V13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13V7C11 6.44772 11.4477 6 12 6Z' fill='currentColor' /%3E%3Cpath d='M12 16C11.4477 16 11 16.4477 11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17C13 16.4477 12.5523 16 12 16Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12Z' fill='currentColor' /%3E%3C/svg%3E");
+}
+
 /* ---------------------- Icon Bars - Floating bars (WORK IN PROGRESS - WIP) --------------------- */
 
 .stickyUI.iconBarHorizontal {
@@ -1654,3 +1668,154 @@ input:checked + .stickyUI.switchSlider:before {
     right: 50px;
     top: 50px;
 }
+
+
+
+
+
+
+
+
+
+
+.stickyUI.messageBox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 999999;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.stickyUI.messageBoxTitleBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: var(--background-color-secondary);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 4px 4px 0 0;
+}
+
+.stickyUI.messageBoxTitle {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.stickyUI.messageBoxCloseButton {
+    cursor: pointer;
+    padding: 4px;
+    color: var(--text-color);
+}
+
+.stickyUI.messageBoxCloseButton:hover {
+    color: var(--text-color-hover);
+}
+
+.stickyUI.messageBoxContent {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.stickyUI.messageBoxFooter {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 12px;
+    background-color: var(--background-color-secondary);
+    border-top: 1px solid var(--border-color);
+    border-radius: 0 0 4px 4px;
+    gap: 8px;
+}
+
+.stickyUI.messageBoxButton {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.stickyUI.messageBoxButton:hover {
+    background-color: var(--background-color-hover);
+}
+
+.stickyUI.alertBox {
+    width: 400px;
+}
+
+.stickyUI.alertBoxContent {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+}
+
+.stickyUI.alertBoxIcon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+.stickyUI.alertBoxMessage {
+    flex: 1;
+    color: var(--text-color);
+}
+
+.stickyUI.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+}
+
+.stickyUI.overlay.overlay-hidden {
+    display: none;
+}
+
+
+.stickyUI.messageBoxWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.stickyUI.messageBoxWrapper.messageBoxWrapper-hidden {
+    display: none;
+}
+
+
+.stickyUI.messageBoxWrapper .stickyUI.messageBox,
+.stickyUI.messageBoxWrapper .stickyUI.alertBox {
+    pointer-events: auto;
+}
+
+
+
+
+.stickyUI.tooltipWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1002;
+}
+

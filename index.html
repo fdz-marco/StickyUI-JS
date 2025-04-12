@@ -91,12 +91,12 @@
         // --------------------------------------
         const rightToolbar01 = ui.toolbar('right');
         const rightToolbar02 = ui.toolbar('right');
-        const rightToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 01 - Icon 01'), 'Right Toolbar 01 - Icon 01');
-        const rightToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 01 - Icon 02'), 'Right Toolbar 01 - Icon 02');
-        const rightToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 01'), 'Right Toolbar 02 - Icon 01');
-        const rightToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 02'), 'Right Toolbar 02 - Icon 02');
-        rightToolbar01.addContent([rightToolbar01icon01, rightToolbar01icon02]);
-        rightToolbar02.addContent([rightToolbar02icon01, rightToolbar02icon02]);
+        const rightToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 01 - Icon 01'), 'Right Toolbar 01 - Icon 01', 'left');
+        const rightToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 01 - Icon 02'), 'Right Toolbar 01 - Icon 02', 'left');
+        const rightToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 01'), 'Right Toolbar 02 - Icon 01', 'left');
+        const rightToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Right Toolbar 02 - Icon 02'), 'Right Toolbar 02 - Icon 02', 'left');
+        rightToolbar01.add([rightToolbar01icon01, rightToolbar01icon02]);
+        rightToolbar02.add([rightToolbar02icon01, rightToolbar02icon02]);
         ui.add([rightToolbar01, rightToolbar02]);
 
         // --------------------------------------
@@ -104,14 +104,14 @@
         // --------------------------------------
         const leftToolbar01 = ui.toolbar('left');
         const leftToolbar02 = ui.toolbar('left');
-        const leftToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 01 - Icon 01'), 'Left Toolbar 01 - Icon 01');
-        const leftToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 01 - Icon 02'), 'Left Toolbar 01 - Icon 02');
-        const leftToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 02 - Icon 01'), 'Left Toolbar 02 - Icon 01');
-        const leftToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 02 - Icon 02'), 'Left Toolbar 02 - Icon 02');
+        const leftToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 01 - Icon 01'), 'Left Toolbar 01 - Icon 01', 'right');
+        const leftToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 01 - Icon 02'), 'Left Toolbar 01 - Icon 02', 'right');
+        const leftToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 02 - Icon 01'), 'Left Toolbar 02 - Icon 01', 'right');
+        const leftToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Left Toolbar 02 - Icon 02'), 'Left Toolbar 02 - Icon 02', 'right');
         const leftToolbar01separator01 = ui.toolbarDivider();
         const leftToolbar01separator02 = ui.toolbarDivider();
-        leftToolbar01.addContent([leftToolbar01icon01, leftToolbar01separator01, leftToolbar01icon02, leftToolbar01separator02]);
-        leftToolbar02.addContent([leftToolbar02icon01, leftToolbar02icon02]);
+        leftToolbar01.add([leftToolbar01icon01, leftToolbar01separator01, leftToolbar01icon02, leftToolbar01separator02]);
+        leftToolbar02.add([leftToolbar02icon01, leftToolbar02icon02]);
         ui.add([leftToolbar01, leftToolbar02]);
 
         // --------------------------------------
@@ -119,12 +119,12 @@
         // --------------------------------------
         const bottomToolbar01 = ui.toolbar('bottom');
         const bottomToolbar02 = ui.toolbar('bottom');
-        const bottomToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 01 - Icon 01'), 'Bottom Toolbar 01 - Icon 01');
-        const bottomToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 01 - Icon 02'), 'Bottom Toolbar 01 - Icon 02');
-        const bottomToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 01'), 'Bottom Toolbar 02 - Icon 01');
-        const bottomToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 02'), 'Bottom Toolbar 02 - Icon 02');
-        bottomToolbar01.addContent([bottomToolbar01icon01, bottomToolbar01icon02]);
-        bottomToolbar02.addContent([bottomToolbar02icon01, bottomToolbar02icon02]);
+        const bottomToolbar01icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 01 - Icon 01'), 'Bottom Toolbar 01 - Icon 01', 'top');
+        const bottomToolbar01icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 01 - Icon 02'), 'Bottom Toolbar 01 - Icon 02', 'top');
+        const bottomToolbar02icon01 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 01'), 'Bottom Toolbar 02 - Icon 01', 'top');
+        const bottomToolbar02icon02 = ui.toolbarButton('icon-robot', () =>  console.log('Bottom Toolbar 02 - Icon 02'), 'Bottom Toolbar 02 - Icon 02', 'top');
+        bottomToolbar01.add([bottomToolbar01icon01, bottomToolbar01icon02]);
+        bottomToolbar02.add([bottomToolbar02icon01, bottomToolbar02icon02]);
         ui.add([bottomToolbar01, bottomToolbar02]);
 
         // --------------------------------------
@@ -132,21 +132,19 @@
         // --------------------------------------
         const topToolbar01 = ui.toolbar('top');
         const topToolbar02 = ui.toolbar('top');
-        const topToolbar01icon01 = ui.toolbarButton('icon-toolbar-top', () => topToolbar02.toggle(), 'Top Toolbar 01 - Icon 01');
-        const topToolbar01icon02 = ui.toolbarButton('icon-toolbar-bottom', () => bottomToolbar02.toggle(), 'Top Toolbar 01 - Icon 02');
-        const topToolbar01icon03 = ui.toolbarButton('icon-toolbar-right', () => rightToolbar02.toggle(), 'Top Toolbar 01 - Icon 03');
-        const topToolbar01icon04 = ui.toolbarButton('icon-toolbar-left', () => leftToolbar02.toggle(), 'Top Toolbar 01 - Icon 04');
-        const topToolbar01icon05 = ui.toolbarButton('icon-sidepanel-close', () => leftPanel.toggle(), 'Top Toolbar 01 - Icon 05');
-        const topToolbar01icon06 = ui.toolbarButton('icon-sidepanel-open', () => rightPanel.toggle(), 'Top Toolbar 01 - Icon 06');
-        const topToolbar01icon07 = ui.toolbarButton('icon-moon', () => ui.switchTheme(), 'Top Toolbar 01 - Icon 07');
-       
-
+        const topToolbar01icon01 = ui.toolbarButton('icon-toolbar-top', () => topToolbar02.toggle(), 'Top Toolbar 01 - Icon 01', 'bottom');
+        const topToolbar01icon02 = ui.toolbarButton('icon-toolbar-bottom', () => bottomToolbar02.toggle(), 'Top Toolbar 01 - Icon 02', 'bottom');
+        const topToolbar01icon03 = ui.toolbarButton('icon-toolbar-right', () => rightToolbar02.toggle(), 'Top Toolbar 01 - Icon 03', 'bottom');
+        const topToolbar01icon04 = ui.toolbarButton('icon-toolbar-left', () => leftToolbar02.toggle(), 'Top Toolbar 01 - Icon 04', 'bottom');
+        const topToolbar01icon05 = ui.toolbarButton('icon-sidepanel-close', () => leftPanel.toggle(), 'Top Toolbar 01 - Icon 05', 'bottom');
+        const topToolbar01icon06 = ui.toolbarButton('icon-sidepanel-open', () => rightPanel.toggle(), 'Top Toolbar 01 - Icon 06', 'bottom');
+        const topToolbar01icon07 = ui.toolbarButton('icon-moon', () => ui.switchTheme(), 'Top Toolbar 01 - Icon 07', 'bottom');
         const topToolbar01separator01 = ui.toolbarDivider();
         const topToolbar01separator02 = ui.toolbarDivider();
         const topToolbar01separator03 = ui.toolbarDivider();
-        const topToolbar02icon01 = ui.toolbarButton('icon-robot', () => console.log('Top Toolbar 02 - Icon 01'), 'Top Toolbar 02 - Icon 01');
-        topToolbar01.addContent([topToolbar01icon01, topToolbar01icon02, topToolbar01separator01, topToolbar01icon03, topToolbar01icon04, topToolbar01separator02, topToolbar01icon05, topToolbar01icon06, topToolbar01separator03, topToolbar01icon07]);
-        topToolbar02.addContent([topToolbar02icon01]);
+        const topToolbar02icon01 = ui.toolbarButton('icon-robot', () => console.log('Top Toolbar 02 - Icon 01'), 'Top Toolbar 02 - Icon 01', 'bottom');
+        topToolbar01.add([topToolbar01icon01, topToolbar01icon02, topToolbar01separator01, topToolbar01icon03, topToolbar01icon04, topToolbar01separator02, topToolbar01icon05, topToolbar01icon06, topToolbar01separator03, topToolbar01icon07]);
+        topToolbar02.add([topToolbar02icon01]);
         ui.add([topToolbar01, topToolbar02]);
 
         // --------------------------------------
@@ -181,14 +179,14 @@
         let button1 = ui.button('Random Button 1');
         let button2 = ui.button('Random Button 2', '#06f3b1');
         let button3 = ui.button('Random Button 3', '#06f3b1', '#cc0050');
-        floatingPanel.addContent([separator1, button1, button2, button3]);
+        floatingPanel.add([separator1, button1, button2, button3]);
 
         // Switches
         let separator2 = ui.separator('Switches', '#06f3b1');
         let switch1 = ui.switch('Switch 1');
         let switch2 = ui.switch('Switch 2', '#06f3b1');
         let switch3 = ui.switch('Switch 3', '#06f3b1', '#F7227E');
-        floatingPanel.addContent([separator2, switch1, switch2, switch3]);
+        floatingPanel.add([separator2, switch1, switch2, switch3]);
 
         // Text Input / Dropdown / Color Picker / 
         let separator3 = ui.separator(' Text Input / Dropdown', '#06f3b1');
@@ -198,7 +196,7 @@
             { value: 'option2', label: 'Option 2' }
         ];
         let dropdown = ui.dropdown('Dropdown List', dropdownOptions, 'option1');
-        floatingPanel.addContent([separator3, textInput, dropdown]);
+        floatingPanel.add([separator3, textInput, dropdown]);
 
         // Color Picker / Checkbox Group
         let separator4 = ui.separator('Color Picker / Checkbox Group', '#06f3b1');
@@ -209,14 +207,14 @@
         ];
         let checkboxGroup = ui.checkboxGroup('Select Multiple Options', checkboxOptions);
         let colorPicker = ui.colorPicker('Select Color', '#06f3b1');
-        floatingPanel.addContent([separator4, checkboxGroup, colorPicker]);
+        floatingPanel.add([separator4, checkboxGroup, colorPicker]);
                 
         // Sliders
         let separator5 = ui.separator('Sliders', '#06f3b1');
         let rangeSlider = ui.sliderRange('Range Slider 1', 0, 100, 1, 50);
         let stepperSlider = ui.sliderStepper('Stepper Slider 2', 0, 100, 5, 50);
         let intervalSlider = ui.sliderInterval('Interval Slider 3', 0, 100, 1, 25, 75);
-        floatingPanel.addContent([separator5, rangeSlider, stepperSlider, intervalSlider]);
+        floatingPanel.add([separator5, rangeSlider, stepperSlider, intervalSlider]);
 
         // Add panel to body
         ui.add(floatingPanel);
@@ -233,7 +231,7 @@
         let folderButton1 = ui.button('Folder Button 1');
         let folderButton2 = ui.button('Folder Button 2');
         let folder = ui.folder('My Folder', 'icon-folder-close', 'icon-folder-open', '#06f3b1', '#F7227E', true, [folderButton1, folderButton2]);
-        floatingPanel2.addContent([separator6, folder]);
+        floatingPanel2.add([separator6, folder]);
 
         // Tabs
         let separator7 = ui.separator('Tabs', '#06f3b1');
@@ -252,7 +250,7 @@
         ], '1');
         let tabPage2 = ui.tabPage('Settings', 'icon-folder-close', [tabPage2Button1, tabPage2SliderRange, tabPage2Dropdown]);
         let tabs = ui.tabs([tabPage1, tabPage2], 0);
-        floatingPanel2.addContent([separator7, tabs]);
+        floatingPanel2.add([separator7, tabs]);
         
         // Add panel to body
         ui.add(floatingPanel2);
@@ -268,14 +266,14 @@
         let vector2Control = ui.vector2('Position', -10, 10, -10, 10, 0, 0, 15,
             //(x, y) => console.log(`Position changed: x=${x}, y=${y}`)
         );
-        floatingPanel3.addContent([separator8, vector2Control]);
+        floatingPanel3.add([separator8, vector2Control]);
         
         // Joystick
         let separator9 = ui.separator('Joystick', '#06f3b1');
         let joystick1 = ui.joystick('Joystick Name', true, 100, (direction, speed, x, y) => {
             console.log(`Panel 3 Joystick => Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
-        floatingPanel3.addContent([separator9, joystick1]);
+        floatingPanel3.add([separator9, joystick1]);
 
         // Add panel to body
         ui.add(floatingPanel3);
@@ -313,8 +311,9 @@
 
         const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 930, 650);
 
+        ui.setDraggable(faceplate1);    
         // Add Tooltips Faceplate to body
-        ui.add([tooltipTop, tooltipBottom, tooltipLeft, tooltipRight, faceplate1]);
+        ui.add([faceplate1]);
 
         // --------------------------------------
         // Faceplate
@@ -336,10 +335,38 @@
         let iconBarButton1 = ui.iconBarButton();
         let iconBarButton2 = ui.iconBarButton();
         let iconBarButton3 = ui.iconBarButton();
-        iconBarHorizontal.addContent([iconBarButton1, iconBarButton2, iconBarButton3]);
+        iconBarHorizontal.add([iconBarButton1, iconBarButton2, iconBarButton3]);
         ui.setDraggable(iconBarHorizontal);    
         ui.add(iconBarHorizontal);
 
+        // ----------------------------------------
+        // Message Box and Alert Box Examples
+        // ----------------------------------------
+        /*
+        const messageBoxControl1 = ui.textInput('Name', 'Enter your name');
+        const messageBoxControl2 = ui.dropdown('Country', [
+            { value: 'mx', label: 'Mexico' },
+            { value: 'ru', label: 'Russia' }
+        ], 'mx');
+        const messageBoxControls = [messageBoxControl1, messageBoxControl2];
+        const messageBoxButton1 = ui.button('Save');
+        const messageBoxButton2 = ui.button('Cancel');
+        const messageBoxButtons = [messageBoxButton1, messageBoxButton2]
+        const messageBox = ui.messageBox('Custom Message Box', messageBoxControls, messageBoxButtons);
+
+        const alertBox =   ui.alertBox(
+            'Alert Box',
+            'This is an alert message with an icon and OK/Cancel buttons.',
+            'icon-robot',
+            () => console.log('OK clicked'),
+            () => console.log('Cancel clicked')
+        );
+
+        const topToolbar01icon08 = ui.toolbarButton('icon-message', () => messageBox.show(), 'Top Toolbar 01 - Icon 08');
+        const topToolbar01icon09 = ui.toolbarButton('icon-alert', () => alertBox.show(), 'Top Toolbar 01 - Icon 09');
+        const topToolbar01separator04 = ui.toolbarDivider();
+        topToolbar01.add([topToolbar01icon08, topToolbar01icon09, topToolbar01separator04]);
+        */
     </script>
 </body>
 </html>
