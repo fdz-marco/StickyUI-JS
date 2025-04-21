@@ -1,36 +1,15 @@
-/*
-/* ------------------------------------------------------------------------------
-/* ClassName: Sticky UI JS
-/* Description: A simple class to create user interfaces over the browser DOM
-/* specially useful for canvas-based applications or HMIs.
-/* Author: Marco Fernandez (marcofdz.com)
-/* Version: 1.0.2
-/* License: MIT
-/* Repository: https://github.com/fdz-marco/StickyUI-JS
-/* File: StickyUI.js
-/* ------------------------------------------------------------------------------
-*/
-  
-/***
- * 
- * To Do:
- * - Change the icon size in the alert message box
- * - Context Menu multiple 
- * - Context Menu submenu
- * - Context Menu right click
- * - Context Menu keyboard shortcuts
- * - Control the progress bar
- * - Big button with icon and text
- * - Add a toast notification
- * - Check add Event Listeners in all elements
- * - You were adding wrappers: for tooltip, for context menu, for messageBox & alertBox
- * - Some elements will be added to the body automatically: tooltip, context menu, messageBox & alertBox
- *   
-*/
-
-
-
-
+/**
+ * StickyUI
+ * A simple class to create user interfaces over the browser DOM
+ * specially useful for canvas-based applications or HMIs.
+ * @version 1.0.3
+ * @date 2025-04-13
+ * @author Marco Fernandez (marcofdz.com)
+ * @license MIT
+ * @website https://marcofdz.com/projects/stickyui
+ * @repository https://github.com/fdz-marco/StickyUI-JS
+ * @file StickyUI.js
+ */
 
 class StickyUI {
     #classBase = 'stickyUI';
@@ -40,7 +19,7 @@ class StickyUI {
 
     // ----------------------------------------
     // #region Constructor
-    // ----------------------------------------
+    // =======================================>
 
     /**
      * Constructor
@@ -50,272 +29,292 @@ class StickyUI {
         //this.addStyles();
 
         // Init the theme according to the system preferences
-        this.applyStoredTheme();
+        this.theme.applyStoredTheme();
     }
-
-    // ----------------------------------------
+    
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Aliases for window, document, document.body
-    // ----------------------------------------
+    // =======================================>
 
     /**
-     * Alias for document.body.appendChild
-     * @param {DOMElement | string | Array<DOMElement | string>} content the content to append to the document body
+     * Aliases for document and document.body
      */
-    add = (content) => {
-    if (content !== null && typeof content === 'string') {
-        document.body.innerHTML = content;
-        }
-        else if (content !== null && typeof content === 'object') {
-            if (content instanceof Array) {
-                content.forEach(item => {
-                    document.body.appendChild(item);
-                });
-            } else {
-                document.body.appendChild(content);
+    body = {     
+        /**
+         * Create a new element
+         * @param {string} type Type of the element to create
+         * @returns {HTMLElement} Created element
+         */
+        create: (type) => {
+            return document.createElement(type);
+        },
+        /**
+         * Alias for document.body.appendChild
+         * @param {DOMElement | string | Array<DOMElement | string>} content Content to append to the document body
+         */
+        add: (content) => {
+        if (content !== null && typeof content === 'string') {
+            document.body.innerHTML = content;
             }
-        }
-    }
-
-    /**
-     * Alias for document.body.removeChild
-     * @param {DOMElement | string | Array<DOMElement | string>} content the content to remove from the document body
-     */
-    remove = (content) => {
-        if (content !== null && typeof content === 'object') {
-            if (content instanceof Array) {
-                content.forEach(item => {
-                    document.body.removeChild(item);
-                });
-            } else {
-                document.body.removeChild(content);
+            else if (content !== null && typeof content === 'object') {
+                if (content instanceof Array) {
+                    content.forEach(item => {
+                        document.body.appendChild(item);
+                    });
+                } else {
+                    document.body.appendChild(content);
+                }
             }
+        },
+        /**
+         * Alias for document.body.removeChild
+         * @param {DOMElement | string | Array<DOMElement | string>} content Content to remove from the document body
+         */
+        remove: (content) => {
+            if (content !== null && typeof content === 'object') {
+                if (content instanceof Array) {
+                    content.forEach(item => {
+                        document.body.removeChild(item);
+                    });
+                } else {
+                    document.body.removeChild(content);
+                }
+            }
+        },
+        /**
+         * Alias for document.querySelector
+         * @param {string} selector Selector to query
+         * @returns {DOMElement} First element that matches the selector
+         */
+        query: (selector) => {
+            return document.querySelector(selector);
+        },
+        /**
+         * Alias for document.querySelectorAll
+         * @param {string} selector Selector to query
+         * @returns {Array<DOMElement>} All elements that match the selector
+         */
+        queryAll: (selector) => {
+            return document.querySelectorAll(selector);
+        },
+        /**
+         * Alias for document.addEventListener and add the listener to the listeners array
+         * @param {string} event Event to listen to
+         * @param {function} callback Callback to call when the event is triggered
+         */
+        listenEvent: (event, callback) => {
+            document.addEventListener(event, callback);
+            this.#listeners.push({ listener: 'document', event, callback, element: null });
+        },
+        /**
+         * Alias for document.removeEventListener and remove the listener from the listeners array
+         * @param {string} event Event to remove
+         * @param {function} callback Callback to remove
+         */
+        unlistenEvent: (event, callback) => {
+            document.removeEventListener(event, callback);
+            this.#listeners = this.#listeners.filter(listener => listener.listener !== 'document' || listener.event !== event || listener.callback !== callback);
+        },
+        /**
+         * Alias for document.getElementById
+         * @param {string} id Id of the element to get
+         * @returns {DOMElement} Element with the given id
+         */
+        getById: (id) => {
+            return document.getElementById(id);
+        },
+        /**
+         * Alias for document.getElementsByClassName
+         * @param {string} className Class name to get
+         * @returns {DOMElement} First element with the given class name
+         */
+        getByClass: (className) => {
+            const elements = document.getElementsByClassName(className);
+            return elements.length > 0 ? elements[0] : null;
+        },
+        /**
+         * Alias for document.getElementsByName
+         * @param {string} name Name of the element to get
+         * @returns {DOMElement} First element with the given name
+         */
+        getByName: (name) => {
+            return document.getElementsByName(name);
+        },
+        /**
+         * Alias for document.new CustomEvent
+         * @param {string} eventName Name of the event to create
+         * @param {object} data Data to pass to the event
+         * @returns {CustomEvent} Created event
+         */
+        createEvent: (eventName, data = null) => {
+            const event = new CustomEvent(eventName, data);
+            this.#customEvents.push(event);
+            return event;
+        },
+        /**
+         * Destroy a custom event
+         * @param {CustomEvent} event Event to destroy
+         */
+        destroyEvent: (event) => {
+            if (event instanceof CustomEvent) { 
+                this.#customEvents = this.#customEvents.filter(e => e !== event);
+            }
+        },      
+        /**
+         * Alias for document.dispatchEvent
+         * @param {CustomEvent} event Event to trigger
+         */
+        triggerEvent: (event) => {
+            document.dispatchEvent(event);
+        },
+        /**
+         * Check if an element is in the DOM
+         * @param {DOMElement} element Element to check
+         * @returns {boolean} True if the element is in the DOM, false otherwise
+         */ 
+        isInDOM: (element) => {
+            return document.body.contains(element);
         }
     }
 
-    /**
-     * Alias for document.querySelector
-     * @param {string} selector the selector to query
-     * @returns {DOMElement} the first element that matches the selector
-     */
-    query = (selector) => {
-        return document.querySelector(selector);
-    }
-
-    /**
-     * Alias for document.querySelectorAll
-     * @param {string} selector the selector to query
-     * @returns {Array<DOMElement>} all elements that match the selector
-     */
-    queryAll = (selector) => {
-        return document.querySelectorAll(selector);
-    }
-
-    /**
-     * Alias for document.addEventListener
-     * @param {string} event the event to listen to
-     * @param {function} callback the callback to call when the event is triggered
-     */
-    listenEvent = (event, callback) => {
-        document.addEventListener(event, callback);
-        this.#listeners.push({ listener: 'document', event, callback, element: null });
-    }
-
-    /**
-     * Alias for document.removeEventListener
-     * @param {string} event the event to remove
-     * @param {function} callback the callback to remove
-     */
-    unlistenEvent = (event, callback) => {
-        document.removeEventListener(event, callback);
-        this.#listeners = this.#listeners.filter(listener => listener.listener !== 'document' || listener.event !== event || listener.callback !== callback);
-    }
-
-    /**
-     * Alias for document.getElementById
-     * @param {string} id the id of the element to get
-     * @returns {DOMElement} the element with the given id
-     */
-    getById = (id) => {
-        return document.getElementById(id);
-    }
-
-    /**
-     * Alias for document.getElementsByClassName
-     * @param {string} className the class name to get
-     * @returns {DOMElement} the first element with the given class name
-     */
-    getByClass = (className) => {
-        const elements = document.getElementsByClassName(className);
-        return elements.length > 0 ? elements[0] : null;
-    }
-
-    /**
-     * Alias for document.getElementsByName
-     * @param {string} name the name of the element to get
-     * @returns {DOMElement} the first element with the given name
-     */
-    getByName = (name) => {
-        return document.getElementsByName(name);
-    } 
-
-    /**
-     * Alias for document.new CustomEvent
-     * @param {string} eventName the name of the event to create
-     * @param {object} data the data to pass to the event
-     * @returns {CustomEvent} the created event
-     */
-    createEvent = (eventName, data = null) => {
-        const event = new CustomEvent(eventName, { detail: data });
-        this.#customEvents.push(event);
-        return event;
-    }
-
-    /**
-     * Destroy a custom event
-     * @param {CustomEvent} event the event to destroy
-     */
-    destroyEvent = (event) => {
-        if (event instanceof CustomEvent) { 
-            this.#customEvents = this.#customEvents.filter(e => e !== event);
-        }
-    }
-    
-    /**
-     * Alias for document.dispatchEvent
-     * @param {CustomEvent} event the event to trigger
-     */
-    triggerEvent = (event) => {
-        document.dispatchEvent(event);
-    }
-
-    /**
-     * Check if an element is in the DOM
-     * @param {DOMElement} element the element to check
-     * @returns {boolean} true if the element is in the DOM, false otherwise
-     */ 
-    isInDOM = (element) => {
-        return document.body.contains(element);
-    }
-
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Theme
-    // ----------------------------------------
+    // =======================================>
 
     /**
-     * Switch theme
-     * @param {string} theme the theme's name to switch to
+     * Theme methods to get and switch the theme
      */
-    switchTheme = (theme = null) => {
-        // If no theme is provided, toggle between the themes
-        if (theme === null)
-            theme = this.#theme === 'dark' ? 'light' : 'dark';
-        // Validate the theme
-        if (theme !== 'dark' && theme !== 'light') {
-            console.error('Invalid theme. Use "dark" or "light".');
-            return;
+    theme = {
+        /**
+         * Get the current theme
+         * @returns {string} Current theme
+         */
+        getTheme: () => {
+            return this.#theme;
+        },
+        /**
+         * Switch theme
+         * @param {string} theme Theme's name to switch to
+         */
+        switchTheme: (theme = null) => {
+            // If no theme is provided, toggle between the themes
+            if (theme === null)
+                theme = this.#theme === 'dark' ? 'light' : 'dark';
+            // Validate the theme
+            if (theme !== 'dark' && theme !== 'light') {
+                console.error('Invalid theme. Use "dark" or "light".');
+                return;
+            }
+            // Save the current theme
+            this.#theme = theme;
+            // Apply the theme to the document
+            document.documentElement.setAttribute('data-theme', theme);
+            console.log('Theme applied:', theme);
+            // Create and send a theme change event
+            const event = this.body.createEvent('theme-change', { theme: theme });
+            this.body.triggerEvent(event);
+            // Save preference in localStorage to keep it between sessions
+            try {
+                localStorage.setItem(`${this.#classBase}-theme`, theme);
+            } catch (e) {
+                console.warn('Could not save theme in localStorage.');
+            }
+            return theme;
+        },
+        /**
+         * Apply the stored theme
+         */
+        applyStoredTheme: () => {
+            let storedTheme = null;
+            // Try to recover the saved theme
+            try {
+                storedTheme = localStorage.getItem(`${this.#classBase}-theme`);
+            } catch (e) {
+                console.warn('Could not recover theme from localStorage.');
+            }
+            // If there is a saved theme, apply it
+            if (storedTheme) {
+                this.theme.switchTheme(storedTheme);
+            } else {
+                // If there is no saved theme, use the system preference
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.theme.switchTheme(prefersDark ? 'dark' : 'light');
+            }
         }
-        // Save the current theme
-        this.#theme = theme;
-        // Apply the theme to the document
-        document.documentElement.setAttribute('data-theme', theme);
-        console.log('Theme applied:', theme);
-        // Create and send a theme change event
-        const event = this.createEvent('theme-change', { theme: theme });
-        this.triggerEvent(event);
-        // Save preference in localStorage to keep it between sessions
-        try {
-            localStorage.setItem(`${this.#classBase}-theme`, theme);
-        } catch (e) {
-            console.warn('Could not save theme in localStorage.');
-        }
-        return theme;
     }
 
-    /**
-     * Get the current theme
-     * @returns {string} the current theme
-     */
-    getTheme = () => {
-        return this.#theme;
-    }
-
-    /**
-     * Apply the stored theme
-     */
-    applyStoredTheme = () => {
-        let storedTheme = null;
-        
-        // Try to recover the saved theme
-        try {
-            storedTheme = localStorage.getItem(`${this.#classBase}-theme`);
-        } catch (e) {
-            console.warn('Could not recover theme from localStorage.');
-        }
-        
-        // If there is a saved theme, apply it
-        if (storedTheme) {
-            this.switchTheme(storedTheme);
-        } else {
-            // If there is no saved theme, use the system preference
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            this.switchTheme(prefersDark ? 'dark' : 'light');
-        }
-    }
-
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Basic Components & Methods
-    // ----------------------------------------
+    // =======================================>
     
     /**
-     * @typedef {Element} DOMElement DOM Element alias for Element
+     * Generate a random UID (to avoid duplicate IDs)
+     * @param {number} length Length of the UID
+     * @returns {string} Generated UID
      */
+    UID(length = 5) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() *  chars.length));
+        }
+        return result;
+    }
 
     /**
-     * @typedef {Object} UIElementBase (Base) UI Element with custom methods
-     * @property {function(string|DOMElement|Array<DOMElement>): void} add - Add content to the element, alias for appendChild (content)
-     * @property {function(string|DOMElement|Array<DOMElement>): void} replace - Replace the content of the element, alias for innerHTML (content)
-     * @property {function(string|DOMElement|Array<DOMElement>): void} listenEvent - Listen to an event, alias for addEventListener (event, callback)
-     * @property {function(string|DOMElement|Array<DOMElement>): void} unlistenEvent - Unlisten to an event, alias for removeEventListener (event, callback) 
-     * @property {function(string): void} triggerEvent - Trigger an event, alias for dispatchEvent (event)
+     * @typedef {Object} UIElementBase (Base) UI HTML Element with custom methods
+     * @property {function(): string} getType - Get the type of the element
+     * @property {function(string|HTMLElement|Array<HTMLElement>): void} add - Add content to the element, alias for appendChild (content)
+     * @property {function(string|HTMLElement|Array<HTMLElement>): void} replace - Replace the content of the element, alias for innerHTML (content)
+     * @property {function(): void} removeAll - Remove all child elements from the element
+     * @property {function(string|HTMLElement|Array<HTMLElement>): void} listenEvent - Listen to an event, alias for addEventListener (event, callback)
+     * @property {function(string|HTMLElement|Array<HTMLElement>): void} unlistenEvent - Unlisten to an event, alias for removeEventListener (event, callback) 
      * @property {function(string|Array<string>): void} addClass - Add a class to the element, alias for classList.add (className)
      * @property {function(string|Array<string>): void} removeClass - Remove a class from the element, alias for classList.remove (className)
      * @property {function(string|Array<string>): void} toggleClass - Toggle a class to the element, alias for classList.toggle (className)
      * @property {function(string|Array<string>): boolean} hasClass - Check if the element has a class, alias for classList.contains (className)
-     * @property {function(string): DOMElement} query - Query a child element, alias for querySelector (selector)
+     * @property {function(string): HTMLElement} query - Query a child element, alias for querySelector (selector)
      * @property {function(string): NodeList} queryAll - Query all child elements, alias for querySelectorAll (selector)
+     * @property {function(HTMLElement): boolean} isIn - Check if the element is inside another element, alias for element.contains (targetElement)
      */
 
     /**
-     * @typedef {DOMElement & UIElementBase} UIElement UI Element with custom methods
+     * @typedef {HTMLElement & UIElementBase} UIElement UI HTML Element with custom methods
      */
 
     /**
-     * Creates a DOM Element (UIElement)
-     * @param {string} type type of the element to create
-     * @param {string} id id of the element to create
-     * @param {string} className class name of the element to create
-     * @param {string} content content of the element to create
-     * @returns {UIElement} created element
+     * Creates a UI HTML Element in DOM (UIElement)
+     * @param {string} type Type of the element to create
+     * @param {string} id Id of the element to create
+     * @param {string} className Class name of the element to create
+     * @param {string} content Content of the element to create
+     * @param {string} UItype Type of the UIElement to create
+     * @returns {UIElement} Created element
      */
-    element(type, id = null, className = null, content = null) {
+    element(type, id = null, className = null, content = null, UItype = 'element') {
         // Create the element
-        let element = document.createElement(type);
+        let element = this.body.create(type);
         if (id !== null) 
             element.id = id;
+        if (UItype !== null)
+            element.dataset.uiType = UItype;
 
         // External methods
+        element.getType = () => {
+            return element.dataset.uiType ?? 'element';
+        }
         element.add = (content) => {
             if (content !== null && typeof content === 'string') {
                 element.innerHTML = content;
@@ -334,13 +333,18 @@ class StickyUI {
             element.innerHTML = '';
             element.add(content);
         };
+        element.removeAll = () => {
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
+        };
         element.listenEvent = (event, callback) => {
             element.addEventListener(event, callback);
-            this.#listeners.push({ listener: `${type}#${element.id}`, event, callback, element });
+            this.#listeners.push({ listener: `${type}#${UItype}#${element.id}`, event, callback, element });
         };     
         element.unlistenEvent = (event, callback) => {
             element.removeEventListener(event, callback);
-            this.#listeners = this.#listeners.filter(listener => listener.listener !== `${type}#${element.id}` || listener.event !== event || listener.callback !== callback);
+            this.#listeners = this.#listeners.filter(listener => listener.listener !== `${type}#${UItype}#${element.id}` || listener.event !== event || listener.callback !== callback);
         };
         element.triggerEvent = (event) => {
             element.dispatchEvent(event);
@@ -383,40 +387,355 @@ class StickyUI {
         element.queryAll = (selector) => {
             return element.querySelectorAll(selector);
         }
+        element.isIn = (targetElement) => {
+            return targetElement.contains(element);
+        }
 
         // Add the class and content (Invoked after methods)
-        element.addClass(this.#classBase);
-        element.addClass(className);
+        element.addClass(`${this.#classBase} ${className}`);
         element.add(content);
 
         // Return the element
         return element;
     }
 
-    /**
-     * Generate a random UID (to avoid duplicate IDs)
-     * @param {number} length the length of the UID
-     * @returns {string} the generated UID
-     */
-    UID = (length = 5) => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < length; i++) {
-            result += chars.charAt(Math.floor(Math.random() *  chars.length));
-        }
-        return result;
-    }
+    // <=======================================
+    // #endregion
+    // ----------------------------------------
 
     // ----------------------------------------
+    // #region Private Helper Methods
+    // =======================================>
+
+    /**
+     * Position and dimension helper methods
+     */
+    #utils = {
+        /**
+         * Get element position and dimensions
+         * @param {HTMLElement} element Element to get the position and dimensions of
+         * @returns {{width: number, height: number, xLeft: number, xCenter: number, xRight: number, yTop: number, yCenter: number, yBottom: number}} Position and dimensions of the element (width, height, xLeft, xCenter, xRight, yTop, yCenter, yBottom)
+         */
+        __getElemPosDim: (element) => {
+            const rect = element.getBoundingClientRect();
+            const width = parseFloat(rect.width);
+            const height = parseFloat(rect.height);
+            const xLeft = parseFloat(rect.left);
+            const xCenter = xLeft + (width / 2);
+            const xRight = xLeft + width;
+            const yTop = parseFloat(rect.top);
+            const yCenter = yTop + (height / 2);
+            const yBottom = yTop + height;
+            return { width, height, xLeft, xCenter, xRight, yTop, yCenter, yBottom }
+        },
+        /**
+         * Get element dimensions, if needed make it visible temporarily outside of the viewport to measure its dimensions
+         * @param {HTMLElement} element Element to get the dimensions of
+         * @returns {{width: number, height: number}} Dimensions of the element (width, height)
+         */
+        __getElemDim: (element) => {
+            // Save the original style
+            const _style = {
+                visibility: element.style.visibility ?? null,
+                display: element.style.display ?? null,
+                position: element.style.position ?? null,
+                top: element.style.top ?? null,
+                left: element.style.left ?? null
+            };
+            if (
+                (_style.display !== null && (_style.display === 'none' || _style.display === '')) || 
+                (_style.visibility !== null && (_style.visibility === 'hidden' || _style.visibility === '')) 
+            ) {
+                // Make the target element visible temporarily outside of the viewport to measure
+                element.style.visibility = 'hidden';
+                element.style.display = 'block';
+                element.style.position = 'fixed';
+                element.style.top = '-9999px';
+                element.style.left = '-9999px';
+            }
+            // Get the dimensions
+            const rect = element.getBoundingClientRect();
+            const width = parseFloat(rect.width);
+            const height = parseFloat(rect.height);
+            // Restore the original style
+            if (
+                (_style.display !== null && (_style.display === 'none' || _style.display === '')) || 
+                (_style.visibility !== null && (_style.visibility === 'hidden' || _style.visibility === '')) 
+            ) {
+                if (_style.visibility !== null) element.style.visibility = _style.visibility;
+                if (_style.display !== null) element.style.display = _style.display;
+                if (_style.position !== null) element.style.position = _style.position;
+                if (_style.top !== null) element.style.top = _style.top;
+                if (_style.left !== null) element.style.left = _style.left;
+            }
+            return { width, height };
+        },
+        /**
+         * Get the position to display of a target element relative to a reference element
+         * @param {HTMLElement} referenceElement Reference element (The object element which will be used as a reference to display the target element)
+         * @param {HTMLElement} targetElement Target element (The object element which will be displayed)
+         * @param {string} refAnchor Reference element anchor point (Anchors: top-left, top-center, top-right | bottom-left, bottom-center, bottom-right | left-top, left-center, left-bottom | right-top, right-center, right-bottom)
+         * @param {string} targetAnchor Target element anchor point (Anchors: top-left, top-center, top-right | bottom-left, bottom-center, bottom-right | left-top, left-center, left-bottom | right-top, right-center, right-bottom)
+         * @param {{x: number, y: number}|number} offset Offset of the target element relative to the reference element (x, y) or number
+         * @param {number} viewportMargin Margin of the viewport
+         * @returns {{x: number, y: number, refAnchor: string, targetAnchor: string}} Position of the target element relative to the reference element (x, y, refAnchor, targetAnchor)
+         */
+        __getElemPosToDisplay: (referenceElement, targetElement, refAnchor = 'right-bottom', targetAnchor = 'top-left',  offset = { x: 0, y: 0 }, viewportMargin = 0) => {        
+            // Get the reference element dimensions and position
+            const { 
+                width: refWidth, height: refHeight, 
+                xLeft: refXLeft, xCenter: refXCenter, xRight: refXRight, 
+                yTop: refYTop, yCenter: refYCenter, yBottom: refYBottom 
+            } = this.#utils.__getElemPosDim(referenceElement);
+            // Get the target element dimensions and position
+            const { width: targetWidth, height: targetHeight } = this.#utils.__getElemDim(targetElement);
+            // Get the viewport dimensions
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            // Get offset object
+            if (typeof offset === 'number') {
+                offset = { x: offset, y: offset };
+            }
+            // Calculate available space in each direction from the reference element
+            const spaceRight = viewportWidth - refXRight;
+            const spaceLeft = refXLeft;
+            const spaceBottom = viewportHeight - refYBottom;
+            const spaceTop = refYTop;
+            // Determine best position based on available space
+            const _refAnchorMain = refAnchor.split('-')[0];
+            // Check horizontal space and adjust if necessary
+            if (_refAnchorMain.includes('right') && spaceRight < targetWidth + viewportMargin) {
+                refAnchor = refAnchor.replace('right', 'left');
+                targetAnchor = targetAnchor.replace('left', 'right');
+                offset.x = -offset.x;
+            } else if (_refAnchorMain.includes('left') && spaceLeft < targetWidth + viewportMargin) {
+                refAnchor = refAnchor.replace('left', 'right');
+                targetAnchor = targetAnchor.replace('right', 'left');
+                offset.x = -offset.x;
+            }
+            // Determine best position based on available space
+            // Check vertical space and adjust if necessary
+            if (_refAnchorMain.includes('bottom') && spaceBottom < targetHeight + viewportMargin) {
+                refAnchor = refAnchor.replace('bottom', 'top');
+                targetAnchor = targetAnchor.replace('top', 'bottom');
+                offset.y = -offset.y;
+            } else if (_refAnchorMain.includes('top') && spaceTop < targetHeight + viewportMargin) {
+                refAnchor = refAnchor.replace('top', 'bottom');
+                targetAnchor = targetAnchor.replace('bottom', 'top');
+                offset.y = -offset.y;
+            }
+            // Determine the base position relative to the reference element
+            let baseX, baseY;
+            const [refAnchorMain, refAnchorSub] = refAnchor.split('-');
+            if (refAnchorMain === 'top') {
+                baseY = refYTop;
+                if (refAnchorSub === 'left') baseX = refXLeft; // top-left
+                else if (refAnchorSub === 'right') baseX = refXRight; // top-right
+                else baseX = refXCenter; // top-center
+            } 
+            else if (refAnchorMain === 'bottom') {
+                baseY = refYBottom;
+                if (refAnchorSub === 'left') baseX = refXLeft; // bottom-left
+                else if (refAnchorSub === 'right') baseX = refXRight; // bottom-right
+                else baseX = refXCenter; // bottom-center
+            }
+            else if (refAnchorMain === 'left') {
+                baseX = refXLeft;
+                if (refAnchorSub === 'top') baseY = refYTop; // left-top
+                else if (refAnchorSub === 'bottom') baseY = refYBottom;
+                else baseY = refYCenter; // center
+            }
+            else if (refAnchorMain === 'right') {
+                baseX = refXRight;
+                if (refAnchorSub === 'top') baseY = refYTop; // right-top
+                else if (refAnchorSub === 'bottom') baseY = refYBottom; // right-bottom
+                else baseY = refYCenter; // right-center
+            }
+            // Adjust position based on the targetAnchor 
+            // (which part of the target element should be placed at the base position)
+            let finalX = baseX, finalY = baseY;
+            const [targetAnchorMain, targetAnchorSub] = targetAnchor.split('-');        
+            // Adjust X position based on targetAnchor
+            if (targetAnchorMain === 'left' || targetAnchorSub === 'left') { // left-top, left-center, left-bottom || top-left, center-left, bottom-left
+                // No adjustment needed for left alignment
+            } else if (targetAnchorMain === 'right' || targetAnchorSub === 'right') { // right-top, right-center, right-bottom || top-right, center-right, bottom-right
+                finalX -= targetWidth;
+            } else if (targetAnchorMain === 'center' || targetAnchorSub === 'center') { // top-center, bottom-center, left-center, right-center
+                finalX -= targetWidth / 2;
+            }
+            // Adjust Y position based on targetAnchor
+            if (targetAnchorMain === 'top' || targetAnchorSub === 'top') { // top-left, top-center, top-right || left-top, center-top, right-top  
+                // No adjustment needed for top alignment
+            } else if (targetAnchorMain === 'bottom' || targetAnchorSub === 'bottom') { // bottom-left, bottom-center, bottom-right || left-bottom, center-bottom, right-bottom
+                finalY -= targetHeight;
+            } else if (targetAnchorMain === 'center' || targetAnchorSub === 'center') { // top-center, bottom-center, left-center, right-center
+                finalY -= targetHeight / 2;
+            }
+            // Apply additional offset
+            finalX += offset.x;
+            finalY += offset.y;
+            // Ensure menu stays within viewport bounds
+            finalX = Math.max(viewportMargin, Math.min(finalX, viewportWidth - targetWidth - viewportMargin));
+            finalY = Math.max(viewportMargin, Math.min(finalY, viewportHeight - targetHeight - viewportMargin));
+            return { x: finalX, y: finalY, refAnchor, targetAnchor };
+        }
+    }
+
+    /**
+     * Toolbar helper methods
+     */
+    #toolbarUtils = {
+        /**
+         * Handle multiple toolbars at top (stack them from top to bottom)
+         * Get the top offset of the toolbars:
+         * (1) If toolbar is given, calculate the offset relative to it.
+         * (2) If no toolbar is given, calculate the offset of all top toolbars
+         * @param {UIElement} relativeTo - Toolbar element to calculate the offset relative to (Optional)
+         * @returns {number} Top offset of the toolbars
+         */
+        __getToolbarTopOffset: (relativeTo = null) => {
+            let topOffset = 0;
+            // Add the offset of the menuBar if it exists
+            const menuBar = document.querySelector(`.${this.#classBase}.menuBar`);
+            if (menuBar)
+                topOffset += menuBar.offsetHeight;
+            // Add the offset of the toolbars at top
+            const topToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-top`);
+            if (topToolbars.length > 0) {
+                // If no relativeTo is given, add the height of all top toolbars    
+                if (relativeTo === null) {
+                    topOffset += Array.from(topToolbars).reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+                }
+                // If a relativeTo is given, add the height of the top toolbars until the relativeTo toolbar
+                else {
+                    const index = Array.from(topToolbars).indexOf(relativeTo);
+                    const previousToolbars = Array.from(topToolbars).slice(0, index);
+                    topOffset += previousToolbars.reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+                }
+            }
+            return topOffset;
+        },
+        /**
+         * Handle multiple toolbars at bottom (stack them from bottom to top)
+         * Get the bottom offset of the toolbars:
+         * (1) If toolbar is given, calculate the offset relative to it.
+         * (2) If no toolbar is given, calculate the offset of all bottom toolbars
+         * @param {UIElement} relativeTo - Toolbar element to calculate the offset relative to (Optional)
+         * @returns {number} Bottom offset of the toolbars
+         */
+        __getToolbarBottomOffset: (relativeTo = null) => {
+            let bottomOffset = 0;
+            // Add the offset of the statusBar if it exists
+            const statusBar = document.querySelector(`.${this.#classBase}.statusBar`);
+            if (statusBar)
+                bottomOffset += statusBar.offsetHeight;        
+            // Add the offset of the toolbars at bottom
+            const bottomToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-bottom`);
+            if (bottomToolbars.length > 0) {
+                // If no relativeTo is given, add the height of all bottom toolbars
+                if (relativeTo === null) {
+                    bottomOffset += Array.from(bottomToolbars).reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+                }
+                // If a relativeTo is given, add the height of the bottom toolbars until the relativeTo toolbar
+                else {
+                    const index = Array.from(bottomToolbars).indexOf(relativeTo);
+                    const previousToolbars = Array.from(bottomToolbars).slice(0, index);
+                    bottomOffset += previousToolbars.reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
+                }
+            }
+            return bottomOffset;
+        },
+        /**
+         * Handle multiple toolbars at left (stack them from left to right)
+         * Get the left offset of the toolbars:
+         * (1) If toolbar is given, calculate the offset relative to it.
+         * (2) If no toolbar is given, calculate the offset of all left toolbars
+         * @param {UIElement} relativeTo - Toolbar element to calculate the offset relative to (Optional)
+         * @returns {number} Left offset of the toolbars
+         */
+        __getToolbarLeftOffset: (relativeTo = null) => {
+            let leftOffset = 0;
+            // Add the offset of the toolbars at left
+            const leftToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-left`);
+            if (leftToolbars.length > 0) {
+                // If no relativeTo is given, add the width of all left toolbars
+                if (relativeTo === null) {
+                    leftOffset = Array.from(leftToolbars).reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
+                }
+                // If a relativeTo is given, add the width of the left toolbars until the relativeTo toolbar
+                else {
+                    const index = Array.from(leftToolbars).indexOf(relativeTo);
+                    const previousToolbars = Array.from(leftToolbars).slice(0, index);
+                    leftOffset = previousToolbars.reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
+                }
+            }
+            return leftOffset;
+        },
+        /**
+         * Handle multiple toolbars at right (stack them from right to left)
+         * Get the right offset of the toolbars:
+         * (1) If toolbar is given, calculate the offset relative to it.
+         * (2) If no toolbar is given, calculate the offset of all right toolbars
+         * @param {UIElement} relativeTo - Toolbar element to calculate the offset relative to (Optional)
+         * @returns {number} Right offset of the toolbars
+         */
+        __getToolbarRightOffset: (relativeTo = null) => {
+            let rightOffset = 0;
+            // Add the offset of the toolbars at right
+            const rightToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-right`);
+            if (rightToolbars.length > 0) {
+                // If no relativeTo is given, add the width of all right toolbars
+                if (relativeTo === null) {
+                    rightOffset = Array.from(rightToolbars).reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);   
+                }
+                // If a relativeTo is given, add the width of the right toolbars until the relativeTo toolbar
+                else {
+                    const index = Array.from(rightToolbars).indexOf(relativeTo);
+                    const previousToolbars = Array.from(rightToolbars).slice(0, index);
+                    rightOffset = previousToolbars.reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
+                }
+            }
+            return rightOffset;
+        }
+    }
+
+    /**
+     * UI Updaters helper methods
+     */
+    #UIUpdaters = {
+        /** 
+         * Update the position of the toolbars
+        */
+        __updatePositionToolbars: () => {
+            const toolbars = this.body.queryAll(`.${this.#classBase}.toolbar`);
+            toolbars.forEach(toolbar => toolbar.updatePosition());
+        },
+        /**
+         * Update the position of the side panels
+         */
+        __updatePositionSidePanels: () => {
+            const sidePanels = this.body.queryAll(`.${this.#classBase}.sidePanel`);
+            sidePanels.forEach(sidePanel => sidePanel.updatePosition());
+        },
+        /**
+         * Update the position of the workspace
+         */
+        __updatePositionWorkspace: () => {
+            const workspace = this.body.query(`.${this.#classBase}.workspace`);
+            workspace.updatePosition();
+        }
+    }
+
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Icon
-    // ----------------------------------------
+    // =======================================>
 
     /**
-     * @typedef {Object} UIIconBase (Base) Icon Element with custom methods
+     * @typedef {Object} UIIconBase (Base) Icon Element
      * @property {function(string): void} changeIcon - Change the icon of the element (iconName)
      * @property {function(number, string): void} setWidth - Set the width of the element (width, unit)
      * @property {function(number, string): void} setHeight - Set the height of the element (height, unit)
@@ -425,20 +744,21 @@ class StickyUI {
      */
 
     /**
-     * @typedef {UIElement & UIIconBase} UIIcon Icon Element with custom methods
+     * @typedef {UIElement & UIIconBase} UIIcon Icon Element
      */
 
     /**
      * Creates an icon element
-     * @param {string} iconName the name of the icon to create
-     * @returns {UIIcon} the created icon element
+     * @param {string} iconName Name of the icon to create
+     * @returns {UIIcon} Created icon element
      */
-
-    icon = (iconName = null) => {
+    icon(iconName = null) {
+        // Create the element
         const UID = this.UID();
         let _currentIcon = iconName;
-        const iconElement = this.element('div',`icon_${UID}`, 'icon');
+        const iconElement = this.element('div',`icon_${UID}`, 'icon', null, 'icon');
 
+        // Add the class (icon name is the class name)
         if (iconName)
             iconElement.addClass(iconName)
             
@@ -471,31 +791,46 @@ class StickyUI {
         return iconElement;
     }
 
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Menu Bar
-    // ----------------------------------------
+    // =======================================>
  
-    menuBarItem = (labelText = null, icon = null, contextMenu = null) => {
+    /**
+     * @typedef {Object} UIMenuBarItemBase (Base) Menu Bar Item Element
+     * @property {function(string): void} showContextMenu - Show the context menu of the menu bar item (contextMenu)
+     */
+
+    /**
+     * @typedef {UIElement & UIMenuBarItemBase} UIMenuBarItem Menu Bar Item Element
+     */
+
+    /**
+     * Creates a menu bar item
+     * @param {string} labelText Label text of the menu bar item
+     * @param {string} icon Icon of the menu bar item
+     * @param {UIContextMenu} contextMenu Context menu of the menu bar item
+     * @returns {UIMenuBarItem} Created menu bar item
+     */
+    menuBarItem(labelText = null, icon = null, contextMenu = null) {
+        // Create the element
         const UID = this.UID();
-        const menuBarItem = this.element('div', `menuBarItem_${UID}`, 'menuBarItem');
+        const menuBarItem = this.element('div', `menuBarItem_${UID}`, 'menuBarItem', null, 'menuBarItem');
 
         // Add the icon
         if (icon) {
-            const menuBarItemIconContainer = this.element('div', `menuBarItemIconContainer_${UID}`, 'menuBarItemIconContainer');
             const menuBarItemIcon = this.icon(icon);
-            menuBarItemIconContainer.add(menuBarItemIcon);
-            menuBarItem.add(menuBarItemIconContainer);
-            menuBarItemIcon.setSize(16);
-            menuBarItemIcon.setColor('var(--color-primary)');
+            menuBarItem.add(menuBarItemIcon);
         }
 
         // Add the label
-        const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText);
-        menuBarItem.add(menuBarItemLabel);
+        if (labelText) {
+            const menuBarItemLabel = this.element('div', `menuBarItemLabel_${UID}`, 'menuBarItemLabel', labelText, 'label');
+            menuBarItem.add(menuBarItemLabel);
+        }
 
         // Add the context menu (if provided) on click
         if (contextMenu) {
@@ -503,217 +838,114 @@ class StickyUI {
                 e.preventDefault();
                 e.stopPropagation();
                 // Close other context menus    
-                const activeContextMenu = this.query(`.${this.#classBase}.contextMenu.show`);
+                const activeContextMenu = this.body.query(`.${this.#classBase}.contextMenu.show`);
                 if (activeContextMenu) {
                     activeContextMenu.hideContextMenu();
                 }
                 // Get position and show the context menu
-                
                 const parentMenuBar = menuBarItem.closest('.menuBarItem');
-                console.log(">>>", parentMenuBar);
                 contextMenu.showContextMenu(parentMenuBar, 'bottom-left', 'top-left');
             });
-            this.add(contextMenu); // DOM Insertion ***
         }
         
         return menuBarItem;
     }
 
-    menuBar = (menuBarItems) => {
-        const UID = this.UID();
-        const menuBar = this.element('div', `menuBar_${UID}`, 'menuBar');
-        if (menuBarItems !== null && menuBarItems instanceof Array) 
-            menuBar.add(menuBarItems);
+    /**
+     * @typedef {Object} UIMenuBarBase (Base) Menu Bar Element
+     * @property {function(Array<UIMenuBarItem>): void} addItems - Add menu bar items to the menu bar (menuBarItems)
+     */
 
-        // Hide context menu when clicking outside
-        this.listenEvent('click', () => {
-            const activeContextMenu = this.query(`.${this.#classBase}.contextMenu.show`);
-            if (activeContextMenu) {
-                activeContextMenu.hideContextMenu();
-            }
-        });
+    /**
+     * @typedef {UIElement & UIMenuBarBase} UIMenuBar Menu Bar Element
+     */
+
+    /**
+     * Creates a menu bar
+     * @param {Array<UIMenuBarItem>} menuBarItems Menu bar items of the menu bar
+     * @returns {UIMenuBar} Created menu bar
+     */
+    menuBar(menuBarItems = null) {
+        // Create the element
+        const UID = this.UID();
+        const menuBar = this.element('div', `menuBar_${UID}`, 'menuBar', null, 'menuBar');
+        
+        // External methods
+        menuBar.addItems = (menuBarItems) => {
+            if (menuBarItems !== null && typeof menuBarItems === 'object')
+                menuBar.add(menuBarItems);
+        }
+
+        // Add the menu bar items (if provided, after methods defined)
+        if (menuBarItems) 
+            menuBar.addItems(menuBarItems);
 
         return menuBar;
     }
 
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Context Menu
-    // ----------------------------------------
+    // =======================================>
 
-    // Get element position and dimensions
-    __getElemPosDim = (element) => {
-        const rect = element.getBoundingClientRect();
-        const width = parseFloat(rect.width);
-        const height = parseFloat(rect.height);
-        const xLeft = parseFloat(rect.left);
-        const xCenter = xLeft + (width / 2);
-        const xRight = xLeft + width;
-        const yTop = parseFloat(rect.top);
-        const yCenter = yTop + (height / 2);
-        const yBottom = yTop + height;
-        return { width, height, xLeft, xCenter, xRight, yTop, yCenter, yBottom }
-    }
-
-    // Make the target element visible temporarily outside of the viewport to measure
-    __getElemDim_Hidden = (element) => {
-        // Save the original style
-        const _style = {
-            visibility: element.style.visibility ?? null,
-            display: element.style.display ?? null,
-            position: element.style.position ?? null,
-            top: element.style.top ?? null,
-            left: element.style.left ?? null
-        };
-        // Make the target element visible temporarily outside of the viewport to measure
-        element.style.visibility = 'hidden';
-        element.style.display = 'block';
-        element.style.position = 'fixed';
-        element.style.top = '-9999px';
-        element.style.left = '-9999px';
-        // Get the dimensions
-        const rect = element.getBoundingClientRect();
-        const width = parseFloat(rect.width);
-        const height = parseFloat(rect.height);
-        // Restore the original style
-        if (_style.visibility !== null) element.style.visibility = _style.visibility;
-        if (_style.display !== null) element.style.display = _style.display;
-        if (_style.position !== null) element.style.position = _style.position;
-        if (_style.top !== null) element.style.top = _style.top;
-        if (_style.left !== null) element.style.left = _style.left;
-        return { width, height };
-    }
-
-    // Get the position of the target element relative to the reference element
-    // refAnchor: the anchor point of the reference element
-    // targetAnchor: the anchor point of the target element
-    // offset: the offset of the target element relative to the reference element
-    // viewportMargin: the margin of the viewport
-    // Anchors: 
-    // top-left, top-center, top-right,
-    // bottom-left, bottom-center, bottom-right,
-    // left-top, left-center, left-bottom,
-    // right-top, right-center, right-bottom
-    __getElemPosDisplay = (referenceElement, targetElement, refAnchor = 'right-bottom', targetAnchor = 'top-left',  offset = { x: 0, y: 0 }, viewportMargin = 0) => {        
-        // Get the reference element dimensions and position
-        const { 
-            width: refWidth, height: refHeight, 
-            xLeft: refXLeft, xCenter: refXCenter, xRight: refXRight, 
-            yTop: refYTop, yCenter: refYCenter, yBottom: refYBottom 
-        } = this.__getElemPosDim(referenceElement);
-        // Get the target element dimensions and position
-        const { width: targetWidth, height: targetHeight } = this.__getElemDim_Hidden(targetElement);
-        // Get the viewport dimensions
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        // Get offset object
-        if (typeof offset === 'number') {
-            offset = { x: offset, y: offset };
-        }
-        // Calculate available space in each direction from the reference element
-        const spaceRight = viewportWidth - refXRight;
-        const spaceLeft = refXLeft;
-        const spaceBottom = viewportHeight - refYBottom;
-        const spaceTop = refYTop;
-        // Determine best position based on available space
-        const _refAnchorMain = refAnchor.split('-')[0];
-        // Check horizontal space and adjust if necessary
-        if (_refAnchorMain.includes('right') && spaceRight < targetWidth + viewportMargin) {
-            refAnchor = refAnchor.replace('right', 'left');
-            targetAnchor = targetAnchor.replace('left', 'right');
-            offset.x = -offset.x;
-        } else if (_refAnchorMain.includes('left') && spaceLeft < targetWidth + viewportMargin) {
-            refAnchor = refAnchor.replace('left', 'right');
-            targetAnchor = targetAnchor.replace('right', 'left');
-            offset.x = -offset.x;
-        }
-        // Determine best position based on available space
-        // Check vertical space and adjust if necessary
-        if (_refAnchorMain.includes('bottom') && spaceBottom < targetHeight + viewportMargin) {
-            refAnchor = refAnchor.replace('bottom', 'top');
-            targetAnchor = targetAnchor.replace('top', 'bottom');
-            offset.y = -offset.y;
-        } else if (_refAnchorMain.includes('top') && spaceTop < targetHeight + viewportMargin) {
-            refAnchor = refAnchor.replace('top', 'bottom');
-            targetAnchor = targetAnchor.replace('bottom', 'top');
-            offset.y = -offset.y;
-        }
-        // Determine the base position relative to the reference element
-        let baseX, baseY;
-        const [refAnchorMain, refAnchorSub] = refAnchor.split('-');
-        if (refAnchorMain === 'top') {
-            baseY = refYTop;
-            if (refAnchorSub === 'left') baseX = refXLeft; // top-left
-            else if (refAnchorSub === 'right') baseX = refXRight; // top-right
-            else baseX = refXCenter; // top-center
-        } 
-        else if (refAnchorMain === 'bottom') {
-            baseY = refYBottom;
-            if (refAnchorSub === 'left') baseX = refXLeft; // bottom-left
-            else if (refAnchorSub === 'right') baseX = refXRight; // bottom-right
-            else baseX = refXCenter; // bottom-center
-        }
-        else if (refAnchorMain === 'left') {
-            baseX = refXLeft;
-            if (refAnchorSub === 'top') baseY = refYTop; // left-top
-            else if (refAnchorSub === 'bottom') baseY = refYBottom;
-            else baseY = refYCenter; // center
-        }
-        else if (refAnchorMain === 'right') {
-            baseX = refXRight;
-            if (refAnchorSub === 'top') baseY = refYTop; // right-top
-            else if (refAnchorSub === 'bottom') baseY = refYBottom; // right-bottom
-            else baseY = refYCenter; // right-center
-        }
-        // Adjust position based on the targetAnchor 
-        // (which part of the target element should be placed at the base position)
-        let finalX = baseX, finalY = baseY;
-        const [targetAnchorMain, targetAnchorSub] = targetAnchor.split('-');        
-        // Adjust X position based on targetAnchor
-        if (targetAnchorMain === 'left' || targetAnchorSub === 'left') { // left-top, left-center, left-bottom || top-left, center-left, bottom-left
-            // No adjustment needed for left alignment
-        } else if (targetAnchorMain === 'right' || targetAnchorSub === 'right') { // right-top, right-center, right-bottom || top-right, center-right, bottom-right
-            finalX -= targetWidth;
-        } else if (targetAnchorMain === 'center' || targetAnchorSub === 'center') { // top-center, bottom-center, left-center, right-center
-            finalX -= targetWidth / 2;
-        }
-        // Adjust Y position based on targetAnchor
-        if (targetAnchorMain === 'top' || targetAnchorSub === 'top') { // top-left, top-center, top-right || left-top, center-top, right-top  
-            // No adjustment needed for top alignment
-        } else if (targetAnchorMain === 'bottom' || targetAnchorSub === 'bottom') { // bottom-left, bottom-center, bottom-right || left-bottom, center-bottom, right-bottom
-            finalY -= targetHeight;
-        } else if (targetAnchorMain === 'center' || targetAnchorSub === 'center') { // top-center, bottom-center, left-center, right-center
-            finalY -= targetHeight / 2;
-        }
-        // Apply additional offset
-        finalX += offset.x;
-        finalY += offset.y;
-        // Ensure menu stays within viewport bounds
-        finalX = Math.max(viewportMargin, Math.min(finalX, viewportWidth - targetWidth - viewportMargin));
-        finalY = Math.max(viewportMargin, Math.min(finalY, viewportHeight - targetHeight - viewportMargin));
-        return { x: finalX, y: finalY, refAnchor, targetAnchor };
-    }
+    /**
+     * @typedef {Object} UIContextMenuItemBase (Base) Context Menu Item Element
+     * @property {function(string): void} changeIcon - Change the icon of the context menu item (iconName)
+     * @property {function(string): void} setLabel - Set the label of the context menu item (labelText)
+     * @property {function(string): void} setColor - Set the color of the context menu item (color)
+     */
     
-    
-    contextMenuItem = (labelText = null, icon = null, onClick = null, closeOnClick = true) => {
+    /**
+     * @typedef {UIElement & UIContextMenuItemBase} UIContextMenuItem Context Menu Item Element
+
+    /**
+     * Creates a context menu item
+     * @param {string} labelText Label text of the context menu item
+     * @param {string} icon Icon of the context menu item
+     * @param {function} onClick Click event of the context menu item
+     * @param {boolean} closeOnClick Close the context menu on click
+     * @returns {UIMenuBarItem} Created context menu item
+     */
+    contextMenuItem(labelText = null, icon = null, onClick = null, closeOnClick = true) {
+        // Create the element
         const UID = this.UID();
-        const contextMenuItem = this.element('div', `contextMenuItem_${UID}`, 'contextMenuItem');
+        const contextMenuItem = this.element('div', `contextMenuItem_${UID}`, 'contextMenuItem', null, 'contextMenuItem');
         
         // Add the icon
-        if (icon) {
-            const contextMenuItemIconContainer = this.element('div', `contextMenuItemIconContainer_${UID}`, 'contextMenuItemIconContainer');
+        if (icon !== null) {
             const contextMenuItemIcon = this.icon(icon);
-            contextMenuItemIconContainer.add(contextMenuItemIcon);
-            contextMenuItem.add(contextMenuItemIconContainer);
+            contextMenuItem.add(contextMenuItemIcon);
         }
         
         // Add the label
-        const contextMenuItemLabel = this.element('div', `contextMenuItemLabel_${UID}`, 'contextMenuItemLabel', labelText);
-        contextMenuItem.add(contextMenuItemLabel);
+        if (labelText !== null) {
+            const contextMenuItemLabel = this.element('div', `contextMenuItemLabel_${UID}`, 'contextMenuItemLabel', labelText, 'label');
+            contextMenuItem.add(contextMenuItemLabel);
+        }
 
+        // External methods
+        contextMenuItem.changeIcon = (iconName) => {
+            if (iconName !== null && typeof iconName === 'string') {
+                const _icon = contextMenuItem.query('.icon');                
+                if (_icon)
+                    _icon.changeIcon(iconName);
+            }
+        }
+        contextMenuItem.setLabel = (labelText) => {
+            if (labelText !== null && typeof labelText === 'string') {
+                const _label = contextMenuItem.query('.contextMenuItemLabel');
+                if (_label)
+                    _label.innerText = labelText;
+            }
+        }
+        contextMenuItem.setColor = (color) => {
+            contextMenuItem.style.color = color;
+        }
+
+        // Listeners 
         // Add the on click event (if provided)
         if (onClick) {
             contextMenuItem.onClick = onClick;
@@ -729,109 +961,237 @@ class StickyUI {
         return contextMenuItem;
     }
 
-    contextMenu = (contextMenuItems) => {
+    /**
+     * @typedef {Object} UIContextMenuBase (Base) Context Menu Element
+     * @property {function(Array<UIContextMenuItem>): void} addItems - Add context menu items to the context menu (contextMenuItems)
+     * @property {function(HTMLElement, string, string, {x: number, y: number}): void} showContextMenu - Show the context menu (referenceElement, refAnchor, targetAnchor, offset)
+     * @property {function(): void} hideContextMenu - Hide the context menu 
+     */
+
+    /**
+     * @typedef {UIElement & UIContextMenuBase} UIContextMenu Context Menu Element
+     */
+
+    /**
+     * Creates a context menu
+     * @param {Array<UIContextMenuItem>} contextMenuItems Context menu items of the context menu
+     * @returns {UIContextMenu} Created context menu
+     */
+    contextMenu(contextMenuItems = null) {
+        // Create context menu wrapper (Group all context menus in a single wrapper)
+        let contextMenuWrapper = this.body.getByClass('contextMenuWrapper');
+        if (!contextMenuWrapper) {
+            const _UID = this.UID();
+            contextMenuWrapper = this.element('div', `contextMenuWrapper_${_UID}`, 'contextMenuWrapper', null, 'contextMenuWrapper');
+            this.body.add(contextMenuWrapper); // DOM Insertion ***
+        }
+
+        // Create the element
         const UID = this.UID();
-        const contextMenu = this.element('div', `contextMenu_${this.UID()}`, 'contextMenu');
+        const contextMenu = this.element('div', `contextMenu_${UID}`, 'contextMenu', null, 'contextMenu');
 
-        // Add the context menu items
-        if (contextMenuItems !== null && contextMenuItems instanceof Array) 
-            contextMenu.add(contextMenuItems);
-
-        // Methods to show and hide the context menu externally
+        // External methods
+        contextMenu.addItems = (contextMenuItems) => {
+            if (contextMenuItems !== null && contextMenuItems instanceof Array) 
+                contextMenu.add(contextMenuItems);
+        }
         contextMenu.showContextMenu = (referenceElement, refAnchor = 'bottom-right', targetAnchor = 'top-left', offset = { x: 0, y: 0 }) => {
             // Add the menu to the DOM if it's not already there
-            const isInDOM = this.isInDOM(contextMenu);
-            if (!isInDOM) {
-                this.add(contextMenu); // DOM Insertion ***
+            const isIn = contextMenu.isIn(contextMenuWrapper);
+            if (!isIn) {
+                contextMenuWrapper.add(contextMenu); // DOM Insertion ***
             }
             // Get the final position
-            const { x, y, refAnchor: _refAnchor, targetAnchor: _targetAnchor } = this.__getElemPosDisplay(referenceElement, contextMenu, refAnchor, targetAnchor, offset, 0);
+            const { x, y } = this.#utils.__getElemPosToDisplay(referenceElement, contextMenu, refAnchor, targetAnchor, offset, 0);
             // Apply final position and show menu    
             contextMenu.style.left = `${x}px`;
             contextMenu.style.top = `${y}px`;
             contextMenu.addClass('show');
             contextMenu.removeClass('hidden');
-            console.log(">>>", refAnchor, targetAnchor);
-            console.log(">>>", _refAnchor, _targetAnchor);
         }
-
         contextMenu.hideContextMenu = () => {
             contextMenu.removeClass('show');
             contextMenu.addClass('hidden');
-            
         }
-
+        
+        // Add the context menu items (if provided, after methods defined)
+        if (contextMenuItems !== null) 
+            contextMenu.addItems(contextMenuItems);
+        
+        // Listeners
+        // Hide context menu when clicking outside
+        this.body.listenEvent('click', () => {
+            contextMenu.hideContextMenu();
+        });
         return contextMenu;
     }
 
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Status Bar
-    // ----------------------------------------
+    // =======================================>
     
-    statusBarItem = (labelText = null, icon = null, onClick = null) => {
+    /**
+     * @typedef {Object} UIStatusBarItemBase (Base) Status Bar Item Element
+     * @property {function(string): void} setLabel - Set the label of the status bar item
+     * @property {function(string): void} setColor - Set the color of the status bar item
+     * @property {function(string): void} setIcon - Set the icon of the status bar item
+     */
+    
+    /**
+     * @typedef {UIElement & UIStatusBarItemBase} UIStatusBarItem Status Bar Item Element
+     */
+
+    /**
+     * Creates a status bar item
+     * @param {string} labelText Label text of the status bar item
+     * @param {string} icon Icon of the status bar item
+     * @param {function} onClick Click event of the status bar item
+     * @returns {UIStatusBarItem} Created status bar item
+     */
+    statusBarItem(labelText = null, icon = null, onClick = null) {
+
+        // Create the element
         const UID = this.UID();
-        const container = this.element('div', `statusBarItem_${UID}`, 'statusBarItem');
+        const statusBarItem = this.element('div', `statusBarItem_${UID}`, 'statusBarItem', null, 'statusBarItem');
         
         if (icon) {
             const iconElement = this.icon(icon);
-            container.add(iconElement);
+            statusBarItem.add(iconElement);
         }
         
         if (labelText) {
-            const labelElement = this.element('span', `statusBarItemLabel_${UID}`, 'statusBarItemLabel', labelText);
-            container.add(labelElement);
+            const labelElement = this.element('span', `statusBarItemLabel_${UID}`, 'statusBarItemLabel', labelText, 'label');
+            statusBarItem.add(labelElement);
         }
 
         if (onClick) {
-            container.listenEvent('click', onClick);
+            statusBarItem.listenEvent('click', onClick);
         }
-        
-        return container;
+
+        // External methods
+        statusBarItem.setLabel = (labelText) => {
+            if (labelText !== null && typeof labelText === 'string') {
+                const labelElement = statusBarItem.query('.statusBarItemLabel');
+                if (labelElement)
+                    labelElement.innerText = labelText;
+            }
+        }
+        statusBarItem.setColor = (color) => {
+            statusBarItem.style.color = color;
+        }
+        statusBarItem.setIcon = (icon) => {
+            const iconElement = statusBarItem.query('.icon');
+            if (iconElement)
+                iconElement.changeIcon(icon);
+            else
+                statusBarItem.add(this.icon(icon)); // DOM Insertion ***
+        }
+
+        return statusBarItem;
     }
 
-    statusBar = (statusBarItems) => {
+    /**
+     * @typedef {Object} UIStatusBarBase (Base) Status Bar Element
+     * @property {function(Array<UIStatusBarItem>): void} addItems - Add status bar items to the status bar
+     * @property {function(string): void} setColor - Set the color of the status bar
+     * @property {function(number): void} setHeight - Set the height of the status bar
+     * @property {function(): void} show - Show the status bar
+     * @property {function(): void} hide - Hide the status bar
+     * @property {function(): void} toggle - Toggle the status bar
+     */
+
+    /**
+     * @typedef {UIElement & UIStatusBarBase} UIStatusBar Status Bar Element
+     */
+
+    /**
+     * Creates a status bar
+     * @param {Array<UIStatusBarItem>} statusBarItems Status bar items of the status bar
+     * @returns {UIStatusBar} Created status bar
+     */
+    statusBar(statusBarItems = null) {
+        // Create the element
         const UID = this.UID();
-        const container = this.element('div', `statusBar_${UID}`, 'statusBar');
-        if (statusBarItems !== null && statusBarItems instanceof Array) 
-            container.add(statusBarItems);
+        const statusBar = this.element('div', `statusBar_${UID}`, 'statusBar', null, 'statusBar');
 
-        return container;
+        // External methods
+        statusBar.addItems = (statusBarItems) => {
+            if (statusBarItems !== null && statusBarItems instanceof Array) 
+                statusBar.add(statusBarItems);
+        }
+        statusBar.setColor = (color) => {
+            statusBar.style.backgroundColor = color;
+        }
+        statusBar.setHeight = (height) => {
+            statusBar.style.height = height;
+        }
+        statusBar.show = () => {
+            statusBar.style.display = 'block';
+        }
+        statusBar.hide = () => {
+            statusBar.style.display = 'none';
+        }
+        statusBar.toggle = () => {
+            statusBar.style.display = statusBar.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Add the status bar items (if provided, after methods defined)
+        if (statusBarItems !== null) 
+            statusBar.addItems(statusBarItems);
+
+        return statusBar;
     }
 
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
 
     // ----------------------------------------
     // #region Tooltip
-    // ----------------------------------------
+    // =======================================>
+
+    /**
+     * @typedef {Object} UITooltipBase (Base) Tooltip Element
+     * @property {function(HTMLElement): void} showTooltip - Show the tooltip (targetElement)
+     * @property {function(): void} hideTooltip - Hide the tooltip 
+     */
+
+    /**
+     * @typedef {UIElement & UITooltipBase} UITooltip Tooltip Element
+     */
 
     /**
      * Create a tooltip for an element (Self-DOM Insertion ***)
-     * @param {DOMElement} element the element to create the tooltip for
-     * @param {string} text the text to display in the tooltip
-     * @param {string} position the position of the tooltip (top, bottom, left, right)
-     * @returns {DOMElement} the tooltip element
+     * @param {HTMLElement} targetElement Target element to create the tooltip for
+     * @param {string} text Text to display in the tooltip
+     * @param {string} position Position of the tooltip (top, bottom, left, right)
+     * @returns {UITooltip} Created tooltip element
      */
-    tooltip = (element, text, position = 'top') => {
-        const UID = this.UID();
-
-        // Create tooltip wrapper
-        let tooltipWrapper = this.getByClass('tooltipWrapper');
+    tooltip(targetElement, text, position = 'top') {
+        // Create tooltip wrapper (Group all tooltips in a single wrapper)
+        let tooltipWrapper = this.body.getByClass('tooltipWrapper');
         if (!tooltipWrapper) {
-            tooltipWrapper = this.element('div', `tooltipWrapper_${UID}`, 'tooltipWrapper');
-            this.add(tooltipWrapper); // Self-DOM Insertion ***
+            const _UID = this.UID();
+            tooltipWrapper = this.element('div', `tooltipWrapper_${_UID}`, 'tooltipWrapper', null, 'tooltipWrapper');
+            this.body.add(tooltipWrapper); // DOM Insertion ***
         }
 
         // Create tooltip
-        const tooltip = this.element('div', `tooltip_${UID}`, 'tooltip', text);
-        tooltipWrapper.add(tooltip);
+        const UID = this.UID();
+        const tooltip = this.element('div', `tooltip_${UID}`, 'tooltip', text, 'tooltip');
 
+        // External methods
         tooltip.showTooltip = (e) => {
+            // Add the tooltip to the DOM if it's not already there
+            const isIn = tooltip.isIn(tooltipWrapper);
+            if (!isIn) {
+                tooltipWrapper.add(tooltip); // DOM Insertion ***
+            }
+            // Tooltip positions (top, bottom, left, right)
             let refAnchor, targetAnchor, paddingOffset;
             switch (position) {
                 case 'top':
@@ -855,102 +1215,154 @@ class StickyUI {
                     paddingOffset = { x: 8, y: 0 };
                     break;
             }
-
-            // Get the position of the tooltip
-            const { x, y, refAnchor: _refAnchor } = this.__getElemPosDisplay(element, tooltip, refAnchor, targetAnchor, paddingOffset, 0);
+            // Get the final position of the tooltip
+            const { x, y, refAnchor: _refAnchor } = this.#utils.__getElemPosToDisplay(targetElement, tooltip, refAnchor, targetAnchor, paddingOffset, 0);
             tooltip.style.left = `${x}px`;
             tooltip.style.top = `${y}px`;
             const _position = _refAnchor.split("-")[0];
-
-            // Update position class
+            // Update position class (top, bottom, left, right) needed for the triangle indicator
             tooltip.addClass(`show ${_position}`);
         };
-
         tooltip.hideTooltip = () => {
+            // Remove all position classes (top, bottom, left, right) needed for the triangle indicator
             tooltip.removeClass('show top bottom left right');
         };
 
-        element.listenEvent('mouseenter', tooltip.showTooltip);
-        element.listenEvent('mouseleave', tooltip.hideTooltip);
-        
+        // Listeners
+        targetElement.listenEvent('mouseenter', tooltip.showTooltip);
+        targetElement.listenEvent('mouseleave', tooltip.hideTooltip);
         return tooltip;
     }
 
-    // ----------------------------------------
+    // <=======================================
     // #endregion
     // ----------------------------------------
-
+    
     // ----------------------------------------
-    // Floating Panel
-    // ----------------------------------------
+    // #region Floating Panel
+    // =======================================>
      
-    // Floating Panel Title Bar
-    floatingPanelTitleBar = (titleText = 'Panel', floatingPanel = null, defaultOpen = true) => {
-        const UID = this.UID();
-        const titleBarContainer = this.element('div',`floatingPanelTitleBar_${UID}`, 'floatingPanelTitleBar');
-        const titleBarTitle = this.element('div',`floatingPanelTitleBarTitle_${UID}`, 'floatingPanelTitleBarTitle', titleText);
-        const btnMinimize = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-minimize'));
-        const btnMaximize = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-maximize'));
-        const btnScale = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-scale'));
-        const btnStack = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-stack'));
-        const btnClose = this.element('div',`floatingPanelTitleBarButton_${UID}`, 'floatingPanelTitleBarButton', this.icon('icon-close'));
-        btnMaximize.style.display = 'none';
-        
-        // Scale Menu
-        const menuScaleSlider = ui.sliderRange('', 75, 100, 1, 100);
-        const menuScaleResetBtn = ui.button('Reset');
-        const contextMenu = ui.contextMenu([menuScaleSlider, menuScaleResetBtn]);
-        contextMenu.style.padding = '4px';
+    /**
+     * @typedef {Object} FloatingPanelTitleBarBase (Base) Floating Panel Title Bar Element
+     * @property {function(string): void} setTitle - Set the title of the floating panel title bar (titleText)
+     */
 
-        // Set initial state
-        if (!defaultOpen) {
-            btnMinimize.style.display = 'none';
-            btnMaximize.style.display = 'block';
-            floatingPanel.addClass('minimized');
+    /**
+     * @typedef {UIElement & FloatingPanelTitleBarBase} FloatingPanelTitleBar Floating Panel Title Bar Element
+     */
+
+    /**
+     * Create a title bar for a floating panel
+     * @param {string} titleText Title text of the floating panel title bar
+     * @param {FloatingPanel} floatingPanel Floating panel element (Should be the parent of the title bar)
+     * @param {boolean} defaultOpen Default open state of the floating panel title bar
+     * @returns {FloatingPanelTitleBar} Created floating panel title bar
+     */
+    floatingPanelTitleBar(titleText = 'Panel', floatingPanel = null, defaultOpen = true) {
+
+        // Create the title bar
+        const UID = this.UID();
+        const titleBarContainer = this.element('div',`floatingPanelTitleBar_${UID}`, 'floatingPanelTitleBar', null, 'floatingPanelTitleBar');
+        const titleBarTitle = this.element('div',`floatingPanelTitleBarTitle_${UID}`, 'floatingPanelTitleBarTitle', titleText, 'label');
+        const btnMinimizeMaximize = this.icon('icon-minimize');        
+        const btnScale = this.icon('icon-scale');
+        const btnStackUnstack = this.icon('icon-stack');
+        const btnClose = this.icon('icon-close');
+        
+        // External methods
+        titleBarContainer.setTitle = (titleText) => {
+            titleBarTitle.innerText = titleText;
         }
 
-        // Event listeners
+        // Scale Context Menu
+        const menuScaleSlider = this.sliderRange('', 75, 100, 1, 100);
+        const menuScaleResetBtn = this.button('Reset');
+        const contextMenu = this.contextMenu([menuScaleSlider, menuScaleResetBtn]);
+        contextMenu.style.padding = '6px';
+        // Scale Context Menu Event Listeners
+        menuScaleSlider.listenEvent('input', () => {
+            const scale = parseInt(menuScaleSlider.getValue()) / 100;
+            floatingPanel.scale(scale);
+        });
+        menuScaleResetBtn.listenEvent('click', () => {
+            floatingPanel.scale(1);
+        });
+        
+        // Set initial state
+        if (!defaultOpen) {
+            floatingPanel.minimize();
+            btnMinimizeMaximize.changeIcon('icon-maximize');
+        }
+        
+        // Event listeners (Title Bar)
         btnClose.listenEvent('click', () => {
-            floatingPanel.style.display = 'none';
+            floatingPanel.close();
         });
-
-        btnMinimize.listenEvent('click', () => {
-            btnMinimize.style.display = 'none';
-            btnMaximize.style.display = 'block';
-            floatingPanel.addClass('minimized');
+        btnMinimizeMaximize.listenEvent('click', () => {
+            if (floatingPanel.isMinimized()) {
+                floatingPanel.maximize();
+                btnMinimizeMaximize.changeIcon('icon-minimize');
+            }
+            else {
+                floatingPanel.minimize();
+                btnMinimizeMaximize.changeIcon('icon-maximize');
+            }
         });
-
-        btnMaximize.listenEvent('click', () => {
-            btnMaximize.style.display = 'none';
-            btnMinimize.style.display = 'block';
-            floatingPanel.removeClass('minimized');
-        });
-
         btnScale.listenEvent('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            contextMenu.showContextMenu(btnScale, 'top-left', 'bottom-left', { x: 0, y: -6 });
+            contextMenu.showContextMenu(btnScale, 'top-right', 'bottom-left', { x: 0, y: -6 });
+        });
+        btnStackUnstack.listenEvent('click', () => {
+            if (floatingPanel.isStacked()) {
+                floatingPanel.unstack();
+                btnStackUnstack.changeIcon('icon-stack');
+            }
+            else {
+                floatingPanel.stack();
+                btnStackUnstack.changeIcon('icon-stack');
+            }
         });
 
-        menuScaleSlider.listenEvent('input', () => {
-            const scale = parseInt(menuScaleSlider.getValue()) / 100;
-            floatingPanel.style.transform = `scale(${scale})`;
-            floatingPanel.style.transformOrigin = 'top right';
-        });
-
-        menuScaleResetBtn.listenEvent('click', () => {
-            floatingPanel.style.transform = `scale(1)`;
-        });
-
-        titleBarContainer.add([titleBarTitle, btnMinimize, btnMaximize, btnScale, btnStack, btnClose]);
+        // Add the title bar items
+        titleBarContainer.add([titleBarTitle, btnMinimizeMaximize, btnScale, btnStackUnstack, btnClose]);
         return titleBarContainer;
     }
 
-    // Floating Panel
-    floatingPanel = (titleText = 'Panel', width = null, height = null, positionX = null, positionY = null, defaultOpen = true) => {
+    /**
+     * @typedef {Object} FloatingPanelBase (Base) Floating Panel Element
+     * @property {function(string): void} add -  Add content to the floating panel *Overwritten (content)
+     * @property {function(): void} close - Close the floating panel
+     * @property {function(): void} open - Open the floating panel
+     * @property {function(): void} minimize - Minimize the floating panel
+     * @property {function(): void} maximize - Maximize the floating panel
+     * @property {function(): void} stack - Stack the floating panel
+     * @property {function(): void} unstack - Unstack the floating panel
+     * @property {function(): void} savePosition - Save the position of the floating panel
+     * @property {function(): void} restorePosition - Restore the position of the floating panel
+     * @property {function(number): void} scale - Scale the floating panel (scale = 1)
+     * @property {function(): void} isMinimized - Check if the floating panel is minimized
+     * @property {function(): void} isStacked - Check if the floating panel is stacked
+     */
+
+    /**
+     * @typedef {UIElement & FloatingPanelBase} FloatingPanel Floating Panel Element
+     */
+
+    /**
+     * Create a floating panel
+     * @param {string} titleText Title text of the floating panel title bar
+     * @param {number} width Width of the floating panel
+     * @param {number} height Height of the floating panel
+     * @param {number} positionX Position X of the floating panel
+     * @param {number} positionY Position Y of the floating panel
+     * @param {boolean} defaultOpen Default open state of the floating panel
+     * @returns {FloatingPanel} Created floating panel
+     */
+    floatingPanel(titleText = 'Panel', width = null, height = null, positionX = null, positionY = null, defaultOpen = true) {
         const UID = this.UID();
-        const floatingPanel = this.element('div',`floatingPanel_${UID}`, 'floatingPanel');
-        const contentWrapper = this.element('div',`floatingPanelContentWrapper_${UID}`, 'floatingPanelContentWrapper');
+        const floatingPanel = this.element('div',`floatingPanel_${UID}`, 'floatingPanel', null, 'floatingPanel');
+        const contentWrapper = this.element('div',`floatingPanelContentWrapper_${UID}`, 'floatingPanelContentWrapper', null, 'floatingPanelContentWrapper');
         const titleBar = this.floatingPanelTitleBar(titleText, floatingPanel, defaultOpen);
         floatingPanel.add([titleBar, contentWrapper]);
 
@@ -960,7 +1372,7 @@ class StickyUI {
                 floatingPanel.style.width = 'auto';
             else if (typeof width === 'number')
                 floatingPanel.style.width = `${width}px`;
-            else if (typeof width === 'string' && width.includes('%'))
+            else if (typeof width === 'string' && (width.includes('%') || width.includes('px') || width.includes('em') || width.includes('rem')))
                 floatingPanel.style.width = width;
             else
                 floatingPanel.style.width = 'auto';
@@ -970,7 +1382,7 @@ class StickyUI {
                 floatingPanel.style.height = 'auto';
             else if (typeof height === 'number')
                 floatingPanel.style.height = `${height}px`;
-            else if (typeof height === 'string' && height.includes('%'))
+            else if (typeof height === 'string' && (height.includes('%') || height.includes('px') || height.includes('em') || height.includes('rem')))
                 floatingPanel.style.height = height;
             else
                 floatingPanel.style.height = 'auto';
@@ -982,7 +1394,7 @@ class StickyUI {
                 else
                     floatingPanel.style.right = `${positionX*-1}px`;
             }
-            else if (typeof positionX === 'string' && positionX.includes('%'))
+            else if (typeof positionX === 'string' && (positionX.includes('%') || positionX.includes('px') || positionX.includes('em') || positionX.includes('rem')))
                 floatingPanel.style.left = positionX;
             else
                 floatingPanel.style.left = 'auto';
@@ -994,15 +1406,71 @@ class StickyUI {
                 else
                     floatingPanel.style.bottom = `${positionY*-1}px`;
             }
-            else if (typeof positionY === 'string' && positionY.includes('%'))
+            else if (typeof positionY === 'string' && (positionY.includes('%') || positionY.includes('px') || positionY.includes('em') || positionY.includes('rem')))
                 floatingPanel.style.top = positionY;
             else
                 floatingPanel.style.top = 'auto';
         }
-        // Overwrite add method
-        // To allow add content from external sources in the contentWrapper directly
+        
+        // External methods
+        // Overwrite add method (To allow add content from external sources in the contentWrapper directly)
         floatingPanel.add = (content) => {
             contentWrapper.add(content);
+        }
+        floatingPanel.close = () => {
+            floatingPanel.style.display = 'none';
+        }
+        floatingPanel.open = () => {
+            floatingPanel.style.display = 'block';
+        }
+        floatingPanel.minimize = () => {
+            floatingPanel.addClass('minimized');
+        }
+        floatingPanel.maximize = () => {
+            floatingPanel.removeClass('minimized');
+        }
+        floatingPanel.stack = (stackPosY = 300, stackPosX = 400, offsetY = 2) => {
+            const floatingPanels = this.body.queryAll('.floatingPanel');
+            floatingPanels.forEach(panel => {
+                panel.scale(1);
+                panel.minimize();
+                panel.addClass('stacked');
+                panel.savePosition();
+                panel.style.top = `${stackPosY}px`;
+                panel.style.bottom = 'auto';
+                panel.style.right = `${stackPosX}px`;
+                panel.style.left = 'auto';
+                stackPosY += panel.offsetHeight + offsetY;
+            });
+        }
+        floatingPanel.unstack = () => {
+            const floatingPanels = this.body.queryAll('.floatingPanel');
+            floatingPanels.forEach(panel => {
+                panel.scale(1);
+                panel.maximize();
+                panel.removeClass('stacked');
+                panel.restorePosition();
+            });
+        }
+        floatingPanel.savePosition = () => {
+            floatingPanel.dataset.posX = floatingPanel.offsetLeft;
+            floatingPanel.dataset.posY = floatingPanel.offsetTop;
+        }
+        floatingPanel.restorePosition = () => {
+            floatingPanel.style.left = `${floatingPanel.dataset.posX}px`;
+            floatingPanel.style.top = `${floatingPanel.dataset.posY}px`;
+            floatingPanel.style.right = 'auto';
+            floatingPanel.style.bottom = 'auto';
+        }
+        floatingPanel.scale = (scale = 1) => {
+            floatingPanel.style.transform = `scale(${scale})`;
+            floatingPanel.style.transformOrigin = 'top right';
+        }
+        floatingPanel.isMinimized = () => {
+            return floatingPanel.hasClass('minimized');
+        }
+        floatingPanel.isStacked = () => {
+            return floatingPanel.hasClass('stacked');   
         }
 
         // Add Drag and Resize
@@ -1012,158 +1480,84 @@ class StickyUI {
         return floatingPanel;
     }
 
+    // <=======================================
+    // #endregion
     // ----------------------------------------
-    // Toolbar
+
     // ----------------------------------------
+    // #region Toolbar
+    // =======================================>
 
-    // Get the top offset of the toolbars, if toolbar is given, calculate the offset relative to it 
-    // Handle multiple toolbars at top (stack them)
-    __getToolbarTopOffset = (relativeTo = null) => {
-        let topOffset = 0;
-        // Add the offset of the menuBar if it exists
-        const menuBar = document.querySelector(`.${this.#classBase}.menuBar`);
-        if (menuBar)
-            topOffset += menuBar.offsetHeight;
-        // Add the offset of the toolbars at top
-        const topToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-top`);
-        if (topToolbars.length > 0) {
-            // If no relativeTo is given, add the height of all top toolbars    
-            if (relativeTo === null) {
-                topOffset += Array.from(topToolbars).reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
-            }
-            // If a relativeTo is given, add the height of the top toolbars until the relativeTo toolbar
-            else {
-                const index = Array.from(topToolbars).indexOf(relativeTo);
-                const previousToolbars = Array.from(topToolbars).slice(0, index);
-                topOffset += previousToolbars.reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
-            }
-        }
-        return topOffset;
-    }
+    /**
+     * @typedef {Object} UIToolbarBase ToolbarBase (Base) Toolbar Element
+     * @property {function(string): void} changePosition - Change the position of the toolbar (top, bottom, left, right)
+     * @property {function(): void} updatePosition - Update the position of the toolbar
+     * @property {function(boolean): void} toggle - Toggle the visibility of the toolbar (visible = null)
+     * @property {function(): void} show - Show the toolbar
+     * @property {function(): void} hide - Hide the toolbar
+     */
 
-    // Get the bottom offset of the toolbars, if toolbar is given, calculate the offset relative to it 
-    // Handle multiple toolbars at bottom (stack them)
-    __getToolbarBottomOffset = (relativeTo = null) => {
-        let bottomOffset = 0;
-        // Add the offset of the statusBar if it exists
-        const statusBar = document.querySelector(`.${this.#classBase}.statusBar`);
-        if (statusBar)
-            bottomOffset += statusBar.offsetHeight;        
-        // Add the offset of the toolbars at bottom
-        const bottomToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-bottom`);
-        if (bottomToolbars.length > 0) {
-            // If no relativeTo is given, add the height of all bottom toolbars
-            if (relativeTo === null) {
-                bottomOffset += Array.from(bottomToolbars).reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
-            }
-            // If a relativeTo is given, add the height of the bottom toolbars until the relativeTo toolbar
-            else {
-                const index = Array.from(bottomToolbars).indexOf(relativeTo);
-                const previousToolbars = Array.from(bottomToolbars).slice(0, index);
-                bottomOffset += previousToolbars.reduce((height, _toolbar) => { return height + _toolbar.offsetHeight; }, 0);
-            }
-        }
-        return bottomOffset;
-    }
+    /**
+     * @typedef {UIElement & UIToolbarBase} UIToolbar Toolbar Element
+     */
 
-    // Get the left offset of the toolbars, if toolbar is given, calculate the offset relative to it 
-    // Handle multiple toolbars at left (stack them)
-    __getToolbarLeftOffset = (relativeTo = null) => {
-        let leftOffset = 0;
-        // Add the offset of the toolbars at left
-        const leftToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-left`);
-        if (leftToolbars.length > 0) {
-            // If no relativeTo is given, add the width of all left toolbars
-            if (relativeTo === null) {
-                leftOffset = Array.from(leftToolbars).reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
-            }
-            // If a relativeTo is given, add the width of the left toolbars until the relativeTo toolbar
-            else {
-                const index = Array.from(leftToolbars).indexOf(relativeTo);
-                const previousToolbars = Array.from(leftToolbars).slice(0, index);
-                leftOffset = previousToolbars.reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
-            }
-        }
-        return leftOffset;
-    }
+    /**
+     * Create a toolbar
+     * @param {string} position Position of the toolbar
+     * @param {UIElement} toolbarItems Items to add to the toolbar
+     * @returns {UIToolbar} Created toolbar
+     */
+    toolbar(position = 'top', toolbarItems = null) {
 
-    // Get the right offset of the toolbars, if toolbar is given, calculate the offset relative to it 
-    // Handle multiple toolbars at right (stack them)
-    __getToolbarRightOffset = (relativeTo = null) => {
-        let rightOffset = 0;
-        // Add the offset of the toolbars at right
-        const rightToolbars = document.querySelectorAll(`.${this.#classBase}.toolbar.toolbar-right`);
-        if (rightToolbars.length > 0) {
-            // If no relativeTo is given, add the width of all right toolbars
-            if (relativeTo === null) {
-                rightOffset = Array.from(rightToolbars).reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);   
-            }
-            // If a relativeTo is given, add the width of the right toolbars until the relativeTo toolbar
-            else {
-                const index = Array.from(rightToolbars).indexOf(relativeTo);
-                const previousToolbars = Array.from(rightToolbars).slice(0, index);
-                rightOffset = previousToolbars.reduce((width, _toolbar) => { return width + _toolbar.offsetWidth; }, 0);
-            }
-        }
-        return rightOffset;
-    }
-
-    // Update position of all toolbars
-    __updatePositionToolbars = () => {
-        const toolbars = document.querySelectorAll(`.${this.#classBase}.toolbar`);
-        toolbars.forEach(toolbar => toolbar.updatePosition());
-    }
-
-    toolbar = (position = 'top', toolbarItems = null) => {
+        // Create the toolbar
         const UID = this.UID();
-        const toolbar = this.element('div', `toolbar_${UID}`, 'toolbar');
+        const toolbar = this.element('div', `toolbar_${UID}`, 'toolbar', null, 'toolbar');
         toolbar.addClass(`toolbar-${position}`);
         if (toolbarItems)
             toolbar.add(toolbarItems);
         
-        // Update the position of the toolbar
+        // External methods
+        toolbar.changePosition = (position) => {
+            toolbar.removeClass(`toolbar-${position}`);
+            toolbar.addClass(`toolbar-${position}`);
+            requestAnimationFrame(toolbar.updatePosition);
+        }
         toolbar.updatePosition = () => {
             // Get the offsets and adjust the position of the toolbar
             if (position === 'top' || position === 'bottom') {
                 toolbar.style.left = `0px`;
                 if (position === 'top') {
                     // Get absolute position under menuBar and other top toolbars if they exist
-                    let topOffset = this.__getToolbarTopOffset(toolbar); 
+                    let topOffset = this.#toolbarUtils.__getToolbarTopOffset(toolbar); 
                     toolbar.style.top = `${topOffset}px`;
                 }
                 else if (position === 'bottom') {
                     // Get absolute position over statusBar and other bottom toolbars if they exist
-                    let bottomOffset = this.__getToolbarBottomOffset(toolbar); 
+                    let bottomOffset = this.#toolbarUtils.__getToolbarBottomOffset(toolbar); 
                     toolbar.style.bottom = `${bottomOffset}px`;
                 }
             }
             else if (position === 'left' || position === 'right') {
                 // Get absolute position under menuBar and ALL top toolbars if they exist
-                let topOffset = this.__getToolbarTopOffset(); 
+                let topOffset = this.#toolbarUtils.__getToolbarTopOffset(); 
                 // Get absolute position over statusBar and ALL bottom toolbars if they exist
-                let bottomOffset = this.__getToolbarBottomOffset(); 
+                let bottomOffset = this.#toolbarUtils.__getToolbarBottomOffset(); 
                 // Adjust the height and vertical position of the toolbar
                 toolbar.style.top = `${topOffset}px`;
                 toolbar.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
                 // Adjust the horizontal position of the toolbar
                 if (position === 'left') {
                     // Get absolute position to the left of other left toolbars if they exist
-                    let leftOffset = this.__getToolbarLeftOffset(toolbar); 
+                    let leftOffset = this.#toolbarUtils.__getToolbarLeftOffset(toolbar); 
                     toolbar.style.left = `${leftOffset}px`;
                 }
                 else if (position === 'right') {
                     // Get absolute position to the right of other right toolbars if they exist
-                    let rightOffset = this.__getToolbarRightOffset(toolbar); 
+                    let rightOffset = this.#toolbarUtils.__getToolbarRightOffset(toolbar); 
                     toolbar.style.right = `${rightOffset}px`;
                 }
             }
         }
-        requestAnimationFrame(toolbar.updatePosition);
-
-        // Update the position of toolbars when the window is resized
-        window.addEventListener('resize', this.__updatePositionToolbars);
-
-        // Toggle the toolbar
         toolbar.toggle = (visible = null) => {         
             // Check if the toolbar is hidden
             const show = (visible === null) ? toolbar.hasClass('toolbar-hidden') : visible;
@@ -1174,131 +1568,266 @@ class StickyUI {
             else {
                 toolbar.addClass('toolbar-hidden');
             }
-            requestAnimationFrame(this.__updatePositionToolbars);
-            requestAnimationFrame(this.__updatePositionSidePanels);
-            requestAnimationFrame(this.__updatePositionWorkspace);
+            requestAnimationFrame(this.#UIUpdaters.__updatePositionToolbars);
+            requestAnimationFrame(this.#UIUpdaters.__updatePositionSidePanels);
+            requestAnimationFrame(this.#UIUpdaters.__updatePositionWorkspace);
         };
-        
-        // Show the toolbar
         toolbar.show = () => {
             return toolbar.toggle(true);
         };
-        
-        // Hide the toolbar
         toolbar.hide = () => {
             return toolbar.toggle(false);
         };
 
+        //Event listeners
+        window.addEventListener('resize', toolbar.updatePosition);
+
+        // Update the position of the toolbar on load
+        requestAnimationFrame(toolbar.updatePosition);
         return toolbar;
     }
 
+    /**
+     * @typedef {Object} UIToolbarButtonBase ToolbarButtonBase (Base) Toolbar Button Element
+     * @property {function(string): void} changeIcon - Change the icon of the toolbar button (iconName = null)
+     * @property {function(string): void} changeTooltip - Change the tooltip of the toolbar button (tooltipText = null)
+     */
 
-    toolbarButton = (icon = null, onClick = null, tooltipText = null, tooltipPosition = 'top') => {
+    /**
+     * @typedef {UIElement & UIToolbarButtonBase} UIToolbarButton Toolbar Button Element
+     */
+
+    /**
+     * Create a toolbar button
+     * @param {string} icon Icon name
+     * @param {function(): void} onClick Click event handler
+     * @param {string} tooltipText Tooltip text
+     * @param {string} tooltipPosition Tooltip position
+     * @returns {UIToolbarButton} Created toolbar button
+     */
+    toolbarButton(icon = null, onClick = null, tooltipText = null, tooltipPosition = 'top') {
+
+        // Create the button
         const UID = this.UID();
-        const button = this.element('div', `toolbarButton_${UID}`, 'toolbarButton');
+        const button = this.element('div', `toolbarButton_${UID}`, 'toolbarButton', null, 'toolbarButton');
         
         if (icon) {
             const iconElement = this.icon(icon);
             button.appendChild(iconElement);
         }
-        
         if (onClick) {
             button.addEventListener('click', onClick);
         }
-        
         if (tooltipText) {
             const tooltip = this.tooltip(button, tooltipText, tooltipPosition);
         }
-        
+
+        // External methods
+        button.changeIcon = (iconName) => {
+            const _icon = button.query('.icon');
+            if (_icon) 
+                _icon.changeIcon(iconName);
+        }
+        button.changeTooltip = (tooltipText) => {
+            const _tooltip = button.query('.tooltip');
+            if (_tooltip) 
+                _tooltip.changeTooltip(tooltipText);
+        }
+
         return button;
     }
 
-    toolbarDivider = () => {
+    /**
+     * @typedef {Object} UIToolbarDividerBase ToolbarDividerBase (Base) Toolbar Divider Element
+     */
+
+    /**
+     * @typedef {UIElement & UIToolbarDividerBase} UIToolbarDivider Toolbar Divider Element
+     */
+
+    /**
+     * Create a toolbar divider
+     * @returns {UIToolbarDivider} Created toolbar divider
+     */
+    toolbarDivider() {
+        // Create divider
         const UID = this.UID();
-        return this.element('div', `toolbarDivider_${UID}`, 'toolbarDivider');
+        const divider = this.element('div', `toolbarDivider_${UID}`, 'toolbarDivider', null, 'toolbarDivider');
+        return divider;
     }
 
+    // <=======================================
+    // #endregion
     // ----------------------------------------
-    // Side Panel
-    // ----------------------------------------
-
-    // Update position of all side panels
-    __updatePositionSidePanels = () => {
-        const sidePanels = document.querySelectorAll(`.${this.#classBase}.sidePanel`);
-        sidePanels.forEach(sidePanel => sidePanel.updatePosition());
-    }
-
-    sidePanelSectionTitleBar = (titleText = 'Section', sidePanelSection = null, defaultOpen = true) => {
-        const UID = this.UID();
-        const titleBarContainer = this.element('div',`sidePanelSectionTitleBar_${UID}`, 'sidePanelSectionTitleBar');
-        const titleBarTitle = this.element('div',`sidePanelSectionTitleBarTitle_${UID}`, 'sidePanelSectionTitleBarTitle', titleText);
-        const iconMinimize = this.icon('icon-chevron-up');
-        const btnMinimize = this.element('div',`sidePanelSectionTitleBarButton_${UID}`, 'sidePanelSectionTitleBarButton', iconMinimize);
         
-        // Set initial state
-        if (!defaultOpen) {
-            sidePanelSection.addClass('minimized');
-            iconMinimize.changeIcon('icon-chevron-down');
-        }
+    // ----------------------------------------
+    // #region Side Panel
+    // =======================================>
 
-         // Event listeners
+    /**
+     * @typedef {Object} UISidePanelSectionTitleBarBase SidePanelSectionTitleBarBase (Base) Side Panel Section Title Bar Element
+     * @property {function(string): void} setTitle - Set the title of the side panel section title bar (titleText = null)
+     */
+
+    /**
+     * @typedef {UIElement & UISidePanelSectionTitleBarBase} UISidePanelSectionTitleBar Side Panel Section Title Bar Element
+     */
+
+    /**
+     * Create a side panel section title bar
+     * @param {string} titleText Title text
+     * @param {UISidePanelSection} sidePanelSection Side panel section element
+     * @param {boolean} defaultOpen Default open state
+     * @returns {UISidePanelSectionTitleBar} Created side panel section title bar
+     */
+    sidePanelSectionTitleBar(titleText = 'Section', sidePanelSection = null, defaultOpen = true) {
+
+        // Create the title bar
+        const UID = this.UID();
+        const titleBarContainer = this.element('div',`sidePanelSectionTitleBar_${UID}`, 'sidePanelSectionTitleBar', null, 'sidePanelSectionTitleBar');  
+        const titleBarTitle = this.element('div',`sidePanelSectionTitleBarTitle_${UID}`, 'sidePanelSectionTitleBarTitle', titleText, 'label');
+        const btnMinimize = this.icon('icon-chevron-up');
+
+        // Set the initial state
+        if (!defaultOpen)
+            btnMinimize.changeIcon('icon-chevron-down');
+
+        // External methods
+        titleBarTitle.setTitle = (titleText = null) => {
+            if (titleText)
+                titleBarTitle.textContent = titleText;
+        }
+        
+        // Event listeners (title bar)
         btnMinimize.listenEvent('click', () => {
             sidePanelSection.toggleClass('minimized');
             if (sidePanelSection.hasClass('minimized'))
-                iconMinimize.changeIcon('icon-chevron-down');
+                btnMinimize.changeIcon('icon-chevron-down');
             else
-                iconMinimize.changeIcon('icon-chevron-up');
+                btnMinimize.changeIcon('icon-chevron-up');
         });
 
+        // Add the title bar to the container
         titleBarContainer.add([titleBarTitle, btnMinimize]);
         return titleBarContainer;
     }
 
-    sidePanelSection = (titleText = 'Section', sidePanelItems = null, defaultOpen = true) => {
+    /**
+     * @typedef {Object} UISidePanelSectionBase SidePanelSectionBase (Base) Side Panel Section Element
+     * @property {function(string): void} setTitle - Set the title of the side panel section (titleText = null)
+     * @property {function(UIElement): void} setContent - Set the content of the side panel section (sidePanelItems = null)
+     * @property {function(): void} removeContent - Remove the content of the side panel section
+     * @property {function(UIElement): void} replaceContent - Replace the content of the side panel section (sidePanelItems = null)
+     * @property {function(boolean): void} toggle - Toggle the visibility of the side panel section (visible = null)
+     * @property {function(): void} minimize - Minimize the side panel section
+     * @property {function(): void} maximize - Maximize the side panel section
+     */
+
+    /**
+     * @typedef {UIElement & UISidePanelSectionBase} UISidePanelSection Side Panel Section Element
+     */
+
+    /**
+     * Create a side panel section
+     * @param {string} titleText Title text
+     * @param {UIElement} sidePanelItems Side panel items
+     * @param {boolean} defaultOpen Default open state
+     * @returns {UISidePanelSection} Created side panel section
+     */
+    sidePanelSection(titleText = 'Section', sidePanelItems = null, defaultOpen = true) {
+        // Create the side panel section
         const UID = this.UID();
-        const sidePanelSection = this.element('div', `sidePanelSection_${UID}`, 'sidePanelSection');
+        const sidePanelSection = this.element('div', `sidePanelSection_${UID}`, 'sidePanelSection', null, 'sidePanelSection');
         const titleBar = this.sidePanelSectionTitleBar(titleText, sidePanelSection, defaultOpen);
-        const contentWrapper = this.element('div', `sidePanelSectionContentWrapper_${UID}`, 'sidePanelSectionContentWrapper');
+        const contentWrapper = this.element('div', `sidePanelSectionContentWrapper_${UID}`, 'sidePanelSectionContentWrapper', null, 'contentWrapper');
         
+        // External methods
+        sidePanelSection.setTitle = (titleText = null) => {
+            if (titleText)
+                titleBar.setTitle(titleText);
+        }
+        sidePanelSection.setContent = (sidePanelItems = null) => {
+            if (sidePanelItems)
+                contentWrapper.add(sidePanelItems);
+        }
+        sidePanelSection.removeContent = () => {
+            contentWrapper.removeAll();
+        }
+        sidePanelSection.replaceContent = (sidePanelItems = null) => {
+            contentWrapper.removeAll();
+            if (sidePanelItems)
+                contentWrapper.add(sidePanelItems);
+        }
+        sidePanelSection.toggle = (visible = null) => {
+            const show = (visible === null) ? sidePanelSection.hasClass('minimized') : visible;
+            if (show) 
+                sidePanelSection.removeClass('minimized');
+            else 
+                sidePanelSection.addClass('minimized');
+        }
+        sidePanelSection.minimize = () => {
+            sidePanelSection.toggle(false);
+        }
+        sidePanelSection.maximize = () => {
+            sidePanelSection.toggle(true);
+        }
+
+        // Add content and set the initial state
+        if (sidePanelItems)
+            sidePanelSection.setContent(sidePanelItems);
+        sidePanelSection.toggle(defaultOpen);
+
+        // Add the title bar and content wrapper to the side panel section
         sidePanelSection.add([titleBar, contentWrapper]);
-        
-        if (sidePanelItems !== null) 
-            contentWrapper.add(sidePanelItems);
-        
         return sidePanelSection;
     }
 
-    sidePanel = (position = 'left', width = '280px') => {
+    /**
+     * @typedef {Object} UISidePanelBase SidePanelBase (Base) Side Panel Element
+     * @property {function(): void} updatePosition - Update the position of the side panel
+     * @property {function(boolean): void} toggle - Toggle the visibility of the side panel (visible = null)
+     * @property {function(): void} show - Show the side panel
+     * @property {function(): void} hide - Hide the side panel
+     * @property {function(string): void} setWidth - Set the width of the side panel (width = null)
+     * @property {function(): string} getWidth - Get the width of the side panel
+     * @property {function(string, string): void} addSection - Add a section to the side panel (titleText, sidePanelItems, defaultOpen = true)
+     */
+
+    /**
+     * @typedef {UIElement & UISidePanelBase} UISidePanel Side Panel Element
+     */
+
+    /**
+     * Create a side panel
+     * @param {string} position Position of the side panel (left, right)
+     * @param {string} width Width of the side panel
+     * @param {boolean} defaultOpen Default open state
+     * @returns {UISidePanel} Created side panel
+     */
+    sidePanel(position = 'left', width = '280px', defaultOpen = true) {
+
+        // Create the side panel
         const UID = this.UID();
-        const sidePanel = this.element('div', `sidePanel_${UID}`, 'sidePanel');
+        const sidePanel = this.element('div', `sidePanel_${UID}`, 'sidePanel', null, 'sidePanel');
         sidePanel.addClass(`sidePanel-${position}`);
-        sidePanel.style.width = width;
-        // Save the original width to restore it later (when hiding the sidePanel)
-        sidePanel._width = width; 
         
-        // Update the position of the sidePanel
+        // External methods
         sidePanel.updatePosition = () => {
             // Get the offsets and adjust the position of the sidePanel
-            let topOffset = this.__getToolbarTopOffset();
-            let bottomOffset = this.__getToolbarBottomOffset();
+            let topOffset = this.#toolbarUtils.__getToolbarTopOffset();
+            let bottomOffset = this.#toolbarUtils.__getToolbarBottomOffset();
             // Adjust the height and vertical position of the sidePanel
             sidePanel.style.top = `${topOffset}px`;
             sidePanel.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
             // Adjust the horizontal position of the sidePanel
             if (position === 'left') {
-                const leftOffset = this.__getToolbarLeftOffset();
+                const leftOffset = this.#toolbarUtils.__getToolbarLeftOffset();
                 sidePanel.style.left = `${leftOffset}px`;
             } else if (position === 'right') {
-                const rightOffset = this.__getToolbarRightOffset();
+                const rightOffset = this.#toolbarUtils.__getToolbarRightOffset();
                 sidePanel.style.right = `${rightOffset}px`;
             }
         };
-        requestAnimationFrame(sidePanel.updatePosition);
-
-        // Update the position of side panels when the window is resized
-        window.addEventListener('resize', this.__updatePositionSidePanels);
-
-        // Toggle the sidePanel
         sidePanel.toggle = (visible = null) => {         
             // Check if the sidePanel is hidden
             const show = (visible === null) ? sidePanel.hasClass('sidePanel-hidden') : visible;
@@ -1309,10 +1838,10 @@ class StickyUI {
                 sidePanel.removeClass('sidePanel-hidden');
                 // Adjust related elements
                 if (position === 'left') {
-                    let leftOffset = this.__getToolbarLeftOffset();
+                    let leftOffset = this.#toolbarUtils.__getToolbarLeftOffset();
                     sidePanel.style.left = `${leftOffset}px`;
                 } else if (position === 'right') {
-                    let rightOffset = this.__getToolbarRightOffset();
+                    let rightOffset = this.#toolbarUtils.__getToolbarRightOffset();
                     sidePanel.style.right = `${rightOffset}px`;     
                 }
             } else {
@@ -1322,72 +1851,98 @@ class StickyUI {
                 sidePanel.style.width = '0px';
                 sidePanel.style.overflow = 'hidden';
             }
-            requestAnimationFrame(this.__updatePositionToolbars);
-            requestAnimationFrame(this.__updatePositionSidePanels);
-            requestAnimationFrame(this.__updatePositionWorkspace);
-        };
-        
-        // Show the sidePanel
+            requestAnimationFrame(this.#UIUpdaters.__updatePositionToolbars);
+            requestAnimationFrame(this.#UIUpdaters.__updatePositionSidePanels);
+            requestAnimationFrame(this.#UIUpdaters.__updatePositionWorkspace);
+        };        
         sidePanel.show = () => {
             return sidePanel.toggle(true);
         };
-        
-        // Hide the sidePanel
         sidePanel.hide = () => {
             return sidePanel.toggle(false);
         };
-
+        sidePanel.setWidth = (width = null) => {
+            // Set the width and save the original width to restore it later (when hiding the sidePanel)
+            if (width) {
+                if (width.includes('px') || width.includes('%') || width.includes('em') || width.includes('rem') || width.includes('vh') || width.includes('vw'))
+                    sidePanel.style.width = width;
+                else
+                    sidePanel.style.width = `${width}px`;
+                sidePanel._width = sidePanel.style.width;
+            }                
+        }
         sidePanel.getWidth = () => {
             return sidePanel._width;
         }
-
-        // Add section to sidePanel from external sources
         sidePanel.addSection = (titleText, sidePanelItems, defaultOpen = true) => {
             const section = this.sidePanelSection(titleText, sidePanelItems, defaultOpen);
             sidePanel.add(section);
             return section;
         };
 
+        // Event Listeners
+        window.addEventListener('resize', sidePanel.updatePosition);
+
+        // Set initial state
+        sidePanel.setWidth(width);
+        sidePanel.toggle(defaultOpen);
+        requestAnimationFrame(sidePanel.updatePosition);
+
+        // Return the sidePanel
         return sidePanel;
     }
 
+    // <=======================================
+    // #endregion
     // ----------------------------------------
-    // Workspace
+    
     // ----------------------------------------
+    // #region Workspace
+    // =======================================>
 
-    // Update position of the workspace
-    __updatePositionWorkspace = () => {
-        const workspace = document.querySelector(`.${this.#classBase}.workspace`);
-        workspace.updatePosition();
-    }
+    /**
+     * @typedef {Object} UIWorkspaceBase WorkspaceBase (Base) Workspace Element
+     * @property {function(): void} updatePosition - Update the position of the workspace
+     * @property {function(): number} getWidth - Get the width of the workspace
+     * @property {function(): number} getHeight - Get the height of the workspace
+     * @property {function(UIElement): void} setContent - Set the content of the workspace (content = null)
+     * @property {function(): void} adjustCanvasSize - Adjust the size of the canvas
+     * @property {function(): void} setCanvas - Set the canvas of the workspace (autoResize = true)
+     * @property {function(): HTMLCanvasElement} getCanvas - Get the canvas of the workspace
+     * @property {function(string): void} setBackgroundColor - Set the background color of the workspace (backgroundColor = null)
+     * @property {function(string): void} setBackgroundImage - Set the background image of the workspace (backgroundImage = null)
+     */
 
-    // Workspace
-    workspace = (content = null, backgroundColor = null, backgroundImage = null) => {
+    /**
+     * @typedef {UIElement & UIWorkspaceBase} UIWorkspace Workspace Element
+     */
+
+    /**
+     * Create a workspace
+     * @param {UIElement} content Content of the workspace
+     * @param {string} backgroundColor Background color of the workspace
+     * @param {string} backgroundImage Background image of the workspace
+     * @returns {UIWorkspace} Created workspace
+     */
+    workspace(content = null, backgroundColor = null, backgroundImage = null) {
+
+        // Create the workspace
         const UID = this.UID();
-        const workspace = this.element('div', `workspace_${UID}`, 'workspace');
-        let _workspaceWidth = 0;
-        let _workspaceHeight = 0;
+        const workspace = this.element('div', `workspace_${UID}`, 'workspace', null, 'workspace');
+        let _width = 0;
+        let _height = 0;
         let _canvas = null;
         
-        if (content) 
-            workspace.add(content);
-        
-        if (backgroundColor)
-            workspace.style.backgroundColor = backgroundColor;
-            
-        if (backgroundImage)
-            workspace.style.backgroundImage = `url("${backgroundImage}")`;
-        
-        // Update the position of the workspace
+        // External methods
         workspace.updatePosition = () => {
              // Get the offsets of the toolbars
-             let topOffset = this.__getToolbarTopOffset();
-             let bottomOffset = this.__getToolbarBottomOffset();
-             let leftOffset = this.__getToolbarLeftOffset();
-             let rightOffset = this.__getToolbarRightOffset();
+             let topOffset = this.#toolbarUtils.__getToolbarTopOffset();
+             let bottomOffset = this.#toolbarUtils.__getToolbarBottomOffset();
+             let leftOffset = this.#toolbarUtils.__getToolbarLeftOffset();
+             let rightOffset = this.#toolbarUtils.__getToolbarRightOffset();
              // Get the offsets of the side panels
-             const leftSidePanel = document.querySelector(`.${this.#classBase}.sidePanel.sidePanel-left:not(.sidePanel-hidden)`);
-             const rightSidePanel = document.querySelector(`.${this.#classBase}.sidePanel.sidePanel-right:not(.sidePanel-hidden)`);
+             const leftSidePanel = this.body.query(`.${this.#classBase}.sidePanel.sidePanel-left:not(.sidePanel-hidden)`);
+             const rightSidePanel = this.body.query(`.${this.#classBase}.sidePanel.sidePanel-right:not(.sidePanel-hidden)`);
              if (leftSidePanel) {
                  //leftOffset += leftSidePanel.offsetWidth;
                  leftOffset += parseInt(leftSidePanel.getWidth());
@@ -1400,280 +1955,637 @@ class StickyUI {
             workspace.style.top = `${topOffset}px`;
             workspace.style.bottom = `${bottomOffset}px`;
             workspace.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
-            _workspaceHeight =  (document.documentElement.clientHeight - topOffset - bottomOffset);
+            _height =  (document.documentElement.clientHeight - topOffset - bottomOffset);
             // Adjust the workspace width and horizontal position
             workspace.style.left = `${leftOffset}px`;
             workspace.style.right = `${rightOffset}px`;
             workspace.style.width = `calc(100% - ${leftOffset + rightOffset}px)`; 
-            _workspaceWidth = (document.documentElement.clientWidth - leftOffset - rightOffset);
+            _width = (document.documentElement.clientWidth - leftOffset - rightOffset);
+            // Adjust the canvas size if it exists
+            if (_canvas)
+                workspace.adjustCanvasSize();
         }
-        requestAnimationFrame(workspace.updatePosition);
-        
-        // Listen for changes in the size of the window
-        window.addEventListener('resize', this.__updatePositionWorkspace);
-      
-        // Workspace set content
-        workspace.setContent = (content) => {
-            // Clear previous content
-            while (workspace.firstChild) {
-                workspace.removeChild(workspace.firstChild);
-            }
-            // Add new content
-            workspace.add(content);
-        }
-
-        // Workspace set Canvas
-        workspace.setCanvas = (autoResize = true) => {
-            workspace.updatePosition();
-            _canvas = document.createElement('canvas');
-            _canvas.style.width ='100%';
-            _canvas.style.height='100%';        
-            _canvas.width = _workspaceWidth;
-            _canvas.height = _workspaceHeight; 
-            workspace.setContent(_canvas);
-            if (autoResize) {
-                window.addEventListener('resize', () => {
-                    // Create a temporary canvas to store the original image
-                    const tempCanvas = document.createElement('canvas');
-                    const tempCtx = tempCanvas.getContext('2d');
-                    tempCanvas.width = canvas.width;
-                    tempCanvas.height = canvas.height;
-                    tempCtx.drawImage(canvas, 0, 0);
-
-                    // Resize the canvas to the new dimensions
-                    canvas.width  = workspace.getWidth();
-                    canvas.height = workspace.getHeight(); 
-                    // Restore the original image
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(tempCanvas, 0, 0);
-                });
-            }
-            return _canvas;
-        }
-        
         workspace.getWidth = () => {
             const rect = workspace.getBoundingClientRect();
             return rect.width;
             //return workspace.offsetWidth;
         }
-
         workspace.getHeight = () => {
             const rect = workspace.getBoundingClientRect();
             return rect.height;
             //return workspace.offsetHeight;
+        }        
+        workspace.setContent = (content = null) => {
+            if (content) {
+                workspace.removeAll();
+                workspace.add(content);
+            }
         }
+        workspace.adjustCanvasSize = () => {
+           if (_canvas) {
+                // Create a temporary canvas to store the original image
+                let __tmpCanvas = document.createElement('canvas');
+                let __tmpCtx = __tmpCanvas.getContext('2d');
+                __tmpCanvas.width = _canvas.width;
+                __tmpCanvas.height = _canvas.height;
+                __tmpCtx.drawImage(_canvas, 0, 0);
+                // Resize the canvas to the new dimensions
+                _canvas.width  = _width; //workspace.getWidth(); // Get instant width
+                _canvas.height = _height; //workspace.getHeight(); // Get instant height
+                // Restore the original image
+                const ctx = _canvas.getContext('2d');
+                ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+                ctx.drawImage(__tmpCanvas, 0, 0);
+                // Remove the temporary canvas
+                __tmpCanvas.remove();
+            }
+        }
+        workspace.setCanvas = () => {
+            workspace.updatePosition();
+            _canvas = document.createElement('canvas');
+            _canvas.style.width ='100%';
+            _canvas.style.height='100%';        
+            _canvas.width = _width;
+            _canvas.height = _height; 
+            workspace.setContent(_canvas);
+            return _canvas;
+        }
+        workspace.getCanvas = () => {
+            return _canvas;
+        }
+        workspace.setBackgroundImage = (backgroundImage = null) => {
+            if (backgroundImage)
+                workspace.style.backgroundImage = `url("${backgroundImage}")`;
+        }
+        workspace.setBackgroundColor = (backgroundColor = null) => {
+            if (backgroundColor)
+                workspace.style.backgroundColor = backgroundColor;
+        }
+        
+        // Event Listeners
+        window.addEventListener('resize', () => {
+            workspace.updatePosition();
+        });
 
-
-
-
-
+        // Set initial state
+        workspace.setBackgroundColor(backgroundColor);
+        workspace.setBackgroundImage(backgroundImage);
+        workspace.setContent(content);
+        requestAnimationFrame(workspace.updatePosition);
 
         return workspace;
     }
 
+    // <=======================================
+    // #endregion
     // ----------------------------------------
-    // Basic Controls
+    
     // ----------------------------------------
+    // #region Basic Controls (separator, button, switch, textInput, dropdown)
+    // =======================================>
 
-    separator = (titleText = null, color = null) => {
+     /**
+      * @typedef {Object} UISeparatorBase SeparatorBase (Base) Separator Element    
+      * @property {function(string): void} setColor - Set the color of the separator (color = null)
+      * @property {function(string): void} setLabel - Set the label of the separator (labelText = null)
+      * @property {function(): void} removeLabel - Remove the label of the separator
+      */
+
+     /**
+      * @typedef {UIElement & UISeparatorBase} UISeparator Separator Element
+      */
+
+     /**
+      * Create a separator
+      * @param {string} labelText Label of the separator
+      * @param {string} color Color of the separator
+      * @returns {UISeparator} Created separator
+      */
+    separator(labelText = null, color = null) {
+
+        // Create the separator
         const UID = this.UID();
-        const container = this.element('div', `separator_${UID}`, 'separator');
+        const separator = this.element('div', `separator_${UID}`, 'separator', null, 'separator');
         
-        if (titleText) {
-            container.classList.add('separator-with-title');
-            const titleSpan = this.element('span', `separatorTitle_${UID}`, 'separator-title', titleText);
-            container.appendChild(titleSpan);
+        // External methods
+        separator.setColor = (color = null) => {
+            if (color)
+                separator.style.setProperty('--separator-color', color);
+        }
+        separator.setLabel = (labelText = null) => {
+            if (labelText) {
+                let titleSpan = separator.query('.separator-title');
+                separator.classList.add('separator-with-title');
+                if (titleSpan) {
+                    titleSpan.innerHTML = labelText;
+                } else {
+                    titleSpan = this.element('span', `separatorTitle_${UID}`, 'separator-title', labelText, 'separator-title');
+                    separator.appendChild(titleSpan);
+                }
+            }
+        }
+        separator.removeLabel = () => {
+            let titleSpan = separator.query('.separator-title');
+            if (titleSpan) {
+                titleSpan.remove();
+                separator.classList.remove('separator-with-title');
+            }
         }
 
-        if (color)
-            container.style.setProperty('--separator-color', color);
-        
-        return container;
+        // Set initial state
+        separator.setColor(color);
+        separator.setLabel(labelText);
+
+        return separator;
     }
 
-    button = (labelText = 'Button', bgColor = null, bgColorHover = null) => {
+    /**
+     * @typedef {Object} UIButtonBase ButtonBase (Base) Button Element  
+     * @property {function(string): void} setLabel - Set the label of the button (labelText = null)
+     * @property {function(string): void} setBackgroundColor - Set the background color of the button (bgColor = null)
+     * @property {function(string): void} setBackgroundColorHover - Set the background color of the button when hovered (bgColorHover = null)
+     */
+
+    /**
+     * @typedef {UIElement & UIButtonBase} UIButton Button Element         
+     */
+
+    /**
+     * Create a button
+     * @param {string} labelText Label of the button
+     * @param {string} bgColor Background color of the button
+     * @param {string} bgColorHover Background color of the button when hovered
+     * @returns {UIButton} Created button
+     */
+    button(labelText = 'Button', bgColor = null, bgColorHover = null) {
+        
+        // Create the button
         const UID = this.UID();
-        const container = this.element('div', `btn_${UID}`, 'button', labelText);
-                
-        if (bgColor)
-            container.style.background = bgColor;
+        const button = this.element('div', `btn_${UID}`, 'button', labelText, 'button');
+        let _bgColor = bgColor;
+        let _bgColorHover = bgColorHover;
 
-        if (bgColorHover) {
-            container.addEventListener('mouseenter', () => {
-                container.style.background = bgColorHover;
-            });
-            
-            container.addEventListener('mouseleave', () => {
-                container.style.background = bgColor || ''; 
-            });
+        // External methods
+        button.setLabel = (labelText = null) => {
+            if (labelText)
+                button.innerHTML = labelText;
+        }
+        button.setBackgroundColor = (bgColor = null) => {
+            if (bgColor) {
+                button.style.background = bgColor;
+                _bgColor = bgColor;
+            }
+        }
+        button.setBackgroundColorHover = (bgColorHover = null) => {
+            if (bgColorHover) {
+                _bgColorHover = bgColorHover;
+            }
         }
 
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            container.addEventListener(eventType, functionCallback);
-        }
+        // Event Listeners       
+        button.listenEvent('mouseenter', () => {
+            if (_bgColorHover)
+                button.style.background = _bgColorHover;
+        });
+        button.listenEvent('mouseleave', () => {
+            if (_bgColor)
+                button.style.background = _bgColor;
+        });
+        
+        // Set initial state
+        button.setLabel(labelText);
+        button.setBackgroundColor(_bgColor);
+        button.setBackgroundColorHover(_bgColorHover);
 
-        return container;
+        return button;
     }
 
-    switch = (labelText = 'Switch', colorActive = null, colorInactive = null) => {
+    /** 
+     * @typedef {Object} UISwitchBase SwitchBase (Base) Switch Element
+     * @property {function(string): void} setLabel - Set the label of the switch (labelText = null)
+     * @property {function(): boolean} getValue - Get the value of the switch
+     * @property {function(boolean): void} setValue - Set the value of the switch (value = null)
+     * @property {function(): void} updateColor - Update the color of the switch
+     * @property {function(string): void} setColorActive - Set the color of the switch when active (colorActive = null)
+     * @property {function(string): void} setColorInactive - Set the color of the switch when inactive (colorInactive = null)
+     */
+
+    /**
+     * @typedef {UIElement & UISwitchBase} UISwitch Switch Element
+     */
+
+    /**
+     * Create a switch
+     * @param {string} labelText Label of the switch
+     * @param {string} colorActive Color of the switch when active
+     * @param {string} colorInactive Color of the switch when inactive
+     */
+    switch(labelText = 'Switch', colorActive = null, colorInactive = null) {
+
+        // Create the switch
         const UID = this.UID();
-        const container = this.element('div', `switchContainer_${UID}`, 'controlContainer');
-        const label = this.element('div', `label_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
-        const switchControl = this.element('label', `switchGroup_${UID}`, 'switchGroup');
-        const switchInput = this.element('input', `switchInput_${UID}`, 'switchInput');
-        const switchSlider = this.element('span', `switchSlider_${UID}`, 'switchSlider');
-        
+        const container = this.element('div', `switchContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper', null, 'switch');
+        const switchControl = this.element('label', `switchGroup_${UID}`, 'switchGroup', null, 'switch');
+        const switchInput = this.element('input', `switchInput_${UID}`, 'switchInput', null, 'switch');
+        const switchSlider = this.element('span', `switchSlider_${UID}`, 'switchSlider', null, 'switch');
         switchInput.type = 'checkbox';
+        switchControl.add([switchInput, switchSlider]);
+        controlWrapper.add(switchControl);
+        container.add(controlWrapper);
 
-        if (labelText) 
-            container.appendChild(label);
+        let _colorActive = colorActive;
+        let _colorInactive = colorInactive;
 
-        controlWrapper.appendChild(switchControl);
-        switchControl.appendChild(switchInput);
-        switchControl.appendChild(switchSlider);
-        container.appendChild(controlWrapper);
-
-        if (colorInactive) 
-            switchSlider.style.backgroundColor = colorInactive;
-
-        if (colorActive)
-            switchInput.addEventListener('change', () => {
-                switchSlider.style.backgroundColor = switchInput.checked ? colorActive : (colorInactive || '');
-            });
-
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            switchInput.addEventListener(eventType, functionCallback);
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
         }
-        
         container.getValue = () => {
             return switchInput.checked;
         }
+        container.setValue = (value = null) => {
+            if (value)
+                switchInput.checked = value;
+        }
+        container.updateColor = () => {
+            if (_colorActive && switchInput.checked)
+                switchSlider.style.backgroundColor = _colorActive;
+            else if (!switchInput.checked)
+                switchSlider.style.backgroundColor = _colorInactive || '';
+        }
+        container.setColorActive = (colorActive = null) => {
+            if (colorActive) {
+                _colorActive = colorActive;
+                container.updateColor();
+            }
+        }
+        container.setColorInactive = (colorInactive = null) => {
+            if (colorInactive) {
+                _colorInactive = colorInactive;
+                container.updateColor();
+            }
+        }
 
+        // Event Listeners
+        switchInput.addEventListener('change', () => {
+            container.updateColor();
+        });
+        // Add event listener from external source
+        container.addEvent = (eventType, functionCallback) => {
+            switchInput.addEventListener(eventType, functionCallback);
+        }
+
+        // Set initial state
+        container.setLabel(labelText);
+        container.setColorActive(colorActive);
+        container.setColorInactive(colorInactive);
+
+        // Return the container
         return container;
     }
     
-    textInput = (labelText = 'Text Input', placeholder = '', defaultValue = '') => {
+    /**
+     * @typedef {Object} UITextInputBase TextInputBase (Base) Text Input Element
+     * @property {function(string): void} setType - Set the type of the text input (type = null, text, password, number, email, etc.)
+     * @property {function(boolean): void} setReadOnly - Set the read only of the text input (readOnly = null)
+     * @property {function(boolean): void} setDisabled - Set the disabled of the text input (disabled = null)
+     * @property {function(number): void} setMaxLength - Set the max length of the text input (maxLength = null)
+     * @property {function(number): void} setMinLength - Set the min length of the text input (minLength = null)
+     * @property {function(string): void} setLabel - Set the label of the text input (labelText = null)
+     * @property {function(string): void} setPlaceholder - Set the placeholder of the text input (placeholder = null)
+     * @property {function(string): void} setValue - Set the value of the text input (value = null)
+     * @property {function(): string} getValue - Get the value of the text input
+     */
+
+    /**
+     * @typedef {UIElement & UITextInputBase} UITextInput Text Input Element
+     */
+
+    /**
+     * Create a text input
+     * @param {string} labelText Label of the text input
+     * @param {string} placeholder Placeholder of the text input
+     * @param {string} defaultValue Default value of the text input
+     * @returns {UITextInput} Created text input
+     */
+    textInput(labelText = 'Text Input', placeholder = '', defaultValue = '') {
         const UID = this.UID();
-        const container = this.element('div', `textInputContainer_${UID}`, 'controlContainer');
-        const label = this.element('div', `label_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
+        const container = this.element('div', `textInputContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper', null, 'textInput');
         const textInput = this.element('input', `textInput_${UID}`, 'textInput');
 
-        textInput.type = 'text';
-        textInput.placeholder = placeholder;
-        textInput.value = defaultValue;
-    
+        controlWrapper.add(textInput);
+        container.add(controlWrapper);
+
+        // External methods
+        container.setType = (type = null) => {
+            if (type)
+                textInput.type = type;
+        }
+        container.setReadOnly = (readOnly = null) => {
+            if (readOnly)
+                textInput.readOnly = readOnly;
+        }
+        container.setDisabled = (disabled = null) => {
+            if (disabled)
+                textInput.disabled = disabled;
+        }
+        container.setMaxLength = (maxLength = null) => {
+            if (maxLength)
+                textInput.maxLength = maxLength;
+        }
+        container.setMinLength = (minLength = null) => {
+            if (minLength)
+                textInput.minLength = minLength;
+        }
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
+        container.setPlaceholder = (placeholder = null) => {
+            if (placeholder)
+                textInput.placeholder = placeholder;
+        }
+        container.setValue = (value = null) => {
+            if (value)
+                textInput.value = value;
+        }
+        container.getValue = () => {
+            return textInput.value;
+        }
+
+        // Event Listeners
         // Add event listener from external source and get the value
         container.addEvent = (eventType, functionCallback) => {
             textInput.addEventListener(eventType, functionCallback);
         }
         
-        container.getValue = () => {
-            return textInput.value;
-        }
+        // Set initial state
+        container.setType('text');
+        container.setLabel(labelText);
+        container.setPlaceholder(placeholder);
+        container.setValue(defaultValue);
 
-        if (labelText)
-            container.appendChild(label);
-
-        controlWrapper.appendChild(textInput);
-        container.appendChild(controlWrapper);
-
+        // Return the container
         return container;
     }
 
-    dropdown = (labelText  = 'Dropdown', options = [], defaultOption = null) => {
+    /**
+     * @typedef {Object} UIDropdownBase DropdownBase (Base) Dropdown Element
+     * @property {function(string): void} setLabel - Set the label of the dropdown (labelText = null)
+     * @property {function(): string} getValue - Get the value of the dropdown
+     * @property {function(string): void} setValue - Set the value of the dropdown (value = null)
+     * @property {function(array): void} setOptions - Set the options of the dropdown (options = null)
+     * @property {function(string): void} setDefaultOption - Set the default option of the dropdown (defaultOption = null)
+     */
+
+    /**
+     * @typedef {UIElement & UIDropdownBase} UIDropdown Dropdown Element
+     */
+
+    /**
+     * Create a dropdown
+     * @param {string} labelText Label of the dropdown
+     * @param {array} options Options of the dropdown
+     * @param {string} defaultOption Default option of the dropdown
+     * @returns {UIDropdown} Created dropdown
+     */
+    dropdown(labelText = 'Dropdown', options = [], defaultOption = null) {
+
+        // Create the dropdown
         const UID = this.UID();
-        const container = this.element('div', `dropdownContainer_${UID}`, 'controlContainer');
-        const label = this.element('div', `label_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
-        const select = this.element('select', `dropdown_${UID}`, 'dropdown');
+        const container = this.element('div', `dropdownContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper', null, 'dropdown');
+        const select = this.element('select', `dropdown_${UID}`, 'dropdown', null, 'dropdown');
+        let _defaultOption = defaultOption;
+        controlWrapper.add(select);
+        container.add(controlWrapper);
 
-        options.forEach((option, index) => {
-            let optionElement = this.element('option', `option_${index}_${UID}`, 'option', option.label);
-            optionElement.value = option.value;
-            if (defaultOption && option.value === defaultOption)
-                optionElement.selected = true;
-            select.appendChild(optionElement);
-        });
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
+        container.getValue = () => {
+            return select.value;
+        }
+        container.setValue = (value = null) => {
+            if (value)
+                select.value = value;
+        }
+        container.setOptions = (options = null) => {
+            if (options) {
+                select.removeAll();
+                options.forEach((option, index) => {
+                    let optionElement = this.element('option', `option_${index}_${UID}`, 'option', option.label);
+                    optionElement.setAttribute('index', index);
+                    optionElement.setAttribute('value', option.value);
+                    optionElement.value = option.value;
+                    if (_defaultOption && option.value === _defaultOption)
+                        optionElement.selected = true;
+                    select.add(optionElement);
+                });
+            }
+        }
+        container.setDefaultOption = (defaultOption = null) => {
+            if (defaultOption) {
+                _defaultOption = defaultOption;
+            }
+        }
 
+        // Event Listeners
         // Add event listener from external source and get the value
         container.addEvent = (eventType, functionCallback) => {
             select.addEventListener(eventType, functionCallback);
         }
         
+        // Set initial state
+        container.setLabel(labelText);
+        container.setDefaultOption(defaultOption);
+        container.setOptions(options);
+  
+        // Return the container
+        return container;
+    }
+
+    // <======================================= 
+    // #endregion
+    // ----------------------------------------
+
+    // ----------------------------------------
+    // #region Advanced Controls 1 (checkboxGroup, colorPicker, sliderRange, sliderStepper, sliderInterval)
+    // =======================================>
+
+    /**
+     * @typedef {Object} UICheckboxGroupBase CheckboxGroupBase (Base) Checkbox Group Element
+     * @property {function(string): void} setLabel - Set the label of the checkbox group (labelText = null)
+     * @property {function(): array} getValue - Get the value of the checkbox group
+     * @property {function(array): void} setValue - Set the value of the checkbox group (value = null) 
+     * @property {function(array): void} setOptions - Set the options of the checkbox group (options = null)
+     */
+
+    /**
+     * @typedef {UIElement & UICheckboxGroupBase} UICheckboxGroup Checkbox Group Element
+     */
+
+    /**
+     * Create a checkbox group
+     * @param {string} labelText Label of the checkbox group
+     * @param {array} options Options of the checkbox group
+     * @returns {UICheckboxGroup} Created checkbox group
+     */
+    checkboxGroup = (labelText = null, options = []) => {
+        
+        // Create the checkbox group
+        const UID = this.UID();
+        const container = this.element('div', `checkboxGroupContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper', null, 'checkboxGroup');
+        const checkboxGroup = this.element('div', `checkboxGroup_${UID}`, 'checkboxGroup', null, 'checkboxGroup');
+        
+        controlWrapper.add(checkboxGroup);
+        container.add(controlWrapper);
+
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
         container.getValue = () => {
-            return select.value;
+            return checkboxGroup.querySelectorAll('input[type="checkbox"]:checked').map(checkbox => checkbox.value);
+        }
+        container.setValue = (value = null) => {
+            if (value)
+                checkboxGroup.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = value.includes(checkbox.value));
+        }
+        container.setOptions = (options = null) => {
+            if (options) {
+                checkboxGroup.removeAll();
+                options.forEach(option => {
+                    const checkboxContainer = this.element('div', `checkboxContainer_${UID}`, 'checkboxContainer');
+                    const checkbox = this.element('input', `checkbox_${option.value}_${UID}`, 'checkbox');
+                    const checkboxLabel = this.element('label', null, 'checkboxLabel', option.label);
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = option.checked || false;
+                    checkboxContainer.add([checkbox, checkboxLabel]);   
+                    checkboxGroup.add(checkboxContainer);
+                });
+            }
         }
 
-        if (labelText)
-            container.appendChild(label);
-        
-        controlWrapper.appendChild(select);
-        container.appendChild(controlWrapper);
-        return container;
-    }
+        // Event Listeners
+        // Add event listener from external source and get the value
+        container.addEvent = (eventType, functionCallback) => {
+            checkboxGroup.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.addEventListener(eventType, functionCallback));
+        }
 
-    // ----------------------------------------
-    // Advanced Controls 1
-    // ----------------------------------------
-
-    checkboxGroup = (labelText = null, options) => {
-        const UID = this.UID();
-        const container = this.element('div', `checkboxGroupContainer_${UID}`, 'controlContainer');
-        const label = this.element('div', `label_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
-        const checkboxGroup = this.element('div', `checkboxGroup_${UID}`, 'checkboxGroup');
-        
-        options.forEach(option => {
-            const checkboxContainer = this.element('div', `checkboxContainer_${UID}`, 'checkboxContainer');
-            const checkbox = this.element('input', `checkbox_${option.value}_${UID}`, 'checkbox');
-            const checkboxLabel = this.element('label', null, 'checkboxLabel', option.label);
-            checkbox.type = 'checkbox';
-            checkbox.checked = option.checked || false;
-            checkboxContainer.appendChild(checkbox);
-            checkboxContainer.appendChild(checkboxLabel);
-            checkboxGroup.appendChild(checkboxContainer);
-        });
-
-        if (labelText)
-            container.appendChild(label);
-
-        controlWrapper.appendChild(checkboxGroup);
-        container.appendChild(controlWrapper);
+        // Set initial state
+        container.setLabel(labelText);
+        container.setOptions(options);
 
         return container;
     }
 
+    /**
+     * @typedef {Object} UIColorPickerBase ColorPickerBase (Base) Color Picker Element
+     * @property {function(string): void} setLabel - Set the label of the color picker (labelText = null)
+     * @property {function(string): void} setValue - Set the value of the color picker (value = null) 
+     * @property {function(): string} getValue - Get the value of the color picker
+     * @property {function(): void} updateColorValueDisplay - Update the color value display
+     */
+
+    /**
+     * @typedef {UIElement & UIColorPickerBase} UIColorPicker Color Picker Element
+     */
+
+    /**
+     * Create a color picker
+     * @param {string} labelText Label of the color picker
+     * @param {string} defaultColor Default color of the color picker
+     * @returns {UIColorPicker} Created color picker
+     */
     colorPicker = (labelText = 'Color Picker', defaultColor = '#000000') => {
-        const UID = this.UID();
-        const container = this.element('div', `colorPickerContainer_${UID}`, 'controlContainer');
-        const label = this.element('div', `label_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper');
 
-        const colorPicker = this.element('input', `colorPicker_${UID}`, 'colorPicker');
-        const valueContainer = this.element('div', `valueContainer_${UID}`, 'colorValueContainer');
-        const valueDisplay = this.element('input', `colorValue_${UID}`, 'colorValue');
-        const formatToggle = this.element('button', `formatToggle_${UID}`, 'colorFormatToggle', 'HEX');
+        // Create the color picker
+        const UID = this.UID();
+        const container = this.element('div', `colorPickerContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `controlWrapper_${UID}`, 'controlWrapper', null, 'controlWrapper');
+
+        const colorPicker = this.element('input', `colorPicker_${UID}`, 'colorPicker', null, 'colorPicker');
+        const valueContainer = this.element('div', `valueContainer_${UID}`, 'colorValueContainer', null, 'colorPicker');
+        const valueDisplay = this.element('input', `colorValue_${UID}`, 'colorValue', null, 'colorPicker');
+        const formatToggle = this.element('button', `formatToggle_${UID}`, 'colorFormatToggle', 'HEX', null, 'colorPicker');
 
         colorPicker.type = 'color';
-        colorPicker.value = defaultColor;        
         valueDisplay.type = 'text';
         valueDisplay.readOnly = true;
-        valueDisplay.value = defaultColor;
 
-        let currentFormat = 'hex';
+        valueContainer.add([valueDisplay, formatToggle]);
+        controlWrapper.add([colorPicker, valueContainer]);
+        container.add(controlWrapper);        
+ 
+        let _currentFormat = 'hex';
+        let _currentColor = defaultColor;
 
-        // Function to convert color to different formats
-        const updateColorValue = () => {
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
+        container.setValue = (value = null) => {
+            if (value) {
+                _currentColor = value;
+                colorPicker.value = value;
+                valueDisplay.value = value;
+            }
+        }
+        container.getValue = () => {
+            return _currentColor;
+        }
+        container.updateColorValueDisplay = () => {
             const hex = colorPicker.value;
             const r = parseInt(hex.slice(1, 3), 16);
             const g = parseInt(hex.slice(3, 5), 16);
             const b = parseInt(hex.slice(5, 7), 16);
             
-            switch(currentFormat) {
+            switch(_currentFormat) {
                 case 'hex':
                     valueDisplay.value = hex.toUpperCase();
                     break;
@@ -1710,49 +2622,41 @@ class StickyUI {
         };
 
         // Event listeners
-        colorPicker.addEventListener('input', updateColorValue);
-        
+        colorPicker.addEventListener('input', container.updateColorValueDisplay);        
         formatToggle.addEventListener('click', () => {
-            switch(currentFormat) {
+            switch(_currentFormat) {
                 case 'hex':
-                    currentFormat = 'rgb';
+                    _currentFormat = 'rgb';
                     formatToggle.textContent = 'RGB';
                     break;
                 case 'rgb':
-                    currentFormat = 'hsl';
+                    _currentFormat = 'hsl';
                     formatToggle.textContent = 'HSL';
                     break;
                 case 'hsl':
-                    currentFormat = 'hex';
+                    _currentFormat = 'hex';
                     formatToggle.textContent = 'HEX';
                     break;
             }
-            updateColorValue();
+            container.updateColorValueDisplay();
         });
-
-        // Initial value update
-        updateColorValue();
-
         // Add event listener from external source and get the value
         container.addEvent = (eventType, functionCallback) => {
             colorPicker.addEventListener(eventType, functionCallback);
         }
         
-        container.getValue = () => {
-            return colorPicker.value;
-        }
+        // Set initial value
+        container.setValue(defaultColor);
+        container.updateColorValueDisplay();
+        container.setLabel(labelText);
 
-        if (labelText) 
-            container.appendChild(label);
-
-        valueContainer.appendChild(valueDisplay);
-        valueContainer.appendChild(formatToggle);
-        controlWrapper.appendChild(colorPicker);
-        controlWrapper.appendChild(valueContainer);
-        container.appendChild(controlWrapper);
-        
+        // Return the container
         return container;
     }
+
+
+
+
 
     sliderRange = (labelText = 'Slider Range', min = 0, max = 100, step = 1, defaultValue = 0) => {
         const UID = this.UID();
@@ -1950,8 +2854,23 @@ class StickyUI {
         return container;
     }
 
+    // <======================================= 
+    // #endregion
     // ----------------------------------------
-    // Advanced Controls 2
+
+
+
+
+
+
+
+
+
+
+
+
+    // ----------------------------------------
+    // #region Advanced Controls 2
     // ----------------------------------------
     
     vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
@@ -2175,8 +3094,12 @@ class StickyUI {
         return container;
     }
 
+    // <======================================= 
+    // #endregion
     // ----------------------------------------
-    // Advanced Containers
+
+    // ----------------------------------------
+    // #region Advanced Containers
     // ----------------------------------------
 
     folder = (titleText = 'Folder', iconClose = null, iconOpen = null, bgColor = null, bgColorHover = null, defaultClosed = false, controls = []) => {
@@ -2299,8 +3222,12 @@ class StickyUI {
         return tabs;
     }
 
+    // <======================================= 
+    // #endregion
     // ----------------------------------------
-    // Faceplate
+
+    // ----------------------------------------
+    // #region Faceplate
     // ----------------------------------------
 
     faceplate = (controls = [], width = null, height = null, positionX = null, positionY = null) => {
@@ -2322,9 +3249,13 @@ class StickyUI {
         
         return faceplate;
     }
+    
+    // <======================================= 
+    // #endregion
+    // ----------------------------------------
 
     // ----------------------------------------
-    // Draggable and Resizable
+    // #region Draggable and Resizable
     // ----------------------------------------
 
     setDraggable = (element, handle = null) => {
@@ -2413,7 +3344,14 @@ class StickyUI {
         });
     }
 
+    // <======================================= 
+    // #endregion
     // ----------------------------------------
+
+    // ----------------------------------------
+    // #region WIP
+    // ----------------------------------------
+
     // Inject styles to the head (Not used, prefer to use the css file on development)
     // ----------------------------------------
     /*addStyles = () => {
@@ -2550,4 +3488,28 @@ class StickyUI {
 
         return this.messageBox(title, alertContent, buttons, true);
     }
+
+    // <======================================= 
+    // #endregion
+    // ----------------------------------------
+
+
 }
+
+
+/***
+ * 
+ * To Do:
+ * - Change the icon size in the alert message box
+ * - Context Menu multiple 
+ * - Context Menu submenu
+ * - Context Menu right click
+ * - Context Menu keyboard shortcuts
+ * - Control the progress bar
+ * - Big button with icon and text
+ * - Add a toast notification
+ * - Check add Event Listeners in all elements
+ * - You were adding wrappers: for tooltip, for context menu, for messageBox & alertBox
+ * - Some elements will be added to the body automatically: tooltip, context menu, messageBox & alertBox
+ *   
+*/

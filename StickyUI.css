@@ -41,6 +41,29 @@
     /* Separator Styles */
     --separator-color: var(--border-color);
     --separator-text-color: var(--text-color-light);
+
+    /* Z-index */
+    --z-index-base: 1;
+
+    --z-index-workspace: calc(var(--z-index-base));    
+    --z-index-menuBar: calc(var(--z-index-base) + 1);
+    --z-index-toolbar: calc(var(--z-index-base) + 1);
+    --z-index-sidePanel: calc(var(--z-index-base) + 1);
+    --z-index-statusBar: calc(var(--z-index-base) + 1);
+
+    --z-index-floatingPanel: calc(var(--z-index-base) + 2);
+    --z-index-iconBarHorizontal: calc(var(--z-index-base) + 2);
+    --z-index-iconBarVertical: calc(var(--z-index-base) + 2);
+    --z-index-faceplate: calc(var(--z-index-base) + 2);
+
+    --z-index-tooltipWrapper: calc(var(--z-index-base) + 3);
+    --z-index-contextMenuWrapper: calc(var(--z-index-base) + 3);
+    --z-index-tooltip: calc(var(--z-index-base) + 4);
+    --z-index-contextMenu: calc(var(--z-index-base) + 4);
+    
+    --z-index-overlay: calc(var(--z-index-base) + 5);
+    --z-index-messageBoxWrapper: calc(var(--z-index-base) + 6);
+    --z-index-messageBox: calc(var(--z-index-base) + 6);
 }
 
 
@@ -109,7 +132,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: var(--z-index-menuBar);
 }
 
 .stickyUI.menuBarItem {
@@ -149,7 +172,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
     box-shadow: var(--shadow-md);
-    z-index: 1001;
+    z-index: var(--z-index-contextMenu);
     min-width: 180px;
     padding: var(--spacing-xs) 0;
     display: none;
@@ -210,7 +233,7 @@ body {
     padding: 0 var(--spacing-md);
     font-size: 12px;
     color: var(--text-color);
-    z-index: 1000;
+    z-index: var(--z-index-statusBar);
 }
 
 .stickyUI.statusBarItem {
@@ -247,7 +270,7 @@ body {
     font-size: 12px;
     color: var(--text-color);
     box-shadow: var(--shadow-sm);
-    z-index: 1002;
+    z-index: var(--z-index-tooltip);
     max-width: 200px;
     opacity: 0;
     transition: opacity 0.2s;
@@ -317,7 +340,7 @@ body {
     color: var(--text-color);
 }
 
-.stickyUI.floatingPanelTitleBarButton {
+.stickyUI.floatingPanelTitleBar .icon {
     min-width: 20px;
     min-height: 20px;
     padding: var(--spacing-xs);
@@ -326,6 +349,7 @@ body {
     color: var(--text-color);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
+    background-color: var(--text-color);
     font-size: 14px;
 }
 
@@ -344,7 +368,7 @@ body {
     border-radius: var(--border-radius-lg);
     border: none;
     box-shadow: var(--shadow-md);
-    z-index: 1000;
+    z-index: var(--z-index-floatingPanel);
     min-width: 200px;
     min-height: 100px;
     transition: height 0.1s ease;
@@ -359,6 +383,7 @@ body {
     min-height: auto !important;
     width: auto;
     min-width: 300px;
+
 }
 
 .stickyUI.floatingPanel.minimized .floatingPanelContentWrapper {
@@ -421,7 +446,7 @@ body {
     white-space: nowrap;
 }
 
-.stickyUI.sidePanelSectionTitleBarButton {
+.stickyUI.sidePanelSectionTitleBar .icon {
     min-width: 20px;
     min-height: 20px;
     padding: var(--spacing-xs);
@@ -431,10 +456,11 @@ body {
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     font-size: 14px;
+    background-color: var(--text-color);
 }
 
-.stickyUI.sidePanelSectionTitleBarButton:hover {
-    background: var(--hover-color);
+.stickyUI.sidePanelSectionTitleBar .icon:hover {
+    transform: rotate(180deg);
 }
 
 /* ---------------------- Side Panel: Section ---------------------- */
@@ -468,7 +494,7 @@ body {
     background-color: var(--bg-color);
     border-right: 1px solid var(--border-color);
     border-left: 1px solid var(--border-color);
-    z-index: 900;
+    z-index: var(--z-index-sidePanel);
     overflow-y: auto;
     overflow-x: hidden;
     box-shadow: var(--shadow-md);
@@ -516,7 +542,7 @@ body {
     display: flex;
     background-color: var(--bg-color-secondary);
     padding: var(--spacing-xs);
-    z-index: 950;
+    z-index: var(--z-index-toolbar);
     box-shadow: var(--shadow-sm);
     gap: var(--spacing-xs);
     transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
@@ -613,7 +639,7 @@ body {
     overflow: auto;
     /* Transition when changing size/position */
     transition: all 0.3s ease;
-    z-index: 100;
+    z-index: var(--z-index-workspace);
     /* Show scrollbars only when necessary */
     scrollbar-width: thin;
     scrollbar-color: var(--border-color-dark) var(--bg-color-secondary);
@@ -736,12 +762,10 @@ body {
     width: 100%;
     height: 1px;
     background-color: var(--separator-color);
-    z-index: 1;
 }
 
 .stickyUI.separator-title {
     position: relative;
-    z-index: 2;
     background-color: var(--bg-color);
     padding: 0 var(--spacing-md);
     color: var(--separator-text-color);
@@ -761,6 +785,7 @@ body {
     background: var(--primary-color);
     transition: background 0.3s, transform 0.2s;
     user-select: none;
+    pointer-events: auto;
 }
 
 .stickyUI.button:hover {
@@ -1275,7 +1300,7 @@ input:checked + .stickyUI.switchSlider:before {
     background: transparent;
     padding: 0px;
     margin: 0px;
-    z-index: 1000;
+    z-index: var(--z-index-faceplate);
     border: none;
 }
 
@@ -1422,7 +1447,6 @@ input:checked + .stickyUI.switchSlider:before {
 }
 
 .stickyUI.joystick {
-    z-index: 1;
     position: absolute;
     width: 40px;
     height: 40px;
@@ -1625,7 +1649,7 @@ input:checked + .stickyUI.switchSlider:before {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    z-index: 1000;
+    z-index: var(--z-index-iconBarHorizontal);
 }
 
 .stickyUI.iconBarButton {
@@ -1656,7 +1680,7 @@ input:checked + .stickyUI.switchSlider:before {
     box-shadow: var(--shadow-md);
     align-items: center;
     gap: var(--spacing-xs);
-    z-index: 1000;
+    z-index: var(--z-index-iconBarVertical);
 }
 
 .stickyUI.iconBarVertical-left {
@@ -1687,7 +1711,7 @@ input:checked + .stickyUI.switchSlider:before {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 999999;
+    z-index: var(--z-index-messageBox);
     min-width: 300px;
     max-width: 500px;
 }
@@ -1778,7 +1802,7 @@ input:checked + .stickyUI.switchSlider:before {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    z-index: 99999;
+    z-index: var(--z-index-overlay);
 }
 
 .stickyUI.overlay.overlay-hidden {
@@ -1793,7 +1817,7 @@ input:checked + .stickyUI.switchSlider:before {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 9999;
+    z-index: var(--z-index-messageBoxWrapper);
 }
 
 .stickyUI.messageBoxWrapper.messageBoxWrapper-hidden {
@@ -1816,6 +1840,17 @@ input:checked + .stickyUI.switchSlider:before {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1002;
+    z-index: var(--z-index-tooltipWrapper);
 }
 
+
+
+.stickyUI.contextMenuWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: var(--z-index-contextMenuWrapper);
+}
