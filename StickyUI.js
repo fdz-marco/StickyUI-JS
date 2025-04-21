@@ -3,7 +3,7 @@
  * A simple class to create user interfaces over the browser DOM
  * specially useful for canvas-based applications or HMIs.
  * @version 1.0.3
- * @date 2025-04-13
+ * @date 2025-04-21
  * @author Marco Fernandez (marcofdz.com)
  * @license MIT
  * @website https://marcofdz.com/projects/stickyui
@@ -2168,6 +2168,7 @@ class StickyUI {
      * @property {function(): void} updateColor - Update the color of the switch
      * @property {function(string): void} setColorActive - Set the color of the switch when active (colorActive = null)
      * @property {function(string): void} setColorInactive - Set the color of the switch when inactive (colorInactive = null)
+     * @property {function(string): void} listenEvent - Listen the event of the switch (eventType = null, change, input, keydown, keyup, etc.)
      */
 
     /**
@@ -2234,15 +2235,14 @@ class StickyUI {
                 container.updateColor();
             }
         }
+        container.listenEvent = (eventType, functionCallback) => {
+            switchInput.listenEvent(eventType, functionCallback);
+        }        
 
         // Event Listeners
-        switchInput.addEventListener('change', () => {
+        switchInput.listenEvent('change', () => {
             container.updateColor();
         });
-        // Add event listener from external source
-        container.addEvent = (eventType, functionCallback) => {
-            switchInput.addEventListener(eventType, functionCallback);
-        }
 
         // Set initial state
         container.setLabel(labelText);
@@ -2264,6 +2264,7 @@ class StickyUI {
      * @property {function(string): void} setPlaceholder - Set the placeholder of the text input (placeholder = null)
      * @property {function(string): void} setValue - Set the value of the text input (value = null)
      * @property {function(): string} getValue - Get the value of the text input
+     * @property {function(string): void} listenEvent - Listen the event of the text input (eventType = null, input, change, keydown, keyup, etc.)
      */
 
     /**
@@ -2329,11 +2330,8 @@ class StickyUI {
         container.getValue = () => {
             return textInput.value;
         }
-
-        // Event Listeners
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            textInput.addEventListener(eventType, functionCallback);
+        container.listenEvent = (eventType, functionCallback) => {
+            textInput.listenEvent(eventType, functionCallback);
         }
         
         // Set initial state
@@ -2353,6 +2351,7 @@ class StickyUI {
      * @property {function(string): void} setValue - Set the value of the dropdown (value = null)
      * @property {function(array): void} setOptions - Set the options of the dropdown (options = null)
      * @property {function(string): void} setDefaultOption - Set the default option of the dropdown (defaultOption = null)
+     * @property {function(string): void} listenEvent - Listen the event of the dropdown (eventType = null, change, input, keydown, keyup, etc.)
      */
 
     /**
@@ -2415,12 +2414,9 @@ class StickyUI {
                 _defaultOption = defaultOption;
             }
         }
-
-        // Event Listeners
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            select.addEventListener(eventType, functionCallback);
-        }
+        container.listenEvent = (eventType, functionCallback) => {
+            select.listenEvent(eventType, functionCallback);
+        }        
         
         // Set initial state
         container.setLabel(labelText);
@@ -2445,6 +2441,7 @@ class StickyUI {
      * @property {function(): array} getValue - Get the value of the checkbox group
      * @property {function(array): void} setValue - Set the value of the checkbox group (value = null) 
      * @property {function(array): void} setOptions - Set the options of the checkbox group (options = null)
+     * @property {function(string): void} listenEvent - Listen the event of the checkbox group (eventType = null, change, input, keydown, keyup, etc.)
      */
 
     /**
@@ -2457,7 +2454,7 @@ class StickyUI {
      * @param {array} options Options of the checkbox group
      * @returns {UICheckboxGroup} Created checkbox group
      */
-    checkboxGroup = (labelText = null, options = []) => {
+    checkboxGroup(labelText = null, options = []) {
         
         // Create the checkbox group
         const UID = this.UID();
@@ -2502,11 +2499,8 @@ class StickyUI {
                 });
             }
         }
-
-        // Event Listeners
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            checkboxGroup.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.addEventListener(eventType, functionCallback));
+        container.listenEvent = (eventType, functionCallback) => {
+            checkboxGroup.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.listenEvent(eventType, functionCallback));
         }
 
         // Set initial state
@@ -2522,6 +2516,7 @@ class StickyUI {
      * @property {function(string): void} setValue - Set the value of the color picker (value = null) 
      * @property {function(): string} getValue - Get the value of the color picker
      * @property {function(): void} updateColorValueDisplay - Update the color value display
+     * @property {function(string): void} listenEvent - Listen the event of the color picker (eventType = null, change, input, keydown, keyup, etc.)
      */
 
     /**
@@ -2534,7 +2529,7 @@ class StickyUI {
      * @param {string} defaultColor Default color of the color picker
      * @returns {UIColorPicker} Created color picker
      */
-    colorPicker = (labelText = 'Color Picker', defaultColor = '#000000') => {
+    colorPicker(labelText = 'Color Picker', defaultColor = '#000000') {
 
         // Create the color picker
         const UID = this.UID();
@@ -2620,10 +2615,13 @@ class StickyUI {
                     break;
             }
         };
+        container.listenEvent = (eventType, functionCallback) => {
+            colorPicker.listenEvent(eventType, functionCallback);
+        }
 
         // Event listeners
-        colorPicker.addEventListener('input', container.updateColorValueDisplay);        
-        formatToggle.addEventListener('click', () => {
+        colorPicker.listenEvent('input', container.updateColorValueDisplay);        
+        formatToggle.listenEvent('click', () => {
             switch(_currentFormat) {
                 case 'hex':
                     _currentFormat = 'rgb';
@@ -2640,10 +2638,6 @@ class StickyUI {
             }
             container.updateColorValueDisplay();
         });
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            colorPicker.addEventListener(eventType, functionCallback);
-        }
         
         // Set initial value
         container.setValue(defaultColor);
@@ -2654,152 +2648,330 @@ class StickyUI {
         return container;
     }
 
+    /**
+     * @typedef {Object} UISliderRangeBase SliderRangeBase (Base) Slider Range Element
+     * @property {function(string): void} setLabel - Set the label of the slider range (labelText = null)
+     * @property {function(): number} getValue - Get the value of the slider range
+     * @property {function(number): void} setValue - Set the value of the slider range (value = null) 
+     * @property {function(number): void} setMin - Set the minimum value of the slider range (min = null)
+     * @property {function(number): void} setMax - Set the maximum value of the slider range (max = null)
+     * @property {function(number): void} setStep - Set the step value of the slider range (step = null)
+     * @property {function(): void} updateSliderValue - Update the slider value
+     * @property {function(): void} listenEvent - Listen the event of the slider range (eventType = null, change, input, keydown, keyup, etc.)
+     */
 
+    /**
+     * @typedef {UIElement & UISliderRangeBase} UISliderRange Slider Range Element  
+     */
 
+    /**
+     * Creates a range slider control
+     * @param {String} labelText Label text for the control
+     * @param {Number} min Minimum value
+     * @param {Number} max Maximum value
+     * @param {Number} step Step increment
+     * @param {Number} defaultValue Initial value
+     * @returns {UISliderRange} Slider range control container
+     */
+    sliderRange(labelText = 'Slider Range', min = 0, max = 100, step = 1, defaultValue = 0) {
 
-
-    sliderRange = (labelText = 'Slider Range', min = 0, max = 100, step = 1, defaultValue = 0) => {
+        // Create the slider range
         const UID = this.UID();
-        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer');
-        const label = this.element('label', `sliderLabel_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
-        const sliderInput = this.element('input', `sliderInput_${UID}`, 'sliderRange');
-        const sliderValueDisplay = this.element('span', `sliderValue_${UID}`, 'sliderValue');
-
-        sliderInput.type = 'range';
-        sliderInput.min = min;
-        sliderInput.max = max;
-        sliderInput.step = step;
-        sliderInput.value = defaultValue;        
-        sliderValueDisplay.textContent = defaultValue;
-
-        // Method to update the slider value
-        const updateSliderValue = () => {
-            var value = (sliderInput.value-sliderInput.min)/(sliderInput.max-sliderInput.min)*100
-            sliderInput.style.background = 'linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ' + value + '%, var(--border-color) ' + value + '%, var(--border-color) 100%)'
-        }
-
-        // Event listeners
-        sliderInput.addEventListener('input', () => {
-            sliderValueDisplay.textContent = sliderInput.value;
-            updateSliderValue();
-        });
-
-        // Initial value update
-        updateSliderValue();
-
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            sliderInput.addEventListener(eventType, functionCallback);
-        }
+        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper', null, 'controlWrapper');
+        const sliderInput = this.element('input', `sliderInput_${UID}`, 'sliderRange', null, 'sliderRange');
+        const sliderValueDisplay = this.element('span', `sliderValue_${UID}`, 'sliderValue', null, 'sliderRange');
         
+        sliderInput.type = 'range';
+        controlWrapper.add([sliderInput, sliderValueDisplay]);
+        container.add(controlWrapper);
+
+        let _min = min;
+        let _max = max;
+        let _step = step;
+
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
         container.getValue = () => {
             return sliderInput.value;
         }
+        container.setValue = (value = null) => {
+            if (value) {
+                sliderInput.value = value;
+                sliderValueDisplay.textContent = value;
+                container.updateSliderValue();
+            }
+        }
+        container.setMin = (min = null) => {
+            if (min) {
+                _min = min;
+                sliderInput.min = _min;
+            }
+        }
+        container.setMax = (max = null) => {
+            if (max) {
+                _max = max;
+                sliderInput.max = _max;
+            }
+        }
+        container.setStep = (step = null) => {
+            if (step) {
+                _step = step;
+                sliderInput.step = _step;
+            }
+        }
+        container.updateSliderValue = () => {
+            const value = (sliderInput.value-_min)/(_max-_min)*100
+            sliderInput.style.background = 'linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ' + value + '%, var(--border-color) ' + value + '%, var(--border-color) 100%)'
+        }
+        container.listenEvent = (eventType, functionCallback) => {
+            sliderInput.listenEvent(eventType, functionCallback);
+        }
+        
+        // Event listeners
+        sliderInput.listenEvent('input', () => {
+            sliderValueDisplay.textContent = sliderInput.value;
+            container.updateSliderValue();
+        });
 
-        if (labelText)
-            container.appendChild(label)
+        // Set initial value
+        container.setMin(min);
+        container.setMax(max);
+        container.setStep(step);
+        container.setValue(defaultValue);
+        container.setLabel(labelText);
+        container.updateSliderValue();        
 
-        controlWrapper.appendChild(sliderInput);
-        controlWrapper.appendChild(sliderValueDisplay);
-        container.appendChild(controlWrapper);
-
+        // Return the container
         return container;
     }
 
-    sliderStepper = (labelText = 'Slider Stepper', min = 0, max = 100, step = 1, defaultValue = 0) => {
-        const UID = this.UID();
-        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer');
-        const label = this.element('label', `sliderLabel_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
-        const sliderInput = this.element('input', `sliderInput_${UID}`, 'sliderStepper');
-        const sliderValueDisplay = this.element('span', `sliderValue_${UID}`, 'sliderValue');
-        const decrementBtn = this.element('button', `sliderButtonDecrement_${UID}`, 'sliderStepperButton', '-');
-        const incrementBtn = this.element('button', `sliderButtonIncrement_${UID}`, 'sliderStepperButton', '+');
+    /** 
+     * @typedef {Object} UISliderStepperBase SliderStepperBase (Base) Slider Stepper Element
+     * @property {function(string): void} setLabel - Set the label of the slider stepper (labelText = null)
+     * @property {function(): number} getValue - Get the value of the slider stepper
+     * @property {function(number): void} setValue - Set the value of the slider stepper (value = null) 
+     * @property {function(number): void} setMin - Set the minimum value of the slider stepper (min = null)
+     * @property {function(number): void} setMax - Set the maximum value of the slider stepper (max = null)
+     * @property {function(number): void} setStep - Set the step value of the slider stepper (step = null)
+     * @property {function(): void} updateSliderValue - Update the slider value
+     * @property {function(): void} listenEvent - Listen the event of the slider stepper (eventType = null, change, input, keydown, keyup, etc.)
+     */
 
-        sliderInput.type = 'range';
-        sliderInput.min = min;
-        sliderInput.max = max;
-        sliderInput.step = step;
-        sliderInput.value = defaultValue;
-        sliderValueDisplay.textContent = defaultValue;
+    /**
+     * @typedef {UIElement & UISliderStepperBase} UISliderStepper Slider Stepper Element
+     */
 
-        // Method to update the slider value
-        const updateSliderValue = () => {
-            var value = (sliderInput.value-sliderInput.min)/(sliderInput.max-sliderInput.min)*100
-            sliderInput.style.background = 'linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ' + value + '%, var(--border-color) ' + value + '%, var(--border-color) 100%)'
-        }
-
-        // Event listeners
-        decrementBtn.addEventListener('click', () => {
-            sliderInput.value = Math.max(min, parseFloat(sliderInput.value) - step);
-            sliderValueDisplay.textContent = sliderInput.value;
-            var value = (sliderInput.value-sliderInput.min)/(sliderInput.max-sliderInput.min)*100
-            sliderInput.style.background = 'linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ' + value + '%, var(--border-color) ' + value + '%, var(--border-color) 100%)'
-        });
-
-        incrementBtn.addEventListener('click', () => {
-            sliderInput.value = Math.min(max, parseFloat(sliderInput.value) + step);
-            sliderValueDisplay.textContent = sliderInput.value;
-            updateSliderValue();
-        });
-
-        sliderInput.addEventListener('input', () => {
-            sliderValueDisplay.textContent = sliderInput.value;
-            updateSliderValue();
-        });
-
-        // Initial value update
-        updateSliderValue();
-
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            sliderInput.addEventListener(eventType, functionCallback);
-        }
+    /**
+     * Creates a stepper slider control with increment/decrement buttons
+     * @param {String} labelText Label text for the control
+     * @param {Number} min Minimum value
+     * @param {Number} max Maximum value
+     * @param {Number} step Step increment
+     * @param {Number} defaultValue Initial value
+     * @returns Slider stepper control container
+     */
+    sliderStepper(labelText = 'Slider Stepper', min = 0, max = 100, step = 1, defaultValue = 0) {
         
+        // Create the slider stepper
+        const UID = this.UID();
+        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper', null, 'controlWrapper');
+        const sliderInput = this.element('input', `sliderInput_${UID}`, 'sliderStepper', null, 'sliderStepper');
+        const sliderValueDisplay = this.element('span', `sliderValue_${UID}`, 'sliderValue', null, 'sliderStepper');
+        const decrementBtn = this.element('button', `sliderButtonDecrement_${UID}`, 'sliderStepperButton', '-', null, 'sliderStepper');
+        const incrementBtn = this.element('button', `sliderButtonIncrement_${UID}`, 'sliderStepperButton', '+', null, 'sliderStepper');
+        sliderInput.type = 'range';
+
+        controlWrapper.add([decrementBtn, sliderInput, incrementBtn, sliderValueDisplay]);
+        container.add(controlWrapper);
+
+        let _min = min;
+        let _max = max;
+        let _step = step;
+
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
         container.getValue = () => {
             return sliderInput.value;
         }
+        container.setValue = (value = null) => {
+            if (value) {
+                sliderInput.value = value;
+                sliderValueDisplay.textContent = value;
+                container.updateSliderValue();
+            }
+        }
+        container.setMin = (min = null) => {
+            if (min) {
+                _min = min;
+                sliderInput.min = _min;
+            }
+        }
+        container.setMax = (max = null) => {
+            if (max) {
+                _max = max;
+                sliderInput.max = _max;
+            }
+        }
+        container.setStep = (step = null) => {
+            if (step) {
+                _step = step;
+                sliderInput.step = _step;
+            }
+        }
+        container.updateSliderValue = () => {
+            const value = (sliderInput.value-sliderInput.min)/(sliderInput.max-sliderInput.min)*100
+            sliderInput.style.background = 'linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ' + value + '%, var(--border-color) ' + value + '%, var(--border-color) 100%)'
+            sliderValueDisplay.textContent = sliderInput.value;
+        }
+        container.listenEvent = (eventType, functionCallback) => {
+            sliderInput.listenEvent(eventType, functionCallback);
+        }
 
-        if (labelText) 
-            container.appendChild(label);
+        // Event listeners
+        decrementBtn.listenEvent('click', () => {
+            sliderInput.value = Math.max(min, parseFloat(sliderInput.value) - _step);
+            container.updateSliderValue();
+        });
+        incrementBtn.listenEvent('click', () => {
+            sliderInput.value = Math.min(max, parseFloat(sliderInput.value) + _step);
+            container.updateSliderValue();
+        });
+        sliderInput.listenEvent('input', () => {
+            container.updateSliderValue();
+        });
 
-        controlWrapper.appendChild(decrementBtn);
-        controlWrapper.appendChild(sliderInput);
-        controlWrapper.appendChild(incrementBtn);
-        controlWrapper.appendChild(sliderValueDisplay);
-        container.appendChild(controlWrapper);
+        // Set initial value
+        container.setMin(min);
+        container.setMax(max);
+        container.setStep(step);
+        container.setValue(defaultValue);
+        container.setLabel(labelText);
+        container.updateSliderValue();
 
+        // Return the container
         return container;
     }
 
-    sliderInterval = (labelText = 'Slider Interval', min = 0, max = 100, step = 1, defaultValue = 25, defaultValueEnd = 75) => {
+    /**
+     * @typedef {Object} UISliderIntervalBase SliderIntervalBase (Base) Slider Interval Element
+     * @property {function(string): void} setLabel - Set the label of the slider interval (labelText = null)
+     * @property {function(): number} getValues - Get the values of the slider interval
+     * @property {function(number): void} setValues - Set the values of the slider interval (value = null) 
+     * @property {function(number): void} setMin - Set the minimum value of the slider interval (min = null)
+     * @property {function(number): void} setMax - Set the maximum value of the slider interval (max = null)
+     * @property {function(number): void} setStep - Set the step value of the slider interval (step = null)
+     * @property {function(): void} updateSliderValue - Update the slider value
+     * @property {function(): void} listenEvent - Listen the event of the slider interval (eventType = null, change, input, keydown, keyup, etc.)
+     */
+
+    /**
+     * @typedef {UIElement & UISliderIntervalBase} UISliderInterval Slider Interval Element
+     */
+
+    /**
+     * Creates an interval slider control with two control points
+     * @param {String} labelText Label text for the control
+     * @param {Number} min Minimum value
+     * @param {Number} max Maximum value
+     * @param {Number} step Step increment
+     * @param {Number} defaultValueStart Initial value for start point
+     * @param {Number} defaultValueEnd Initial value for end point
+     * @returns {UISliderInterval} Interval slider control container
+     */
+    sliderInterval(labelText = 'Slider Interval', min = 0, max = 100, step = 1, defaultValueStart = 25, defaultValueEnd = 75) {
+
+        // Create the slider interval
         const UID = this.UID();
-        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer');
-        const label = this.element('label', `sliderLabel_${UID}`, 'label', labelText);
-        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper');
-        const valueDisplayStart = this.element('span', `sliderValueStart_${UID}`, 'sliderValue', defaultValue);
-        const sliderContainer = this.element('div', null, 'sliderInterval');
-        const valueDisplayEnd = this.element('span', `sliderValueEnd_${UID}`, 'sliderValue', defaultValueEnd);
-        const sliderStart = this.element('input', `sliderStart_${UID}`, 'slider');
-        const sliderEnd = this.element('input', `sliderEnd_${UID}`, 'slider');
+        const container = this.element('div', `sliderContainer_${UID}`, 'controlContainer', null, 'controlContainer');
+        const controlWrapper = this.element('div', `sliderControlWrapper_${UID}`, 'controlWrapper', null, 'controlWrapper');
+        const valueDisplayStart = this.element('span', `sliderValueStart_${UID}`, 'sliderValue', defaultValueStart, 'sliderInterval');
+        const sliderContainer = this.element('div', null, 'sliderInterval', null, 'sliderInterval');
+        const valueDisplayEnd = this.element('span', `sliderValueEnd_${UID}`, 'sliderValue', defaultValueEnd, 'sliderInterval');
+        const sliderStart = this.element('input', `sliderStart_${UID}`, 'slider', null, 'sliderInterval');
+        const sliderEnd = this.element('input', `sliderEnd_${UID}`, 'slider', null, 'sliderInterval');
+        sliderStart.type = 'range';
+        sliderEnd.type = 'range';
         
-        [sliderStart, sliderEnd].forEach(slider => {
-            slider.type = 'range';
-            slider.min = min;
-            slider.max = max;
-            slider.step = step;
-        });
+        sliderContainer.add([sliderStart, sliderEnd]);
+        controlWrapper.add([valueDisplayStart, sliderContainer, valueDisplayEnd]);
+        container.add(controlWrapper);
 
-        sliderStart.value = defaultValue;
-        sliderEnd.value = defaultValueEnd;
+        let _min = min;
+        let _max = max;
+        let _step = step;
 
-        // Method to update the slider value
-        const updateGradient = () => {
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.innerHTML = labelText;
+                else {  
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
+        container.getValues = () => {
+            return { start: sliderStart.value, end: sliderEnd.value };
+        }
+        container.setValues = (valueStart = null, valueEnd = null) => {
+            if (valueStart) {
+                sliderStart.value = valueStart;
+            }
+            if (valueEnd) {
+                sliderEnd.value = valueEnd;
+            }
+            container.updateSliderValue();
+        }
+        container.setMin = (min = null) => {
+            if (min) {
+                _min = min;
+                sliderStart.min = _min;
+                sliderEnd.min = _min;
+            }
+        }
+        container.setMax = (max = null) => {
+            if (max) {
+                _max = max;
+                sliderStart.max = _max;
+                sliderEnd.max = _max;
+            }
+        }
+        container.setStep = (step = null) => {
+            if (step) {
+                _step = step;
+                sliderStart.step = _step;
+                sliderEnd.step = _step;
+            }
+        }
+        container.updateSliderValue = () => {
             const startVal = parseFloat(sliderStart.value);
             const endVal = parseFloat(sliderEnd.value);
-            const startPercent = ((startVal - min) / (max - min)) * 100;
-            const endPercent = ((endVal - min) / (max - min)) * 100;
+            const startPercent = ((startVal - _min) / (_max - _min)) * 100;
+            const endPercent = ((endVal - _min) / (_max - _min)) * 100;
             
             sliderStart.style.background = `linear-gradient(to right, 
                 var(--border-color) 0%, 
@@ -2812,45 +2984,34 @@ class StickyUI {
             valueDisplayStart.textContent = startVal;
             valueDisplayEnd.textContent = endVal;
         };
-
-        // Initial value update
-        updateGradient();
-
+        container.listenEvent = (eventType, functionCallback) => {
+            sliderStart.listenEvent(eventType, functionCallback);
+            sliderEnd.listenEvent(eventType, functionCallback);
+        }
+        
         // Event listeners
-        sliderStart.addEventListener('input', () => {
+        sliderStart.listenEvent('input', () => {
             if (parseFloat(sliderStart.value) > parseFloat(sliderEnd.value)) {
                 sliderStart.value = sliderEnd.value;
             }
-            updateGradient();
+            container.updateSliderValue();
         });
-
-        sliderEnd.addEventListener('input', () => {
+        sliderEnd.listenEvent('input', () => {
             if (parseFloat(sliderEnd.value) < parseFloat(sliderStart.value)) {
                 sliderEnd.value = sliderStart.value;
             }
-            updateGradient();
+            container.updateSliderValue();
         });
 
-        // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            sliderStart.addEventListener(eventType, functionCallback);
-            sliderEnd.addEventListener(eventType, functionCallback);
-        }
-        
-        container.getValue = () => {
-            return { start: sliderStart.value, end: sliderEnd.value };
-        }
+        // Set initial value
+        container.setMin(min);
+        container.setMax(max);
+        container.setStep(step);
+        container.setValues(defaultValueStart, defaultValueEnd);
+        container.setLabel(labelText);
+        container.updateSliderValue();
 
-        if (labelText) 
-            container.appendChild(label);
-
-        sliderContainer.appendChild(sliderStart);
-        sliderContainer.appendChild(sliderEnd);
-        controlWrapper.appendChild(valueDisplayStart);
-        controlWrapper.appendChild(sliderContainer);
-        controlWrapper.appendChild(valueDisplayEnd);
-        container.appendChild(controlWrapper);
-
+        // Return the container 
         return container;
     }
 
@@ -2858,22 +3019,13 @@ class StickyUI {
     // #endregion
     // ----------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
     // ----------------------------------------
-    // #region Advanced Controls 2
-    // ----------------------------------------
+    // #region Advanced Controls 2 (vector2, joystick)
+    // =======================================>
     
     vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
+
+        // Create the vector2 control
         const UID = this.UID();
         const container = this.element('div', `vector2Container_${UID}`, 'vector2Container');
         const label = this.element('div', `vector2Label_${UID}`, 'label', labelText);
@@ -2939,13 +3091,13 @@ class StickyUI {
         updatePosition(defaultX, defaultY);
 
         // Event listeners
-        area.addEventListener('mousedown', startDragging);
+        area.listenEvent('mousedown', startDragging);
         window.addEventListener('mousemove', handleDrag);
         window.addEventListener('mouseup', () => isDragging = false);
 
         // Add event listener from external source and get the value
-        container.addEvent = (eventType, functionCallback) => {
-            area.addEventListener(eventType, functionCallback);
+        container.listenEvent = (eventType, functionCallback) => {
+            area.listenEvent(eventType, functionCallback);
         }
 
         container.getValue = () => {
@@ -2953,23 +3105,18 @@ class StickyUI {
         }
         
         if (labelText) 
-            container.appendChild(label);
+            container.add(label);
         
         // Add Labels and Values
-        valueX.appendChild(labelX);
-        valueX.appendChild(valueXText);
-        valueY.appendChild(labelY);
-        valueY.appendChild(valueYText);
+        valueX.add([labelX, valueXText]);
+        valueY.add([labelY, valueYText]);
         // Add Grid and Point
-        area.appendChild(grid);
-        area.appendChild(point);
-        values.appendChild(valueX);
-        values.appendChild(valueY);
+        area.add([grid, point]);
+        values.add([valueX, valueY]);
         // Add Area and Values to Control Wrapper
-        controlWrapper.appendChild(area);
-        controlWrapper.appendChild(values);
+        controlWrapper.add([area, values]);
         // Add Control Wrapper to Container
-        container.appendChild(controlWrapper);
+        container.add(controlWrapper);
         
         return container;
     }
@@ -3099,7 +3246,7 @@ class StickyUI {
     // ----------------------------------------
 
     // ----------------------------------------
-    // #region Advanced Containers
+    // #region Advanced Containers (folder, tabPage, tabs, faceplate)
     // ----------------------------------------
 
     folder = (titleText = 'Folder', iconClose = null, iconOpen = null, bgColor = null, bgColorHover = null, defaultClosed = false, controls = []) => {
@@ -3221,14 +3368,6 @@ class StickyUI {
         tabs.appendChild(tabContentContainer);
         return tabs;
     }
-
-    // <======================================= 
-    // #endregion
-    // ----------------------------------------
-
-    // ----------------------------------------
-    // #region Faceplate
-    // ----------------------------------------
 
     faceplate = (controls = [], width = null, height = null, positionX = null, positionY = null) => {
         const UID = this.UID();
