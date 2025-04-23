@@ -180,7 +180,9 @@
         let button1 = ui.button('Random Button 1');
         let button2 = ui.button('Random Button 2', '#06f3b1');
         let button3 = ui.button('Random Button 3', '#06f3b1', '#cc0050');
-        floatingPanel.add([separator1, button1, button2, button3]);
+        let button4 = ui.button('Random Button 4', '#06f3b1', '#cc0050', 'icon-robot', 'icon-robot');   
+        let button5 = ui.button('Random Button 5', '#06f3b1', '#cc0050', 'icon-robot');   
+        floatingPanel.add([separator1, button1, button2, button3, button4, button5]);
 
         // Switches
         let separator2 = ui.separator('Switches', '#06f3b1');
@@ -231,7 +233,7 @@
         // Buttons for Collapsable Folder
         let folderButton1 = ui.button('Folder Button 1');
         let folderButton2 = ui.button('Folder Button 2');
-        let folder = ui.folder('My Folder', 'icon-folder-close', 'icon-folder-open', '#06f3b1', '#F7227E', true, [folderButton1, folderButton2]);
+        let folder = ui.folder('My Folder', '#06f3b1', '#F7227E', true, [folderButton1, folderButton2]);
         floatingPanel2.add([separator6, folder]);
 
         // Tabs
@@ -271,7 +273,7 @@
         
         // Joystick
         let separator9 = ui.separator('Joystick', '#06f3b1');
-        let joystick1 = ui.joystick('Joystick Name', true, 100, (direction, speed, x, y) => {
+        let joystick1 = ui.joystick('Joystick Name', true, 200, (direction, speed, x, y) => {
             console.log(`Panel 3 Joystick => Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
         floatingPanel3.add([separator9, joystick1]);
@@ -310,7 +312,7 @@
         const tooltipLeft = ui.tooltip(buttonLeft, 'This is a tooltip that will adjust its position automatically!', 'left');
         const tooltipRight = ui.tooltip(buttonRight, 'This is a tooltip that will adjust its position automatically!', 'right');
 
-        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 930, 650);
+        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 930, 800);
 
         ui.setDraggable(faceplate1);    
         // Add Tooltips Faceplate to body
@@ -323,10 +325,11 @@
         const joystick2 = ui.joystick(null, false, null, (direction, speed, x, y) => {
            console.log(`Floating Joystick => Direction: ${direction}°, Speed: ${speed}, X: ${x}, Y: ${y}`);
         });
-        const faceplate = ui.faceplate([joystick2], 80, 80, 1310, 770);
+        const faceplate = ui.faceplate([joystick2], 80, 80, 1310, 900);
 
         // Add faceplate to body
         ui.body.add(faceplate);
+        joystick2.adjustParentSize();
 
         // ----------------------------------------
         // Icon Bars - Floating bars (WORK IN PROGRESS - WIP)

@@ -178,6 +178,15 @@ class StickyUI {
          */ 
         isInDOM: (element) => {
             return document.body.contains(element);
+        },
+        /**
+         * Inject CSS into the document
+         * @param {string} css CSS to inject
+         */
+        injectCSS: (css) => {
+            const style = document.createElement('style');
+            style.innerText = css;
+            document.head.appendChild(style);
         }
     }
 
@@ -2104,6 +2113,8 @@ class StickyUI {
      * @property {function(string): void} setLabel - Set the label of the button (labelText = null)
      * @property {function(string): void} setBackgroundColor - Set the background color of the button (bgColor = null)
      * @property {function(string): void} setBackgroundColorHover - Set the background color of the button when hovered (bgColorHover = null)
+     * @property {function(string): void} setIconLeft - Set the icon of the button on the left (icon = null)
+     * @property {function(string): void} setIconRight - Set the icon of the button on the right (icon = null)
      */
 
     /**
@@ -2115,9 +2126,11 @@ class StickyUI {
      * @param {string} labelText Label of the button
      * @param {string} bgColor Background color of the button
      * @param {string} bgColorHover Background color of the button when hovered
+     * @param {string} iconLeft Icon of the button on the left (icon = null)
+     * @param {string} iconRight Icon of the button on the right (icon = null)
      * @returns {UIButton} Created button
      */
-    button(labelText = 'Button', bgColor = null, bgColorHover = null) {
+    button(labelText = 'Button', bgColor = null, bgColorHover = null, iconLeft = null, iconRight = null) {
         
         // Create the button
         const UID = this.UID();
@@ -2141,6 +2154,28 @@ class StickyUI {
                 _bgColorHover = bgColorHover;
             }
         }
+        button.setIconLeft = (icon = null) => {
+            if (icon === null) 
+                icon = 'icon-blank';
+            let _icon = button.query('.icon-left');
+            if (_icon) {
+                _icon.remove();
+            }
+            _icon = this.icon(icon);
+            button.prepend(_icon);
+            _icon.addClass('icon-left');            
+        }
+        button.setIconRight = (icon = null) => {
+            if (icon === null) 
+                icon = 'icon-blank';
+            let _icon = button.query('.icon-right');
+            if (_icon) {
+                _icon.remove();
+            }
+            _icon = this.icon(icon);
+            button.add(_icon);
+            _icon.addClass('icon-right');
+        }
 
         // Event Listeners       
         button.listenEvent('mouseenter', () => {
@@ -2156,9 +2191,12 @@ class StickyUI {
         button.setLabel(labelText);
         button.setBackgroundColor(_bgColor);
         button.setBackgroundColorHover(_bgColorHover);
+        button.setIconLeft(iconLeft);
+        button.setIconRight(iconRight);        
 
         return button;
     }
+
 
     /** 
      * @typedef {Object} UISwitchBase SwitchBase (Base) Switch Element
@@ -3023,12 +3061,41 @@ class StickyUI {
     // #region Advanced Controls 2 (vector2, joystick)
     // =======================================>
     
-    vector2 = (labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) => {
+    /**
+     * @typedef {Object} UIVector2Base Vector2Base (Base) Vector2 Element
+     * @property {function(string): void} setLabel - Set the label of the vector2 (labelText = null)
+     * @property {function(number, number): void} setValues - Set the values of the vector2 (x = 0, y = 0)
+     * @property {function(): {x: number, y: number}} getValues - Get the values of the vector2
+     * @property {function(number, number): void} setAxisX - Set the axis of the vector2 (minX = null, maxX = null)
+     * @property {function(number, number): void} setAxisY - Set the axis of the vector2 (minY = null, maxY = null)
+     * @property {function(boolean): void} showValues - Show/Hide the values of the vector2 (show = true)
+     * @property {function(number): void} setGridSize - Set the size of the grid of the vector2 (gridSize = null)
+     * @property {function(number, number): void} updatePosition - Update the position of the vector2 (x = 0, y = 0, updatePoint = true)
+     * @property {function(): void} listenEvent - Listen the event of the vector2 (eventType = null, change, input, keydown, keyup, etc.)
+     */ 
+
+    /**
+     * @typedef {UIElement & UIVector2Base} UIVector2 Vector2 Element
+     */
+
+    /**
+     * Creates a vector2 control with a grid and a point
+     * @param {String} labelText Label text for the control
+     * @param {Number} minX Minimum value for the x axis
+     * @param {Number} maxX Maximum value for the x axis
+     * @param {Number} minY Minimum value for the y axis
+     * @param {Number} maxY Maximum value for the y axis
+     * @param {Number} defaultX Default value for the x axis
+     * @param {Number} defaultY Default value for the y axis
+     * @param {Number} gridSize Size of the grid
+     * @param {Function} onChange Callback function for the change event
+     * @returns {UIVector2} Vector2 control container
+     */
+    vector2(labelText = 'Vector2', minX = -1, maxX = 1, minY = -1, maxY = 1, defaultX = 0, defaultY = 0, gridSize = 10, onChange = null) {
 
         // Create the vector2 control
         const UID = this.UID();
         const container = this.element('div', `vector2Container_${UID}`, 'vector2Container');
-        const label = this.element('div', `vector2Label_${UID}`, 'label', labelText);
         const controlWrapper = this.element('div', `vector2ControlWrapper_${UID}`, 'controlWrapper');
         const area = this.element('div', `vector2Area_${UID}`, 'vector2Area');
         const grid = this.element('div', `vector2Grid_${UID}`, 'vector2Grid');
@@ -3041,12 +3108,69 @@ class StickyUI {
         const valueXText = this.element('span', `vector2ValueXText_${UID}`);
         const valueYText = this.element('span', `vector2ValueYText_${UID}`);
         
-        grid.style.setProperty('--grid-size', `${gridSize}px`);
-        
-        // Method to update Position
-        const updatePosition = (x, y, updatePoint = true) => {
-            const normalizedX = (x - minX) / (maxX - minX);
-            const normalizedY = 1 - (y - minY) / (maxY - minY);
+        valueX.add([labelX, valueXText]);
+        valueY.add([labelY, valueYText]);
+        values.add([valueX, valueY]);
+        area.add([grid, point]);
+        controlWrapper.add([area, values]);
+        container.add(controlWrapper);        
+   
+        let _onchangeCallback = onChange;
+        let _isDragging = false;
+        let _minX = minX;
+        let _maxX = maxX;
+        let _minY = minY;
+        let _maxY = maxY;
+
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.textContent = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText);
+                    container.prepend(label);
+                }
+            }
+        }
+        container.setValues = (x = 0, y = 0) => {
+            container.updatePosition(x, y);
+        }
+        container.getValues = () => {
+            return { x: valueX.textContent, y: valueY.textContent };
+        }
+        container.setAxisX = (minX = null, maxX = null) => {
+            if (minX) {
+                _minX = minX;
+            }
+            if (maxX) {
+                _maxX = maxX;
+            }
+        }
+        container.setAxisY = (minY = null, maxY = null) => {
+            if (minY) {
+                _minY = minY;
+            }
+            if (maxY) {
+                _maxY = maxY;
+            }
+        }
+        container.showValues = (show = true) => {
+            if (show) {
+                values.style.display = 'block';
+            } else {
+                values.style.display = 'none';
+            }
+        }
+        container.setGridSize = (gridSize = null) => {
+            if (gridSize) {
+                grid.style.setProperty('--grid-size', `${gridSize}px`);
+            }
+        }
+        container.updatePosition = (x, y, updatePoint = true) => {
+            const normalizedX = (x - _minX) / (_maxX - _minX);
+            const normalizedY = 1 - (y - _minY) / (_maxY - _minY);
             
             if (updatePoint) {
                 point.style.left = `${normalizedX * 100}%`;
@@ -3056,96 +3180,133 @@ class StickyUI {
             valueXText.textContent = x.toFixed(2);
             valueYText.textContent = y.toFixed(2);
             
-            if (onChange) onChange(x, y);
+            if (_onchangeCallback) 
+                _onchangeCallback(x, y);
         };
-
-        // Method to handle Drag
-        let isDragging = false;
-
-        const handleDrag = (e) => {
-            if (!isDragging) return;
+        container._handleDrag = (e) => {
+            if (!_isDragging) return;
 
             const rect = area.getBoundingClientRect();
             const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
             
-            const valueX = minX + x * (maxX - minX);
-            const valueY = maxY - y * (maxY - minY);
+            const valueX = _minX + x * (_maxX - _minX);
+            const valueY = _maxY - y * (_maxY - _minY);
             
-            updatePosition(valueX, valueY);
+            container.updatePosition(valueX, valueY);
         };
-
-        const startDragging = (e) => {
-            isDragging = true;
+        container._startDrag = (e) => {
+            _isDragging = true;
             const rect = area.getBoundingClientRect();
             const x = (e.clientX - rect.left) / rect.width;
             const y = (e.clientY - rect.top) / rect.height;
             
-            const valueX = minX + x * (maxX - minX);
-            const valueY = maxY - y * (maxY - minY);
+            const valueX = _minX + x * (_maxX - _minX);
+            const valueY = _maxY - y * (_maxY - _minY);
             
-            updatePosition(valueX, valueY);
+            container.updatePosition(valueX, valueY);
         };
-
-        // Initial value update
-        updatePosition(defaultX, defaultY);
-
-        // Event listeners
-        area.listenEvent('mousedown', startDragging);
-        window.addEventListener('mousemove', handleDrag);
-        window.addEventListener('mouseup', () => isDragging = false);
-
-        // Add event listener from external source and get the value
         container.listenEvent = (eventType, functionCallback) => {
             area.listenEvent(eventType, functionCallback);
         }
 
-        container.getValue = () => {
-            return { x: valueX.textContent, y: valueY.textContent };
-        }
-        
-        if (labelText) 
-            container.add(label);
-        
-        // Add Labels and Values
-        valueX.add([labelX, valueXText]);
-        valueY.add([labelY, valueYText]);
-        // Add Grid and Point
-        area.add([grid, point]);
-        values.add([valueX, valueY]);
-        // Add Area and Values to Control Wrapper
-        controlWrapper.add([area, values]);
-        // Add Control Wrapper to Container
-        container.add(controlWrapper);
-        
+        // Event listeners
+        area.listenEvent('mousedown', container._startDrag);
+        window.addEventListener('mousemove', container._handleDrag);
+        window.addEventListener('mouseup', () => _isDragging = false);
+
+        // Set initial value
+        container.setGridSize(gridSize);
+        container.setAxisX(minX, maxX);
+        container.setAxisY(minY, maxY);
+        container.setLabel(labelText);
+        container.updatePosition(defaultX, defaultY);
+
+        // Return the container
         return container;
     }
     
-    joystick = (labelText = 'Joystick', showDetails = false, size = null, onChange = null) => {
+    /**
+    * @typedef {Object} UIJoystickBase JoystickBase (Base) Joystick Element
+    * @property {function(string): void} setLabel - Set the label of the joystick (labelText = null)
+    * @property {function(boolean): void} showDetails - Show/Hide the details of the joystick (show = true)
+    * @property {function(number, number, number, number): void} setCallback - Set the callback function for the change event (callback = null)
+    * @property {function(number): void} setSize - Set the size of the joystick (size = null)
+    * @property {function(): void} adjustParentSize - Adjust the size of the joystick to the parent element (size = null)
+    * @property {function(number, number, number, number): void} setUpdateDisplay - Set the display of the joystick (deltaY = 0, deltaX = 0, distance = 0, radius = 0)
+    * @property {function(number, number, number, number): void} updateStickPosition - Update the position of the joystick (x = 0, y = 0)
+    */
+
+    /**
+     * @typedef {UIElement & UIJoystickBase} UIJoystick Joystick Element
+     */
+
+    /**
+     * Creates a joystick control with a value display
+     * @param {String} labelText Label text for the control
+     * @param {Boolean} showDetails Show/Hide the details of the joystick
+     * @param {Number} size Size of the joystick
+     * @param {Function} onChange Callback function for the change event
+     * @returns {UIJoystick} Joystick control container
+     */
+    joystick(labelText = 'Joystick', showDetails = false, size = null, onChange = null) {
+
+        // Create the joystick control
         const UID = this.UID();
-        const container = this.element('div', `joystickContainer_${UID}`, 'joystickContainer');
-        const label = this.element('div', `joystickLabel_${UID}`, 'label', labelText);
-        const joystickArea = this.element('div', `joystickArea_${UID}`, 'joystickArea');
-        const joystick = this.element('div', `joystick_${UID}`, 'joystick');
-        const valueDisplay = this.element('div', `joystickValue_${UID}`, 'joystickValue');
+        const container = this.element('div', `joystickContainer_${UID}`, 'joystickContainer', null, 'joystick');
+        const joystickArea = this.element('div', `joystickArea_${UID}`, 'joystickArea', null, 'joystick');
+        const joystick = this.element('div', `joystick_${UID}`, 'joystick', null, 'joystick');
+        const valueDisplay = this.element('div', `joystickValue_${UID}`, 'joystickValue', null, 'joystick');
         
-        // Method to get dimensions
-        const setDimensions = () => {
+        joystickArea.add(joystick);
+        container.add([joystickArea, valueDisplay]);        
+
+        let _onchangeCallback = onChange;
+        let _isDragging = false;
+
+        // External methods
+        container.setLabel = (labelText = null) => {
+            if (labelText) {
+                let label = container.query('.label');
+                if (label)
+                    label.textContent = labelText;
+                else {
+                    label = this.element('div', `label_${UID}`, 'label', labelText, 'label');
+                    container.prepend(label);
+                }
+            }
+        }
+        container.showDetails = (show = true) => {
+            if (show)
+                valueDisplay.style.display = 'block';
+            else
+                valueDisplay.style.display = 'none';
+        }
+        container.setCallback = (callback = null) => {
+            if (callback)
+                _onchangeCallback = callback;
+        }
+        container.setSize = (size = null) => {
+            if (size === null) 
+                size = 200;
+            if (size) {
+                joystickArea.style.width = `${size}px`;
+                joystickArea.style.height = `${size}px`;
+                joystick.style.width = `${size * 0.3}px`;
+                joystick.style.height = `${size * 0.3}px`;
+                joystick.style.left = `${size / 2}px`;
+                joystick.style.top = `${size / 2}px`;
+            }
+        }
+        container.adjustParentSize = () => {
             const parentElement = container.parentElement;
             if (parentElement) {
                 const parentRect = parentElement.getBoundingClientRect();
-                const areaSize = size || Math.min(parentRect.width, parentRect.height);
-                joystickArea.style.width = `${areaSize}px`;
-                joystickArea.style.height = `${areaSize}px`;
-                joystick.style.width = `${areaSize * 0.3}px`;
-                joystick.style.height = `${areaSize * 0.3}px`;
-                return areaSize;
+                size = Math.min(parentRect.width, parentRect.height);
+                container.setSize(size);
             }
-            return size || 200;
-        };
-
-        // Method to update Display
-        const setUpdateDisplay = (deltaY, deltaX, distance, radius) => {
+        }        
+        container.setUpdateDisplay = (deltaY, deltaX, distance, radius) => {
             let direction = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
                 
             // Calculate normalized X/Y coordinates (-1 to +1)
@@ -3157,13 +3318,10 @@ class StickyUI {
             
             valueDisplay.textContent = `Direction: ${Math.round(direction)}°, Speed: ${magnitude.toFixed(2)}, X: ${(normalizedCoordX * magnitude).toFixed(2)}, Y: ${(normalizedCoordY * magnitude).toFixed(2)}`;
             
-            if (onChange) {
-                onChange(direction, magnitude, normalizedCoordX * magnitude, normalizedCoordY * magnitude);
-            }            
+            if (_onchangeCallback) 
+                _onchangeCallback(direction, magnitude, normalizedCoordX * magnitude, normalizedCoordY * magnitude);
         }
-
-        // Method to update Position
-        const updateStickPosition = (x, y, updateDisplay = true) => {
+        container.updateStickPosition = (x, y) => {
             const areaRect = joystickArea.getBoundingClientRect();
             const centerX = areaRect.width / 2;
             const centerY = areaRect.height / 2;
@@ -3187,57 +3345,42 @@ class StickyUI {
             joystick.style.left = `${normalizedX}px`;
             joystick.style.top = `${normalizedY}px`;
             
-            if (updateDisplay) 
-                setUpdateDisplay(deltaY, deltaX, distance, radius);
+            // Update the display and callback
+            container.setUpdateDisplay(deltaY, deltaX, distance, radius);
         };
-
-        // Method to handle Drag
-        let isDragging = false;
-
-        const handleDrag = (e) => {
-            if (!isDragging) return;
+        container._handleDrag = (e) => {
+            if (!_isDragging) return;
             
             const rect = joystickArea.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             
-            updateStickPosition(x, y);
+            container.updateStickPosition(x, y);
         };
 
         // Event listeners
-        joystickArea.addEventListener('mousedown', (e) => {
-            isDragging = true;
+        joystickArea.listenEvent('mousedown', (e) => {
+            _isDragging = true;
             const rect = joystickArea.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            updateStickPosition(x, y);
+            container.updateStickPosition(x, y);
         });
-
-        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('mousemove', container._handleDrag);
         window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
+            if (_isDragging) {
+                _isDragging = false;
                 const rect = joystickArea.getBoundingClientRect();
-                updateStickPosition(rect.width / 2, rect.height / 2);
+                container.updateStickPosition(rect.width / 2, rect.height / 2);
             }
         });
 
-        // Initial value update
-        setUpdateDisplay(0, 0, 0, 1);
+        // Set initial value
+        container.showDetails(showDetails);
+        container.setLabel(labelText);
+        container.setSize(size);
 
-        if (labelText) 
-            container.appendChild(label);
-        joystickArea.appendChild(joystick);
-        container.appendChild(joystickArea);
-        if (showDetails)
-            container.appendChild(valueDisplay);
-
-        // Update position after adding to DOM
-        requestAnimationFrame(() => {
-            const areaSize = setDimensions();
-            updateStickPosition(areaSize / 2, areaSize / 2, false);
-        });
-
+        // Return the container
         return container;
     }
 
@@ -3249,143 +3392,364 @@ class StickyUI {
     // #region Advanced Containers (folder, tabPage, tabs, faceplate)
     // ----------------------------------------
 
-    folder = (titleText = 'Folder', iconClose = null, iconOpen = null, bgColor = null, bgColorHover = null, defaultClosed = false, controls = []) => {
+    /**
+    * @typedef {Object} UIFolderTitleBase UIFolderTitle (Base) Folder Title Element
+    * @property {function(string): void} setBackgroundColor - Set the background color of the folder title (bgColor = null)
+    * @property {function(string): void} setBackgroundColorHover - Set the background color of the folder title when hovered (bgColorHover = null)
+    * @property {function(string): void} setTitle - Set the title of the folder title (titleText = null)
+    * @property {function(boolean): void} toggle - Toggle the collapsed state of the folder title (collapsed = null)
+    * @property {function(): void} _update - Update the state of the folder title
+    */
+
+    /**
+     * @typedef {UIElement & UIFolderTitleBase} UIFolderTitle Folder Title Element
+     */
+
+    /**
+     * Creates a folder title element
+     * @param {UIFolder} folder - Folder element (parent element) (folder = null)
+     * @param {string} titleText - Title text of the folder title (titleText = 'Folder')
+     * @param {string} bgColor - Background color of the folder title (bgColor = null)
+     * @param {string} bgColorHover - Background color of the folder title when hovered (bgColorHover = null)
+     * @param {boolean} collapsed - Collapsed state of the folder title (collapsed = false)
+     * @param {Object} iconLefts - Icons for the left side of the folder title (iconLefts = { "open": "icon-folder-open", "close": "icon-folder-close" })
+     * @param {Object} iconRights - Icons for the right side of the folder title (iconRights = { "open": "icon-chevron-down", "close": "icon-chevron-up" })
+     * @returns {UIFolderTitle} Folder title element
+     */
+    folderTitle(folder = null, titleText = 'Folder', bgColor = null, bgColorHover = null, collapsed = false,
+        iconLefts = { "open": "icon-folder-open", "close": "icon-folder-close" }, 
+        iconRights = { "open": "icon-chevron-down", "close": "icon-chevron-up" }) {
+
+        // Create the folder title
         const UID = this.UID();
-        const folder = this.element('div', `folder_${UID}`, 'folder');
-        const folderHeader = this.element('div', `folderHeader_${UID}`, 'folderHeader');
-        const folderTitle = this.element('div', `folderTitle_${UID}`, 'folderTitle', titleText);
-        const folderIcon = this.element('div', `folderIcon_${UID}`, 'folderIcon');
-        const folderToggleButton = this.element('div', `folderToggleButton_${UID}`, 'folderToggleButton');
-        const contentContainer = this.element('div', `folderContent_${UID}`, 'folderContent');
+        const container = this.element('div', `folderTitleContainer_${UID}`, 'folderTitleContainer', null, 'folderTitle');
+        const folderTitle = this.element('div', `folderTitle_${UID}`, 'folderTitle', titleText, 'folderTitle');
+        const folderLeftIcon = this.icon(iconLefts.open);
+        const folderRightIcon = this.icon(iconRights.open);
+        folderLeftIcon.addClass('folderLeftIcon');
+        folderRightIcon.addClass('folderRightIcon');
 
-        if (bgColor) {
-            folderHeader.style.backgroundColor = bgColor;
+        container.add([folderLeftIcon, folderTitle, folderRightIcon]);
+        container.dataset.isCollapsed = collapsed;
+
+        // External methods
+        container.setBackgroundColor = (bgColor = null) => {
+            if (bgColor) {
+                container.dataset.bgColor = bgColor;
+                container.style.backgroundColor = bgColor;
+            }
+        }
+        container.setBackgroundColorHover = (bgColorHover = null) => {
+            if (bgColorHover) {
+                container.dataset.bgColorHover = bgColorHover;
+            }
+        }
+        container.setTitle = (titleText = null) => {
+            if (titleText)
+                folderTitle.textContent = titleText;
+        }
+        container.toggle = (collapsed = null) => {
+            if (collapsed === null)
+                container.dataset.isCollapsed = !(JSON.parse(container.dataset.isCollapsed));
+            if (collapsed)
+                container.dataset.isCollapsed = collapsed;
+            return JSON.parse(container.dataset.isCollapsed);
+        }
+        container._update = () => {
+            if (JSON.parse(container.dataset.isCollapsed)) {
+                folderLeftIcon.changeIcon(iconLefts.close);
+                folderRightIcon.changeIcon(iconRights.close);
+            } else {
+                folderLeftIcon.changeIcon(iconLefts.open);
+                folderRightIcon.changeIcon(iconRights.open);
+            }
         }
 
-        if (bgColorHover) {
-            folderHeader.dataset.hoverColor = bgColorHover;
-            folderHeader.addEventListener('mouseenter', e => e.target.style.backgroundColor = bgColorHover);
-            folderHeader.addEventListener('mouseleave', e => e.target.style.backgroundColor = bgColor || '');
-        }
-
-        if (defaultClosed) {
-            contentContainer.classList.add('collapsed');
-            folderToggleButton.innerHTML = '<div class="icon icon-chevron-up"></div>';
-            folderIcon.innerHTML = (iconClose) ? `<div class="icon ${iconClose}"></div>` : (iconClose !== false) ?'<div class="icon icon-folder-close"></div>' : '';
-        } else {
-            folderToggleButton.innerHTML = '<div class="icon icon-chevron-down"></div>';
-            folderIcon.innerHTML = (iconOpen) ? `<div class="icon ${iconOpen}"></div>` : (iconOpen !== false) ? '<div class="icon icon-folder-open"></div>' : '';
-        }
-        
-        // Add Controls
-        controls.forEach(control => {
-            contentContainer.appendChild(control);
+        // Event listeners
+        container.listenEvent('mouseenter', () => {
+            if (container.dataset.bgColorHover)
+                container.style.backgroundColor = container.dataset.bgColorHover;
         });
+        container.listenEvent('mouseleave', () => {
+            if (container.dataset.bgColor)
+                container.style.backgroundColor = container.dataset.bgColor;
+        });
+        container.listenEvent('click', () => {
+            let isCollapsed = container.toggle();
+            container._update();
+            if (folder)
+                folder.toggle(isCollapsed);
+        });
+
+        // Set initial icons
+        container.setBackgroundColor(bgColor);
+        container.setBackgroundColorHover(bgColorHover);
+        container.setTitle(titleText);
+        container.toggle(collapsed);
+        container._update();
+
+        // Return the folder title
+        return container;
+    }
+
+    /**
+     * @typedef {Object} UIFolderBase UIFolder (Base) Folder Element
+     * @property {function(): void} collapse - Collapse the folder
+     * @property {function(): void} expand - Expand the folder
+     * @property {function(boolean): void} toggle - Toggle the collapsed state of the folder (collapsed = null)
+     * @property {function(Array): void} add - Add controls to the folder (controls = [])
+     * @property {function(UIElement): void} remove - Remove a control from the folder (control = null)
+     */
+
+    /**
+     * @typedef {UIElement & UIFolderBase} UIFolder Folder Element
+     */
+
+    /**
+     * Creates a folder element
+     * @param {string} titleText - Title text of the folder (titleText = 'Folder')
+     * @param {string} bgColor - Background color of the folder (bgColor = null)
+     * @param {string} bgColorHover - Background color of the folder when hovered (bgColorHover = null)
+     * @param {boolean} collapsed - Collapsed state of the folder (collapsed = false)
+     * @param {Object} controls - Controls to add to the folder (controls = [])
+     * @returns {UIFolder} Folder element
+     */
+    folder(titleText = 'Folder', bgColor = null, bgColorHover = null, collapsed = false, controls = []) {
         
-        // Methods to open/close folder
+        // Create the folder
+        const UID = this.UID();
+        const folder = this.element('div', `folder_${UID}`, 'folder', null, 'folder');
+        const contentContainer = this.element('div', `folderContent_${UID}`, 'folderContent', null, 'folder');
+        const folderTitle = this.folderTitle(folder, titleText, bgColor, bgColorHover, collapsed);
+
+        contentContainer.add(controls);
+        folder.add([folderTitle, contentContainer]);
+        folder.dataset.isCollapsed = collapsed;
+
+        // External methods
         folder.collapse = () => {
-            contentContainer.classList.add('collapsed');
-            folderToggleButton.innerHTML = '<div class="icon icon-chevron-up"></div>';
-            folderIcon.innerHTML = (iconClose) ? `<div class="icon ${iconClose}"></div>` : (iconClose !== false) ? '<div class="icon icon-folder-close"></div>' : '';
+            contentContainer.addClass('collapsed');
+            folder.dataset.isCollapsed = true;
         }
         folder.expand = () => {
-            contentContainer.classList.remove('collapsed');
-            folderToggleButton.innerHTML = '<div class="icon icon-chevron-down"></div>';
-            folderIcon.innerHTML = (iconOpen) ? `<div class="icon ${iconOpen}"></div>` : (iconOpen !== false) ? '<div class="icon icon-folder-open"></div>' : '';
+            contentContainer.removeClass('collapsed');
+            folder.dataset.isCollapsed = false;
+        }
+        folder.toggle = (collapsed = null) => {
+            if (collapsed === null)
+                folder.dataset.isCollapsed = !(JSON.parse(folder.dataset.isCollapsed));
+            if (collapsed)
+                folder.dataset.isCollapsed = collapsed;
+
+            if (JSON.parse(folder.dataset.isCollapsed))
+                folder.expand();
+            else
+                folder.collapse();
+
+            return JSON.parse(folder.dataset.isCollapsed);
+        }
+        folder.add = (controls = []) => {
+            contentContainer.add(controls);
+        }
+        folder.remove = (control = null) => {
+            if (control)
+                contentContainer.removeChild(control);
+            else
+                contentContainer.innerHTML = '';
         }
 
-        // Collapse/Expand Event
-        folderHeader.addEventListener('click', () => {
-            contentContainer.classList.toggle('collapsed');
-            if (contentContainer.classList.contains('collapsed')) {   
-               folder.collapse();
-            } else {
-                folder.expand();
-            }
-        });
-        
-        folderHeader.appendChild(folderIcon);
-        folderHeader.appendChild(folderTitle);
-        folderHeader.appendChild(folderToggleButton);
-        folder.appendChild(folderHeader);
-        folder.appendChild(contentContainer);
+        // Set initial state
+        folder.toggle(collapsed);
+        folderTitle.toggle(collapsed);
+
+        // Return the folder
         return folder;
     }
 
-    tabPage = (titleText = 'Tab', icon = null, controls = []) => {       
-        const UID = this.UID();
-        const tabPage = this.element('div', `tabPage_${UID}`, 'tabPage');
-        const tabPageButton = this.element('button', `tabPageButton_${UID}`, 'tabPageButton');
-        
-        if (titleText)
-            tabPageButton.textContent = titleText;
+    /**
+     * @typedef {Object} UITabPageBase UITabPage (Base) Tab Page Element
+     * @property {function(string): void} setIcon - Set the icon of the tab page (icon = null)
+     * @property {function(string): void} setTitle - Set the title of the tab page (titleText = null)
+     * @property {function(Array): void} add - Add controls to the tab page (controls = [])
+     */
 
-        if (icon) {
-            const tabPageIcon = this.element('div', `tabPageIcon_${UID}`, 'icon');
-            tabPageIcon.classList.add(icon);
-            tabPageButton.insertBefore(tabPageIcon, tabPageButton.firstChild);
+    /**
+     * @typedef {UIElement & UITabPageBase} UITabPage Tab Page Element
+     */ 
+
+    /**
+     * Creates a tab page element
+     * @param {string} titleText - Title text of the tab page (titleText = 'Tab')
+     * @param {string} icon - Icon of the tab page (icon = null)
+     * @param {Array} controls - Controls to add to the tab page (controls = [])
+     * @returns {UITabPage} Tab page element (return { tabPage, tabPageButton })
+     */
+    tabPage(titleText = 'Tab', icon = null, controls = []) {       
+        
+        // Create the tab page
+        const UID = this.UID();
+        const tabPage = this.element('div', `tabPage_${UID}`, 'tabPage', null, 'tabPage');
+        const tabPageButton = this.element('div', `tabPageButton_${UID}`, 'tabPageButton', null, 'tabPageButton');
+        
+        // External methods
+        tabPage.setIcon = (icon = null) => {
+            if (icon) {
+                let _icon = tabPageButton.query('.icon');
+               
+                if (_icon) 
+                    _icon.remove();
+                _icon = this.icon(icon);
+                tabPageButton.prepend(_icon);
+            }
+        }
+        tabPage.setTitle = (titleText = null) => {
+            if (titleText) {
+                let _title = tabPageButton.query('.tabPageTitle');
+                if (_title)
+                    _title.remove();
+                _title = this.element('div', `tabPageTitle_${UID}`, 'tabPageTitle', titleText, 'tabPageTitle');
+                tabPageButton.add(_title);
+            }
         }
 
-        // Controls Container
-        const tabPageControls = this.element('div', `tabPageControls_${UID}`, 'tabPage-controls');
-        controls.forEach(control => {
-            tabPageControls.appendChild(control);
-        });
+        // Set initial state
+        tabPage.setIcon(icon);
+        tabPage.setTitle(titleText);
+        tabPage.add(controls);
 
-        tabPage.appendChild(tabPageControls);    
+        // Return the tab page
         return { tabPage, tabPageButton };
     }
 
-    tabs = (pages = [], defaultPage = 0) => {
-        const UID = this.UID();
-        const tabs = this.element('div', `tabContainer_${UID}`, 'tabContainer');
-        const tabBar = this.element('div', `tabBar_${UID}`, `tabBar`);
-        const tabContentContainer = this.element('div', `tabContentContainer_${UID}`, 'tabContentContainer');
-        
-        pages.forEach((page, index) => {
-            const tabContent = this.element('div', `tabContent_${index}_${UID}`, 'tabContent');
-            const { tabPage, tabPageButton } = page;
-            tabContent.appendChild(tabPage);
-            tabBar.appendChild(tabPageButton);
-            tabContentContainer.appendChild(tabContent);
+    /**
+     * @typedef {Object} UITabsBase UITabs (Base) Tabs Element
+     * @property {function(Array): void} addPages - Add pages to the tabs of UITabPage (pages = [])
+     * @property {function(number): void} selectPage - Select a page (pageIndex = 0)
+     */
 
-            // Set default page
-            if (index === defaultPage) {
-                tabPageButton.classList.add('active');
-                tabContent.classList.add('active');
-            }
-            
-            // Event listener for tab button
-            tabPageButton.addEventListener('click', () => {
-                tabBar.querySelectorAll('.tabPageButton').forEach(t => t.classList.remove('active'));
-                tabContentContainer.querySelectorAll('.tabContent').forEach(c => c.classList.remove('active'));
-                tabPageButton.classList.add('active');
-                tabContent.classList.add('active');
-            });
-        });
+    /**
+     * @typedef {UIElement & UITabsBase} UITabs Tabs Element
+     */
+
+    /**
+     * Creates a tabs element
+     * @param {Array} pages - Pages to add to the tabs of UITabPage (pages = [])
+     * @param {number} defaultPage - Default page to select (defaultPage = 0)
+     * @returns {UITabs} Tabs element (return { tabs, tabBar, tabContentContainer })
+     */
+    tabs(pages = [], defaultPage = 0) {
+
+        // Create the tabs
+        const UID = this.UID();
+        const tabs = this.element('div', `tabContainer_${UID}`, 'tabContainer', null, 'tabContainer');
+        const tabBar = this.element('div', `tabBar_${UID}`, `tabBar`, null, 'tabBar');
+        const tabContentContainer = this.element('div', `tabContentContainer_${UID}`, 'tabContentContainer', null, 'tabContentContainer');
         
-        tabs.appendChild(tabBar);
-        tabs.appendChild(tabContentContainer);
+        // External methods
+        tabs.selectPage = (pageIndex = 0) => {
+            // Remove active class from all tab buttons and contents
+            tabBar.queryAll('.tabPageButton').forEach(t => t.removeClass('active'));
+            tabContentContainer.queryAll('.tabContent').forEach(c => c.removeClass('active'));            
+            // Add active class to the default page
+            tabBar.queryAll('.tabPageButton')[pageIndex].addClass('active');
+            tabContentContainer.queryAll('.tabContent')[pageIndex].addClass('active');
+        }        
+        tabs.addPages = (pages = []) => {
+            const currentIndex = tabContentContainer.queryAll('.tabContent').length;
+            pages.forEach((page, index) => {
+                const tabContent = this.element('div', `tabContent_${currentIndex + index}_${UID}`, 'tabContent');
+                const { tabPage, tabPageButton } = page;
+                tabContent.add(tabPage);
+                tabBar.add(tabPageButton);
+                tabContentContainer.add(tabContent);
+    
+                // Event listener for tab button
+                tabPageButton.listenEvent('click', () => {
+                    tabs.selectPage(currentIndex + index);
+                });
+            });            
+        }
+
+        // Set initial state
+        tabs.addPages(pages);
+        tabs.add(tabBar);
+        tabs.add(tabContentContainer);
+        tabs.selectPage(defaultPage);
+
+        // Return the tabs
         return tabs;
     }
 
-    faceplate = (controls = [], width = null, height = null, positionX = null, positionY = null) => {
-        const UID = this.UID();
-        const faceplate = this.element('div', `faceplate_${UID}`, 'faceplate');
+    /**
+     * @typedef {Object} UIFaceplateBase UIFaceplate (Base) Faceplate Element
+     * @property {function(Array): void} add - Add controls to the faceplate (controls = [])
+     * @property {function(number): void} setWidth - Set the width of the faceplate (width = null)
+     * @property {function(number): void} setHeight - Set the height of the faceplate (height = null)
+     * @property {function(number): void} setPositionX - Set the position X of the faceplate (positionX = null)
+     * @property {function(number): void} setPositionY - Set the position Y of the faceplate (positionY = null)
+     */
 
-        // Configurations
-        if (width)      faceplate.style.width = `${width}px`;
-        if (height)     faceplate.style.height = `${height}px`;
-        if (positionX > 0)  faceplate.style.left = `${positionX}px`;
-        if (positionY > 0)  faceplate.style.top = `${positionY}px`;      
-        if (positionX < 0)  faceplate.style.right = `${positionX*-1}px`;
-        if (positionY < 0)  faceplate.style.bottom = `${positionY*-1}px`;
+    /**
+     * @typedef {UIElement & UIFaceplateBase} UIFaceplate Faceplate Element
+     */
+
+    /**
+     * Creates a faceplate element
+     * @param {Array} controls - Controls to add to the faceplate (controls = [])
+     * @param {number} width - Width of the faceplate (width = null)
+     * @param {number} height - Height of the faceplate (height = null)
+     * @param {number} positionX - Position X of the faceplate (positionX = null)
+     * @param {number} positionY - Position Y of the faceplate (positionY = null)
+     * @returns {UIFaceplate} Faceplate element
+     */
+    faceplate = (controls = [], width = null, height = null, positionX = null, positionY = null) => {
+
+        // Create the faceplate
+        const UID = this.UID();
+        const faceplate = this.element('div', `faceplate_${UID}`, 'faceplate', null, 'faceplate');
+
+
+        faceplate.setWidth = (width = null) => {
+            if (width && typeof width === 'number')      
+                faceplate.style.width = `${width}px`;
+            else if (width && typeof width === 'string')    
+                faceplate.style.width = width;
+        }
+        faceplate.setHeight = (height = null) => {
+            if (height && typeof height === 'number')    
+                faceplate.style.height = `${height}px`;
+            else if (height && typeof height === 'string') 
+                faceplate.style.height = height;
+        }
+        faceplate.setPositionX = (positionX = null) => {
+            if (positionX && typeof positionX === 'string' && !positionX.includes('-')) 
+                faceplate.style.left = positionX;
+            else if (positionX && typeof positionX === 'string' && positionX.includes('-')) 
+                faceplate.style.right = positionX;
+            else if (positionX && typeof positionX === 'number' && positionX > 0) 
+                faceplate.style.left = `${positionX}px`;
+            else if (positionX && typeof positionX === 'number' && positionX < 0) 
+                faceplate.style.right = `${positionX*-1}px`;
+        }
+        faceplate.setPositionY = (positionY = null) => {
+            if (positionY && typeof positionY === 'string' && !positionY.includes('-')) 
+                faceplate.style.top = positionY;      
+            else if (positionY && typeof positionY === 'string' && positionY.includes('-')) 
+                faceplate.style.bottom = positionY;
+            else if (positionY && typeof positionY === 'number' && positionY > 0) 
+                faceplate.style.top = `${positionY}px`;
+            else if (positionY && typeof positionY === 'number' && positionY < 0) 
+                faceplate.style.bottom = `${positionY*-1}px`;
+        }
         
-        // Add Controls
-        controls.forEach(control => {
-            faceplate.appendChild(control);
-        });
-        
+        // Set initial state
+        faceplate.setWidth(width);
+        faceplate.setHeight(height);
+        faceplate.setPositionX(positionX);
+        faceplate.setPositionY(positionY);
+        faceplate.add(controls);
+
+        // Return the faceplate
         return faceplate;
     }
     
@@ -3409,7 +3773,7 @@ class StickyUI {
             isDragging = true;
             dragHandle.style.cursor = 'grabbing';
             
-            // Obtener la escala actual
+            // Get the current scale
             const scale = element.style.transform ? 
                 parseFloat(element.style.transform.replace('scale(', '').replace(')', '')) : 1;
             
@@ -3421,26 +3785,26 @@ class StickyUI {
             if (isDragging) {
                 e.preventDefault();
                 
-                // Obtener la escala actual
+                // Get the current scale
                 const scale = element.style.transform ? 
                     parseFloat(element.style.transform.replace('scale(', '').replace(')', '')) : 1;
                 
-                // Calcular la nueva posición
+                // Calculate the new position
                 currentX = (e.clientX - initialX);
                 currentY = (e.clientY - initialY);
 
-                // Ajustar los límites considerando el espacio extra debido a la escala
+                // Adjust the limits considering the extra space due to the scale
                 const maxX = window.innerWidth - (element.offsetWidth * scale);
                 const maxY = window.innerHeight - (element.offsetHeight * scale);
                 
-                // El mínimo ahora es negativo para compensar la reducción de escala
+                // The minimum is now negative to compensate for the scale reduction
                 const minX = element.offsetWidth * (scale - 1);
                 const minY = element.offsetHeight * (scale - 1);
                 
                 currentX = Math.max(minX, Math.min(currentX, maxX));
                 currentY = Math.max(minY, Math.min(currentY, maxY));
 
-                // Aplicar la posición
+                // Apply the position
                 element.style.left = currentX + 'px';
                 element.style.top = currentY + 'px';
                 element.style.right = 'auto';
@@ -3453,12 +3817,13 @@ class StickyUI {
         });
     }
 
-    setResizable = (element) => {
+    setResizable = (element, minWidth = 250, minHeight = 250, maxWidth = null, maxHeight = null) => {
         let isResizing = false;
         let initialWidth, initialHeight, initialX, initialY;
+        let _minWidth, _minHeight, _maxWidth, _maxHeight;
 
-        const resizer = this.element('div', null, 'resizer');
-        element.appendChild(resizer);
+        const resizer = this.element('div', null, 'resizer', null, 'resizer');
+        element.add(resizer);
 
         resizer.addEventListener('mousedown', (e) => {
             isResizing = true;
@@ -3473,8 +3838,14 @@ class StickyUI {
             if (isResizing) {
                 const width = initialWidth + (e.clientX - initialX);
                 const height = initialHeight + (e.clientY - initialY);
-                element.style.width = `${Math.max(250, width)}px`;
-                element.style.height = `${Math.max(200, height)}px`;
+
+                if (maxWidth === null)                   
+                    maxWidth = initialWidth * 1.2;
+                if (maxHeight === null)
+                    maxHeight = initialHeight * 1.2;
+
+                element.style.width = `${Math.max(minWidth, Math.min(width, maxWidth))}px`;
+                element.style.height = `${Math.max(minHeight, Math.min(height, maxHeight))}px`;
             }
         });
 
@@ -3491,14 +3862,6 @@ class StickyUI {
     // #region WIP
     // ----------------------------------------
 
-    // Inject styles to the head (Not used, prefer to use the css file on development)
-    // ----------------------------------------
-    /*addStyles = () => {
-        var styles = ``;
-        var styleSheet = document.createElement("style")
-        styleSheet.innerText = styles
-        document.head.appendChild(styleSheet)
-    }*/
 
 
     // ----------------------------------------

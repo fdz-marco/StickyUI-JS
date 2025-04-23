@@ -57,13 +57,13 @@
     --z-index-faceplate: calc(var(--z-index-base) + 2);
 
     --z-index-tooltipWrapper: calc(var(--z-index-base) + 3);
-    --z-index-contextMenuWrapper: calc(var(--z-index-base) + 3);
     --z-index-tooltip: calc(var(--z-index-base) + 4);
-    --z-index-contextMenu: calc(var(--z-index-base) + 4);
+    --z-index-contextMenuWrapper: calc(var(--z-index-base) + 5);
+    --z-index-contextMenu: calc(var(--z-index-base) + 6);
     
-    --z-index-overlay: calc(var(--z-index-base) + 5);
-    --z-index-messageBoxWrapper: calc(var(--z-index-base) + 6);
-    --z-index-messageBox: calc(var(--z-index-base) + 6);
+    --z-index-overlay: calc(var(--z-index-base) + 7);
+    --z-index-messageBoxWrapper: calc(var(--z-index-base) + 8);
+    --z-index-messageBox: calc(var(--z-index-base) + 9);
 }
 
 
@@ -786,6 +786,10 @@ body {
     transition: background 0.3s, transform 0.2s;
     user-select: none;
     pointer-events: auto;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .stickyUI.button:hover {
@@ -796,6 +800,7 @@ body {
 .stickyUI.button:active {
     transform: translateY(0);
 }
+
 
 /* ---------------------- Switch ---------------------- */
 
@@ -969,7 +974,7 @@ input:checked + .stickyUI.switchSlider:before {
 .stickyUI.colorValueContainer {
     display: flex;
     gap: var(--spacing-md);
-    align-items: center;
+    align-items: stretch;
     flex: 1;
 }
 
@@ -1131,24 +1136,24 @@ input:checked + .stickyUI.switchSlider:before {
     box-shadow: var(--shadow-sm);
 }
 
-.stickyUI.folderHeader {
+.stickyUI.folderTitleContainer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--bg-color-secondary);
+    background: var(--primary-color);
     cursor: pointer;
     user-select: none;
     border-radius: calc(var(--border-radius-lg) - 1px);
     transition: background-color 0.2s ease;
 }
 
-.stickyUI.folderHeader:hover {
-    background: var(--hover-color);
+.stickyUI.folderTitleContainer:hover {
+    background: var(--primary-color-dark);
 }
 
 .stickyUI.folderTitle {
-    font-size: 14px;
+    font-size: var(--font-size-md);
     font-weight: 600;
     color: var(--text-color);
     display: flex;
@@ -1156,7 +1161,7 @@ input:checked + .stickyUI.switchSlider:before {
     gap: var(--spacing-sm);
 }
 
-.stickyUI.folderIcon {
+.stickyUI.folderLeftIcon {
     display: inline-block;
     width: 24px;
     height: 24px;
@@ -1165,7 +1170,7 @@ input:checked + .stickyUI.switchSlider:before {
     transition: transform 0.3s ease;
 }
 
-.stickyUI.folderToggleButton {
+.stickyUI.folderRightIcon {
     display: inline-block;
     width: 24px;
     height: 24px;
@@ -1189,7 +1194,7 @@ input:checked + .stickyUI.switchSlider:before {
     border-top: none;
 }
 
-.stickyUI.folder .folderContent.collapsed + .folderToggle::before {
+.stickyUI.folder .folderContent.collapsed + .folderRightIcon::before {
     transform: rotate(-90deg);
 }
 
@@ -1226,7 +1231,7 @@ input:checked + .stickyUI.switchSlider:before {
     padding: var(--spacing-sm) var(--spacing-md);
     background: transparent;
     border: none;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
     color: var(--text-color);
     cursor: pointer;
     font-size: 14px;
@@ -1235,7 +1240,7 @@ input:checked + .stickyUI.switchSlider:before {
     justify-content: center;
     gap: var(--spacing-sm);
     transition: all 0.2s ease;
-    min-height: 36px;
+    min-height: 32px;
 }
 
 .stickyUI.tabPageButton:hover {
@@ -1271,9 +1276,7 @@ input:checked + .stickyUI.switchSlider:before {
 }
 
 .stickyUI.tabPage {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
+    display: block;
     width: auto;
     padding: var(--spacing-sm);
     margin-top: 0px;
@@ -1419,6 +1422,7 @@ input:checked + .stickyUI.switchSlider:before {
     gap: var(--spacing-md);
     margin: var(--spacing-xs);
     padding: var(--spacing-xs);
+    user-select: none;
 }
 
 .stickyUI.joystickContainer .label {
@@ -1485,6 +1489,12 @@ input:checked + .stickyUI.switchSlider:before {
     background: currentcolor;
     mask-repeat: no-repeat;
     mask-position: center;
+}
+
+.icon-blank{
+    mask-image: url("");
+    background: transparent;
+    visibility: hidden;
 }
 
 .icon-close {
