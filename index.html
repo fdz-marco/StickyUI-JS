@@ -346,31 +346,33 @@
         // ----------------------------------------
         // Message Box and Alert Box Examples
         // ----------------------------------------
-        /*
+        
         const messageBoxControl1 = ui.textInput('Name', 'Enter your name');
         const messageBoxControl2 = ui.dropdown('Country', [
             { value: 'mx', label: 'Mexico' },
             { value: 'ru', label: 'Russia' }
         ], 'mx');
         const messageBoxControls = [messageBoxControl1, messageBoxControl2];
-        const messageBoxButton1 = ui.button('Save');
-        const messageBoxButton2 = ui.button('Cancel');
+        const messageBoxButton1 = { text: 'Save', action: () => console.log('Save clicked') };
+        const messageBoxButton2 = { text: 'Cancel', action: () => console.log('Cancel clicked') };
         const messageBoxButtons = [messageBoxButton1, messageBoxButton2]
-        const messageBox = ui.messageBox('Custom Message Box', messageBoxControls, messageBoxButtons);
+        const messageBox = ui.messageBox('Custom Message Box', messageBoxControls, messageBoxButtons, true, false, true, true);
 
-        const alertBox =   ui.alertBox(
+        const alertBox = ui.alertBox(
             'Alert Box',
             'This is an alert message with an icon and OK/Cancel buttons.',
             'icon-robot',
             () => console.log('OK clicked'),
-            () => console.log('Cancel clicked')
+            () => console.log('Cancel clicked'),
+            false,
+            true
         );
-
+        
         const topToolbar01icon08 = ui.toolbarButton('icon-message', () => messageBox.show(), 'Top Toolbar 01 - Icon 08');
         const topToolbar01icon09 = ui.toolbarButton('icon-alert', () => alertBox.show(), 'Top Toolbar 01 - Icon 09');
         const topToolbar01separator04 = ui.toolbarDivider();
-        topToolbar01.add([topToolbar01icon08, topToolbar01icon09, topToolbar01separator04]);
-        */
+        topToolbar01.add([topToolbar01icon08, topToolbar01separator04, topToolbar01icon09]);
+        
     </script>
 </body>
 </html>

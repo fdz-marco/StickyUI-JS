@@ -3761,7 +3761,12 @@ class StickyUI {
     // #region Draggable and Resizable
     // ----------------------------------------
 
-    setDraggable = (element, handle = null) => {
+    /**
+     * Make the element draggable
+     * @param {UIElement} element - The element to make draggable
+     * @param {UIElement} handle - The handle of the element (handle = null)
+     */
+    setDraggable(element, handle = null) {
         let isDragging = false;
         let currentX, currentY, initialX, initialY;
         
@@ -3817,7 +3822,15 @@ class StickyUI {
         });
     }
 
-    setResizable = (element, minWidth = 250, minHeight = 250, maxWidth = null, maxHeight = null) => {
+    /**
+     * Make the element resizable
+     * @param {UIElement} element - The element to make resizable
+     * @param {number} minWidth - The minimum width of the element (minWidth = 250)
+     * @param {number} minHeight - The minimum height of the element (minHeight = 250)
+     * @param {number} maxWidth - The maximum width of the element (maxWidth = null)
+     * @param {number} maxHeight - The maximum height of the element (maxHeight = null)
+     */
+    setResizable(element, minWidth = 250, minHeight = 250, maxWidth = null, maxHeight = null) {
         let isResizing = false;
         let initialWidth, initialHeight, initialX, initialY;
         let _minWidth, _minHeight, _maxWidth, _maxHeight;
@@ -3859,13 +3872,174 @@ class StickyUI {
     // ----------------------------------------
 
     // ----------------------------------------
-    // #region WIP
+    // #region Message Box and Alert Box (messageBox, alertBox)
     // ----------------------------------------
 
+    /**
+     * @typedef {Object} UIMessageBoxBase UIMessageBox (Base) Message Box Element
+     * @property {function(boolean): void} showOverlay Show the overlay of the message box (visible = null)
+     * @property {function(boolean): void} hideOverlay Hide the overlay of the message box (visible = null)
+     * @property {function(boolean): void} toggleOverlay Toggle the overlay of the message box (visible = null)
+     * @property {function(): void} show Show the message box
+     * @property {function(): void} hide Hide the message box
+     * @property {function(String, Function): void} addButton Add a button to the message box (text = 'Button', action = null)
+     * @property {function(Array): void} addButtons Add buttons to the message box (buttons = [])
+     */
 
+    /**
+     * @typedef {UIElement & UIMessageBoxBase} UIMessageBox Message Box Element
+     */
+
+    /**
+     * Creates a message box element
+     * @param {string} title Title of the message box (title = 'Message Box')
+     * @param {UIElement|Array<UIElement>} content Content of the message box (content = null)
+     * @param {Array} buttons Buttons of the message box (buttons = [])
+     * @param {boolean} blurBackground Blur the background (blurBackground = true)
+     * @param {boolean} closeOnSelection Close the message box on selection (closeOnSelection = true)
+     * @returns {UIMessageBox} Message box element
+     */
+    messageBox(title = 'Message Box', content = null, buttons = [], blurBackground = true, openOnCreation = false, closeOnSelection = true, isDraggable = true) {
+
+        // Create messageBox wrapper (Group all messageBoxes in a single wrapper)
+        let messageBoxWrapper = this.body.getByClass('messageBoxWrapper');
+        if (!messageBoxWrapper) {
+            const _UID = this.UID();
+            messageBoxWrapper = this.element('div', `messageBoxWrapper_${_UID}`, 'messageBoxWrapper', null, 'messageBoxWrapper');
+            this.body.add(messageBoxWrapper); // DOM Insertion ***
+        }
+
+        // Create overlay (if not exists)
+        let overlay = messageBoxWrapper.query('.overlay');
+        if (!overlay) {
+            const __UID = this.UID();
+            overlay = this.element('div', `overlay_${__UID}`, 'overlay', null, 'overlay');
+            messageBoxWrapper.add(overlay); // DOM Insertion ***
+            overlay.addClass('overlay-hidden');
+        }
+
+        // Create messageBox
+        const UID = this.UID();
+        const messageBox = this.element('div', `messageBox_${UID}`, 'messageBox', null, 'messageBox');
+        messageBox.dataset.blurBackground = blurBackground;
+        // Title Bar
+        const titleBar = this.element('div', `messageBoxTitleBar_${UID}`, 'messageBoxTitleBar', null, 'messageBoxTitleBar');
+        const titleText = this.element('div', `messageBoxTitle_${UID}`, 'messageBoxTitle', title, 'messageBoxTitle');
+        const closeButton = this.icon('icon-close');
+        closeButton.addClass('messageBoxCloseButton');
+        // Content Area
+        const contentArea = this.element('div', `messageBoxContent_${UID}`, 'messageBoxContent', null, 'messageBoxContent');
+
+        titleBar.add([titleText, closeButton]);
+        messageBox.add([titleBar, contentArea]);
+        messageBoxWrapper.add(messageBox); // DOM Insertion ***
+
+        let _blurBackground = blurBackground;
+
+        // External methods
+        messageBox.showOverlay = () => {
+            overlay.removeClass('overlay-hidden');
+        }
+        messageBox.hideOverlay = () => {
+            overlay.addClass('overlay-hidden');
+        }
+        messageBox.toggleOverlay = (visible = null) => {
+            if (visible === null)
+                overlay.toggleClass('overlay-hidden');
+            else if (visible)
+                overlay.removeClass('overlay-hidden');
+            else
+                overlay.addClass('overlay-hidden');
+        }
+        messageBox.show = () => {
+            if (_blurBackground)
+                messageBox.showOverlay();
+            messageBox.removeClass('messageBox-hidden');
+        }
+        messageBox.hide = () => {
+            if (_blurBackground) {
+                if (ui.body.queryAll('[data-blur-background="true"]:not(.messageBox-hidden)').length === 1)
+                    messageBox.hideOverlay();
+            }
+            messageBox.addClass('messageBox-hidden');
+        }
+        messageBox.addButton = (text = 'Button', action = null) => {
+            // Create footer if not exists
+            let footer = messageBox.query('.messageBoxFooter');
+            if (!footer) {
+                footer = this.element('div', `messageBoxFooter_${UID}`, 'messageBoxFooter', null, 'messageBoxFooter');
+                messageBox.add(footer);
+            }
+
+            // Create button
+            let btnIndex = footer.queryAll('button').length;
+            const btn = this.element('button', `messageBoxButton_${UID}_${btnIndex}`, 'messageBoxButton', null, 'messageBoxButton');
+            btn.textContent = text;
+            btn.onclick = () => {
+                if (action) action();
+                if (closeOnSelection) messageBox.hide();
+            };
+            footer.add(btn);
+        }
+        messageBox.addButtons = (buttons = []) => {
+            if (Array.isArray(buttons)) {
+                buttons.forEach(button => {
+                    messageBox.addButton(button.text, button.action);
+                });
+            } 
+            else 
+            {
+                messageBox.addButton(buttons.text, buttons.action);
+            }
+        }
+
+        // Set initial state
+        messageBox.toggleOverlay(_blurBackground);
+        contentArea.add(content);
+        messageBox.addButtons(buttons);
+        if (!openOnCreation) 
+            messageBox.hide();
+        if (isDraggable) 
+            this.setDraggable(messageBox, titleBar);
+
+        // Return the messageBox
+        return messageBox;
+    }
+
+    /**
+     * Creates an alert box element
+     * @param {string} title Title of the alert box (title = 'Alert')
+     * @param {string} message Message of the alert box (message = 'Alert Message')
+     * @param {string} icon Icon of the alert box (icon = 'icon-robot')
+     * @param {function} onOk Callback function for the OK button (onOk = null)
+     * @param {function} onCancel Callback function for the Cancel button (onCancel = null)
+     * @param {boolean} isDraggable Make the alert box draggable (isDraggable = false)
+     * @returns {UIMessageBox} Alert box element
+     */
+    alertBox(title = 'Alert', message = 'Alert Message', icon = 'icon-robot', onOk = null, onCancel = null, openOnCreation = false, isDraggable = true) {
+        
+        // Create alertBox Container
+        const alertContent = this.element('div', `alertBoxContent_${this.UID()}`, 'alertBoxContent', null, 'alertBoxContent');
+        const iconElement = this.icon(icon);
+        iconElement.setSize(64);
+        const messageContainer = this.element('div', `alertBoxMessage_${this.UID()}`, 'alertBoxMessage', message, 'alertBoxMessage');
+        alertContent.add([iconElement, messageContainer]);
+        
+        // Create buttons
+        const buttons = [
+            { text: 'Cancel', action: onCancel },
+            { text: 'OK', action: onOk }
+        ];
+
+        return this.messageBox(title, alertContent, buttons, true, openOnCreation, true, isDraggable);
+    }
+
+    // <======================================= 
+    // #endregion
+    // ----------------------------------------
 
     // ----------------------------------------
-    // Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
+    // #region Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
     // ----------------------------------------
 
     iconBarHorizontal = () => this.element('div','iconBarHorizontal_' + this.UID(), 'iconBarHorizontal');
@@ -3877,125 +4051,9 @@ class StickyUI {
         return iconBar;
     }
 
-    messageBox = (title = 'Message Box', content = null, buttons = [], blurBackground = true) => {
-        const UID = this.UID();
-        
-        // Create messageBox wrapper if needed
-        let messageBoxWrapper = this.query('.messageBoxWrapper');
-        if (!messageBoxWrapper) {
-            messageBoxWrapper = this.element('div', `messageBoxWrapper_${UID}`, 'messageBoxWrapper');
-            this.add(messageBoxWrapper);
-        }
-
-        // Create or get overlay
-        let overlay = messageBoxWrapper.query('.overlay');
-        if (blurBackground) {
-            if (!overlay) {
-                overlay = this.element('div', `overlay_${UID}`, 'overlay');
-                messageBoxWrapper.add(overlay);
-            }
-        }
-
-        // Create messageBox
-        const messageBox = this.element('div', `messageBox_${UID}`, 'messageBox');
-
-        // Create title bar
-        const titleBar = this.element('div', `messageBoxTitleBar_${UID}`, 'messageBoxTitleBar');
-        const titleText = this.element('div', `messageBoxTitle_${UID}`, 'messageBoxTitle', title);
-        const closeButton = this.element('div', `messageBoxCloseButton_${UID}`, 'messageBoxCloseButton');
-        closeButton.add(this.icon('icon-close'));
-        titleBar.add([titleText, closeButton]);
-        messageBox.add(titleBar);
-
-
-        
-        closeButton.onclick = () => {
-            messageBox.hide();
-            if (overlay) overlay.addClass('overlay-hidden');
-        };
-
-
-        // Create content area
-        const contentArea = this.element('div', `messageBoxContent_${UID}`, 'messageBoxContent');
-        if (content) {
-            contentArea.add(content);
-            messageBox.add(contentArea);
-        }
-
-        // Create footer with buttons
-        const footer = this.element('div', `messageBoxFooter_${UID}`, 'messageBoxFooter');
-        if (Array.isArray(buttons)) {
-            buttons.forEach(button => {
-                const btn = this.element('button', `messageBoxButton_${UID}`, 'messageBoxButton');
-                btn.textContent = button.text;
-                btn.onclick = () => {
-                    if (button.action) button.action();
-                    messageBox.remove();
-                    if (overlay) overlay.remove();
-                };
-                footer.add(btn);
-            });
-        } else if (buttons) {
-            const btn = this.element('button', `messageBoxButton_${UID}`, 'messageBoxButton');
-            btn.textContent = buttons.text;
-            btn.onclick = () => {
-                if (buttons.action) buttons.action();
-                messageBox.remove();
-                if (overlay) overlay.remove();
-            };
-            footer.add(btn);
-        }
-        messageBox.add(footer);
-
-        messageBoxWrapper.add(messageBox);
-
-
-        messageBox.show = () => {
-            messageBoxWrapper.removeClass('messageBoxWrapper-hidden');
-        }
-
-        messageBox.hide = () => {
-            messageBoxWrapper.addClass('messageBoxWrapper-hidden');
-        }
-
-
-
-
-
-
-
-        return messageBox;
-    }
-
-    alertBox = (title = 'Alert', message = 'Alert Message', icon = 'icon-robot', onOk = null, onCancel = null) => {
-        const alertContent = this.element('div', `alertBoxContent_${this.UID()}`, 'alertBoxContent');
-        
-        // Create icon container
-        const iconContainer = this.element('div', `alertBoxIcon_${this.UID()}`, 'alertBoxIcon');
-        const iconElement = this.icon(icon);
-        iconElement.setSize(64, 64);
-        iconContainer.add(iconElement);
-        alertContent.add(iconContainer);
-
-        // Create message container
-        const messageContainer = this.element('div', `alertBoxMessage_${this.UID()}`, 'alertBoxMessage');
-        messageContainer.textContent = message;
-        alertContent.add(messageContainer);
-
-        // Create buttons
-        const buttons = [
-            { text: 'Cancel', action: onCancel },
-            { text: 'OK', action: onOk }
-        ];
-
-        return this.messageBox(title, alertContent, buttons, true);
-    }
-
     // <======================================= 
     // #endregion
     // ----------------------------------------
-
-
 }
 
 
