@@ -513,7 +513,7 @@
         fileTreeView.add(rootFolder);
         
         // Create a floating panel to contain the TreeView
-        const treeViewPanel = ui.floatingPanel('File Explorer', 300, 400, 1490, 250);
+        const treeViewPanel = ui.floatingPanel('File Explorer', 300, 300, 1490, 250);
         treeViewPanel.add(fileTreeView);
         
         // Add controls for expanding/collapsing all nodes
@@ -529,6 +529,163 @@
         
         // Add the panel to the body
         ui.body.add(treeViewPanel);
+        
+        // ----------------------------------------
+        // TreeView from JSON Example
+        // ----------------------------------------
+        
+        // Define a JSON structure for the tree
+        const projectStructureJSON = {
+            name: "Proyecto StickyUI",
+            icon: "icon-folder-open",
+            collapsed: false,
+            onSelect: (node) => console.log("Proyecto seleccionado", node),
+            children: [
+                {
+                    name: "docs",
+                    icon: "icon-folder-close",
+                    collapsed: true,
+                    children: [
+                        {
+                            name: "api.md",
+                            icon: "icon-file",
+                            onSelect: (leaf) => console.log("API docs seleccionados", leaf)
+                        },
+                        {
+                            name: "installation.md",
+                            icon: "icon-file",
+                            onSelect: (leaf) => console.log("Installation docs seleccionados", leaf)
+                        }
+                    ]
+                },
+                {
+                    name: "src",
+                    icon: "icon-folder-close",
+                    collapsed: true,
+                    children: [
+                        {
+                            name: "components",
+                            icon: "icon-folder-close",
+                            collapsed: true,
+                            children: [
+                                {
+                                    name: "UI",
+                                    icon: "icon-folder-close",
+                                    collapsed: true,
+                                    children: [
+                                        {
+                                            name: "Button.js",
+                                            icon: "icon-file",
+                                            metadata: { lastModified: "2023-05-20" }
+                                        },
+                                        {
+                                            name: "Input.js",
+                                            icon: "icon-file",
+                                            metadata: { lastModified: "2023-05-22" }
+                                        }
+                                    ]
+                                },
+                                {
+                                    name: "Layout",
+                                    icon: "icon-folder-close",
+                                    collapsed: true,
+                                    children: [
+                                        {
+                                            name: "Grid.js",
+                                            icon: "icon-file"
+                                        },
+                                        {
+                                            name: "Container.js",
+                                            icon: "icon-file"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: "utils",
+                            icon: "icon-folder-close",
+                            collapsed: true,
+                            children: [
+                                {
+                                    name: "helpers.js",
+                                    icon: "icon-file"
+                                },
+                                {
+                                    name: "formatters.js",
+                                    icon: "icon-file"
+                                }
+                            ]
+                        },
+                        {
+                            name: "index.js",
+                            icon: "icon-file"
+                        }
+                    ]
+                },
+                {
+                    name: "tests",
+                    icon: "icon-folder-close",
+                    collapsed: true,
+                    children: [
+                        {
+                            name: "unit",
+                            icon: "icon-folder-close",
+                            children: [
+                                {
+                                    name: "button.test.js",
+                                    icon: "icon-file"
+                                }
+                            ]
+                        },
+                        {
+                            name: "integration",
+                            icon: "icon-folder-close",
+                            children: [
+                                {
+                                    name: "app.test.js",
+                                    icon: "icon-file"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "package.json",
+                    icon: "icon-file"
+                },
+                {
+                    name: "README.md",
+                    icon: "icon-file"
+                }
+            ]
+        };
+        
+        // Crear TreeView a partir del JSON
+        const jsonTreeView = ui.createTreeFromJSON(projectStructureJSON, {
+            nodeIcon: 'icon-folder-close',
+            leafIcon: 'icon-file',
+            defaultCollapsed: true,
+            maxHeight: '350px'
+        });
+        
+        // Create a floating panel to contain the TreeView
+        const jsonTreeViewPanel = ui.floatingPanel('TreeView desde JSON', 300, 300, 1490, 570);
+        jsonTreeViewPanel.add(jsonTreeView);
+        
+        // Add controls for expanding/collapsing all nodes
+        const jsonTreeViewControls = ui.element('div', null, 'treeViewControls', null);
+        const jsonExpandAllButton = ui.button('Expandir Todo', null, null, 'icon-folder-open');
+        const jsonCollapseAllButton = ui.button('Colapsar Todo', null, null, 'icon-folder-close');
+        
+        jsonExpandAllButton.addEventListener('click', () => jsonTreeView.expandAll());
+        jsonCollapseAllButton.addEventListener('click', () => jsonTreeView.collapseAll());
+        
+        jsonTreeViewControls.add([jsonExpandAllButton, jsonCollapseAllButton]);
+        jsonTreeViewPanel.add(jsonTreeViewControls);
+        
+        // Add the panel to the body
+        ui.body.add(jsonTreeViewPanel);
         
     </script>
 </body>

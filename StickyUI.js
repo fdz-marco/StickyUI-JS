@@ -4652,6 +4652,118 @@ class StickyUI {
         return treeView;
     }
 
+    /**
+     * Creates a tree view from a JSON object
+     * 
+     * The JSON structure should follow this format:
+     * {
+     *   name: "Root Node",
+     *   icon: "icon-folder-open",
+     *   collapsed: false,
+     *   onSelect: (node) => { console.log("Node selected", node) },
+     *   children: [
+     *     {
+     *       name: "Child Node 1",
+     *       icon: "icon-folder-close",
+     *       collapsed: true,
+     *       children: [
+     *         {
+     *           name: "Leaf 1",
+     *           icon: "icon-file",
+     *           onSelect: (leaf) => { console.log("Leaf selected", leaf) }
+     *         }
+     *       ]
+     *     },
+     *     {
+     *       name: "Leaf 2",
+     *       icon: "icon-file"
+     *     }
+     *   ]
+     * }
+     * 
+     * @param {Object} jsonData - JSON object representing the tree structure
+     * @param {Object} options - Options for tree creation
+     * @param {string} options.nodeIcon - Default icon for nodes (options.nodeIcon = 'icon-folder-close')
+     * @param {string} options.leafIcon - Default icon for leaves (options.leafIcon = 'icon-file')
+     * @param {boolean} options.defaultCollapsed - Default collapsed state for nodes (options.defaultCollapsed = false)
+     * @param {string} options.maxHeight - Maximum height of the tree view (options.maxHeight = '400px')
+     * @returns {UITreeView} Tree view element
+     */
+    createTreeFromJSON(jsonData, options = {}) {
+        const {
+            nodeIcon = 'icon-folder-close',
+            leafIcon = 'icon-file',
+            defaultCollapsed = false,
+            maxHeight = '400px'
+        } = options;
+
+        // Create the tree view
+        const treeView = this.treeView([], maxHeight);
+        
+        // Recursively process the JSON data
+        const processNode = (data) => {
+            // Skip if no data
+            if (!data) return null;
+            
+            // Extract node properties
+            const { 
+                name, 
+                icon, 
+                collapsed = defaultCollapsed, 
+                onSelect, 
+                children = [], 
+                metadata
+            } = data;
+            
+            // Create node or leaf based on children
+            let node;
+            
+            if (Array.isArray(children) && children.length > 0) {
+                // Create a node with children
+                node = this.treeNode(
+                    name || 'Node', 
+                    icon || nodeIcon, 
+                    collapsed, 
+                    [], 
+                    onSelect || null
+                );
+                
+                // Process and add children
+                const childElements = children.map(child => processNode(child)).filter(Boolean);
+                node.add(childElements);
+            } else {
+                // Create a leaf (node without children)
+                node = this.treeLeaf(
+                    name || 'Leaf', 
+                    icon || leafIcon, 
+                    onSelect || null
+                );
+            }
+            
+            // Store any additional metadata
+            if (metadata) {
+                node.metadata = metadata;
+            }
+            
+            return node;
+        };
+        
+        // Process the root node(s)
+        if (Array.isArray(jsonData)) {
+            // Multiple root nodes
+            const rootNodes = jsonData.map(data => processNode(data)).filter(Boolean);
+            treeView.add(rootNodes);
+        } else {
+            // Single root node
+            const rootNode = processNode(jsonData);
+            if (rootNode) {
+                treeView.add(rootNode);
+            }
+        }
+        
+        return treeView;
+    }
+
     // <======================================= 
     // #endregion
     // ----------------------------------------
