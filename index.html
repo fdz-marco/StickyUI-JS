@@ -332,16 +332,25 @@
         joystick2.adjustParentSize();
 
         // ----------------------------------------
-        // Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
+        // Icon Bars - Floating bars
         // ----------------------------------------
 
         let iconBarHorizontal = ui.iconBarHorizontal();
-        let iconBarButton1 = ui.iconBarButton();
-        let iconBarButton2 = ui.iconBarButton();
-        let iconBarButton3 = ui.iconBarButton();
+        let iconBarButton1 = ui.iconBarButton('icon-message', () => console.log('Message clicked'), 'Tooltip Icon Bar Horizontal 1');
+        let iconBarButton2 = ui.iconBarButton('icon-alert', () => console.log('Alert clicked'), 'Tooltip Icon Bar Horizontal 2');
+        let iconBarButton3 = ui.iconBarButton('icon-robot', () => console.log('Robot clicked'), 'Tooltip Icon Bar Horizontal 3');
         iconBarHorizontal.add([iconBarButton1, iconBarButton2, iconBarButton3]);
         ui.setDraggable(iconBarHorizontal);    
         ui.body.add(iconBarHorizontal);
+
+
+        let iconBarVertical = ui.iconBarVertical();
+        let iconBarButton4 = ui.iconBarButton('icon-message', () => console.log('Message clicked'), 'Tooltip Icon Bar Vertical 1', 'right');
+        let iconBarButton5 = ui.iconBarButton('icon-alert', () => console.log('Alert clicked'), 'Tooltip Icon Bar Vertical 2', 'right');
+        let iconBarButton6 = ui.iconBarButton('icon-robot', () => console.log('Robot clicked'), 'Tooltip Icon Bar Vertical 3', 'right');
+        iconBarVertical.add([iconBarButton4, iconBarButton5, iconBarButton6]);
+        ui.setDraggable(iconBarVertical);    
+        ui.body.add(iconBarVertical);
 
         // ----------------------------------------
         // Message Box and Alert Box Examples

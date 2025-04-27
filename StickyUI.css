@@ -37,7 +37,7 @@
     --spacing-sm: 4px;
     --spacing-md: 8px;
     --spacing-lg: 10px;
-    
+    --spacing-xl: 16px;
     /* Separator Styles */
     --separator-color: var(--border-color);
     --separator-text-color: var(--text-color-light);
@@ -1489,6 +1489,14 @@ input:checked + .stickyUI.switchSlider:before {
     background: currentcolor;
     mask-repeat: no-repeat;
     mask-position: center;
+
+    -webkit-mask-size: contain; /* or cover */
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+
+    mask-size: contain; /* or cover */
+    mask-repeat: no-repeat;
+    mask-position: center;
 }
 
 .icon-blank{
@@ -1642,41 +1650,40 @@ input:checked + .stickyUI.switchSlider:before {
 }
 
 .icon-alert {
-    background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M12 6C12.5523 6 13 6.44772 13 7V13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13V7C11 6.44772 11.4477 6 12 6Z' fill='currentColor' /%3E%3Cpath d='M12 16C11.4477 16 11 16.4477 11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17C13 16.4477 12.5523 16 12 16Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12Z' fill='currentColor' /%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M12 6C12.5523 6 13 6.44772 13 7V13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13V7C11 6.44772 11.4477 6 12 6Z' fill='currentColor' /%3E%3Cpath d='M12 16C11.4477 16 11 16.4477 11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17C13 16.4477 12.5523 16 12 16Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12Z' fill='currentColor' /%3E%3C/svg%3E");
 }
 
 /* ---------------------- Icon Bars - Floating bars (WORK IN PROGRESS - WIP) --------------------- */
 
 .stickyUI.iconBarHorizontal {
     position: fixed;
-    top: 50px;
-    right: 50px;
-    background: var(--bg-color-secondary);
-    padding: var(--spacing-xs);
+    background: var(--bg-color);
+    padding: var(--spacing-sm);
     border-radius: var(--border-radius-md);
     border: none;
     box-shadow: var(--shadow-md);
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
     z-index: var(--z-index-iconBarHorizontal);
 }
 
-.stickyUI.iconBarButton {
-    min-width: 20px;
-    min-height: 20px;
-    padding: var(--spacing-xs);
-    border: none;
-    background: var(--bg-color-secondary);
-    color: var(--text-color);
+.stickyUI.iconBarContainer {
+    padding: var(--spacing-sm);
+    border: var(--text-color) 1px solid;
+    background: var(--bg-color);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    font-size: 14px;
+}
+.stickyUI.iconBarContainer .icon{
+    background: var(--text-color);
+}
+.stickyUI.iconBarContainer:hover {
+    background: var(--background-color-hover);
 }
 
-.stickyUI.iconBarButton:hover {
-    background: var(--hover-color);
-}
+
+
 
 /* Adjust icon bar vertical */
 .stickyUI.iconBarVertical {
@@ -1692,18 +1699,6 @@ input:checked + .stickyUI.switchSlider:before {
     gap: var(--spacing-xs);
     z-index: var(--z-index-iconBarVertical);
 }
-
-.stickyUI.iconBarVertical-left {
-    left: 50px;
-    top: 50px;
-}
-
-.stickyUI.iconBarVertical-right {
-    right: 50px;
-    top: 50px;
-}
-
-
 
 
 

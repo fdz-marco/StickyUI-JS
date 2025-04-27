@@ -399,6 +399,12 @@ class StickyUI {
         element.isIn = (targetElement) => {
             return targetElement.contains(element);
         }
+        
+        // Detect changes in the attributes of the element
+        this.#utils.__watchAttributeChange(element, (attributeName, attributeValue, attributeOldValue) => {
+            const customEvent = this.body.createEvent('attributechange', { detail: { attributeName, attributeValue, attributeOldValue } });
+            element.triggerEvent(customEvent);
+        });
 
         // Add the class and content (Invoked after methods)
         element.addClass(`${this.#classBase} ${className}`);
@@ -587,6 +593,25 @@ class StickyUI {
             finalX = Math.max(viewportMargin, Math.min(finalX, viewportWidth - targetWidth - viewportMargin));
             finalY = Math.max(viewportMargin, Math.min(finalY, viewportHeight - targetHeight - viewportMargin));
             return { x: finalX, y: finalY, refAnchor, targetAnchor };
+        },
+        /**
+         * Watch for attribute changes on an element
+         * @param {HTMLElement} element - Element to watch
+         * @param {function} callback - Callback function to call when an attribute changes (attributeName, attributeValue, attributeOldValue)
+         */
+        __watchAttributeChange: (element, callback) => {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes') {
+                        const attributeName = mutation.attributeName;
+                        const attributeValue = mutation.target.getAttribute(attributeName);
+                        const attributeOldValue = mutation.oldValue; 
+                        if(callback) 
+                            callback(attributeName, attributeValue, attributeOldValue);
+                    }
+                });
+            });
+            observer.observe(element, { attributes: true });
         }
     }
 
@@ -1165,8 +1190,9 @@ class StickyUI {
 
     /**
      * @typedef {Object} UITooltipBase (Base) Tooltip Element
-     * @property {function(HTMLElement): void} showTooltip - Show the tooltip (targetElement)
-     * @property {function(): void} hideTooltip - Hide the tooltip 
+     * @property {function(string, string): void} setTooltip Set the tooltip of the tooltip (text, position)
+     * @property {function(HTMLElement): void} showTooltip Show the tooltip (targetElement)
+     * @property {function(): void} hideTooltip Hide the tooltip 
      */
 
     /**
@@ -1192,8 +1218,16 @@ class StickyUI {
         // Create tooltip
         const UID = this.UID();
         const tooltip = this.element('div', `tooltip_${UID}`, 'tooltip', text, 'tooltip');
+        tooltip.dataset.targetElement = targetElement.getAttribute('id') ?? null;
+        tooltip.dataset.text = text;
+        tooltip.dataset.position = position;
 
         // External methods
+        tooltip.setTooltip = (text, position) => {
+            tooltip.dataset.text = text;
+            tooltip.dataset.position = position;
+            tooltip.innerText = text;
+        }
         tooltip.showTooltip = (e) => {
             // Add the tooltip to the DOM if it's not already there
             const isIn = tooltip.isIn(tooltipWrapper);
@@ -1202,7 +1236,7 @@ class StickyUI {
             }
             // Tooltip positions (top, bottom, left, right)
             let refAnchor, targetAnchor, paddingOffset;
-            switch (position) {
+            switch (tooltip.dataset.position) {
                 case 'top':
                     refAnchor = 'top-center';
                     targetAnchor = 'bottom-center';
@@ -1240,6 +1274,7 @@ class StickyUI {
         // Listeners
         targetElement.listenEvent('mouseenter', tooltip.showTooltip);
         targetElement.listenEvent('mouseleave', tooltip.hideTooltip);
+
         return tooltip;
     }
 
@@ -3993,6 +4028,11 @@ class StickyUI {
             }
         }
 
+        // Event Listeners
+        closeButton.listenEvent('click', () => {
+            messageBox.hide();
+        });
+
         // Set initial state
         messageBox.toggleOverlay(_blurBackground);
         contentArea.add(content);
@@ -4038,17 +4078,151 @@ class StickyUI {
     // #endregion
     // ----------------------------------------
 
+    
     // ----------------------------------------
-    // #region Icon Bars - Floating bars (WORK IN PROGRESS - WIP)
+    // #region Icon Bars - Floating bars
     // ----------------------------------------
 
-    iconBarHorizontal = () => this.element('div','iconBarHorizontal_' + this.UID(), 'iconBarHorizontal');
-    iconBarButton = () => this.element('div','iconBarButton_' + this.UID(), 'iconBarButton');
-    iconBarVertical = (position = 'left') => {
+    /**
+     * @typedef {Object} UIIconBarButtonBase UIIconBarButton (Base) Icon Bar Button Element
+     * @property {function(string, string): void} setTooltip Set the tooltip of the icon bar button (text, position)
+     * @property {function(): void} removeTooltip Remove the tooltip of the icon bar button
+     * @property {function(string): void} setIcon Set the icon of the icon bar button (iconName)
+     */
+
+    /**
+     * @typedef {UIElement & UIIconBarButtonBase} UIIconBarButton Icon Bar Button Element
+     */
+    
+    /**
+     * Creates an icon bar button element
+     * @param {string} iconName Icon name of the icon bar button (iconName = 'icon-robot')
+     * @param {Function} action Action to be executed when the icon bar button is clicked (action = null)
+     * @param {string} tooltip Tooltip of the icon bar button (tooltip = null)
+     * @param {string} tooltipPosition Position of the tooltip (tooltipPosition = 'top')
+     * @returns {UIIconBarButton} Icon bar button element
+     */
+    iconBarButton(iconName = 'icon-robot', action = null, tooltip = null, tooltipPosition = 'top') {
+
+        // Create iconBarButton
         const UID = this.UID();
-        const iconBar = this.element('div', `iconBarVertical_${UID}`, 'iconBarVertical');
-        iconBar.classList.add(`iconBarVertical-${position}`);
-        return iconBar;
+        const iconBarContainer = this.element('div', `iconBarContainer_${UID}`, 'iconBarContainer', null, 'iconBarContainer');
+        const icon = this.icon(iconName);
+        icon.setSize(24);
+        iconBarContainer.add(icon);
+        let _tooltip = null;
+
+        // External methods
+        iconBarContainer.setTooltip = (text, position) => {
+            if(text && !_tooltip)
+                _tooltip = this.tooltip(iconBarContainer, text, position);
+            else if(text && _tooltip)
+                _tooltip.setTooltip(text, position);
+        }
+        iconBarContainer.removeTooltip = () => {
+            if (_tooltip)
+                _tooltip.remove();
+        }
+        iconBarContainer.setIcon = (iconName) => {
+            icon.setIcon(iconName);
+        }
+
+        // Event Listeners
+        if (action)
+            iconBarContainer.onclick = action;
+
+        // Set initial state
+        iconBarContainer.setTooltip(tooltip, tooltipPosition);
+
+        // Return the iconBarButton
+        return iconBarContainer;
+    }
+
+    /**
+     * @typedef {Object} UIIconBarHorizontalBase (Base) Icon Bar Horizontal Element
+     * @property {function(number, number, string): void} setPosition Set the position of the icon bar (positionX, positionY, units)
+     */
+
+    /**
+     * @typedef {UIElement & UIIconBarHorizontalBase} UIIconBarHorizontal Icon Bar Horizontal Element   
+     */
+
+    /**
+     * Creates an icon bar horizontal element
+     * @param {number} positionX Position X of the icon bar horizontal container (positionX = 500)
+     * @param {number} positionY Position Y of the icon bar horizontal container (positionY = 190)
+     * @param {string} units Units of the position (units = 'px')
+     * @returns {UIIconBarHorizontal} Icon bar horizontal element
+     */
+    iconBarHorizontal(positionX = 500, positionY = 190, units = 'px') {
+        // Creates the icon bar horizontal container
+        const UID = this.UID();
+        const iconBarHorizontal = this.element('div', `iconBarHorizontal_${UID}`, 'iconBarHorizontal', null, 'iconBarHorizontal');
+        
+        // External methods
+        iconBarHorizontal.setPosition = (positionX, positionY, units = 'px') => {
+            if (units != '%' && units != 'px' && units != 'vh' && units != 'vw' && units != 'em' && units != 'rem')
+                units = 'px';
+
+            if (positionX < 0)
+                iconBarHorizontal.style.right = `${positionX}${units}`;
+            else
+                iconBarHorizontal.style.left = `${positionX}${units}`;
+    
+            if (positionY < 0)
+                iconBarHorizontal.style.bottom = `${positionY}${units}`;
+            else
+                iconBarHorizontal.style.top = `${positionY}${units}`;
+        }   
+
+        // Set initial state
+        iconBarHorizontal.setPosition(positionX, positionY, units);
+
+        // Return the iconBarHorizontal
+        return iconBarHorizontal;
+    }
+    
+    /**
+     * @typedef {Object} UIIconBarVerticalBase (Base) Icon Bar Vertical Element
+     * @property {function(number, number, string): void} setPosition Set the position of the icon bar (positionX, positionY, units)
+     */
+
+    /**
+     * @typedef {UIElement & UIIconBarVerticalBase} UIIconBarVertical Icon Bar Vertical Element   
+     */
+
+    /**
+     * Creates an icon bar vertical element
+     * @param {number} positionX Position X of the icon bar vertical container (positionX = 650)
+     * @param {number} positionY Position Y of the icon bar vertical container (positionY = 130)
+     * @param {string} units Units of the position (units = 'px')
+     * @returns {UIIconBarVertical} Icon bar vertical element
+     */ 
+    iconBarVertical(positionX = 650, positionY = 130, units = 'px') {
+        const UID = this.UID();
+        const iconBarVertical = this.element('div', `iconBarVertical_${UID}`, 'iconBarVertical', null, 'iconBarVertical');
+
+        // External methods
+        iconBarVertical.setPosition = (positionX, positionY, units = 'px') => {
+            if (units != '%' && units != 'px' && units != 'vh' && units != 'vw' && units != 'em' && units != 'rem')
+                units = 'px';
+
+            if (positionX < 0)
+                iconBarVertical.style.right = `${positionX}${units}`;
+            else
+                iconBarVertical.style.left = `${positionX}${units}`;
+    
+            if (positionY < 0)
+                iconBarVertical.style.bottom = `${positionY}${units}`;
+            else
+                iconBarVertical.style.top = `${positionY}${units}`;
+        }   
+
+        // Set initial state
+        iconBarVertical.setPosition(positionX, positionY, units);
+
+        // Return the iconBarVertical
+        return iconBarVertical;
     }
 
     // <======================================= 
@@ -4060,7 +4234,7 @@ class StickyUI {
 /***
  * 
  * To Do:
- * - Change the icon size in the alert message box
+ 
  * - Context Menu multiple 
  * - Context Menu submenu
  * - Context Menu right click
