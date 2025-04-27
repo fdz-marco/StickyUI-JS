@@ -886,6 +886,115 @@ class StickyUI {
     }
 
     /**
+     * Creates an app details element for the menu bar including icon and app name
+     * @param {string} iconName Icon name for the app
+     * @param {string} size Size of the icon (default: '24px')
+     * @param {string} appName Name of the application
+     * @returns {UIElement} Created app details element
+     */
+    appDetails(iconName = 'icon-robot', size = '24px', appName = 'StickyUI App') {
+        // Create the element
+        const UID = this.UID();
+        const appDetailsContainer = this.element('div', `appDetails_${UID}`, 'appDetails', null, 'appDetails');
+        
+        // Create and add the icon
+        const iconElement = this.icon(iconName);
+        iconElement.addClass('appDetailsIcon');
+        
+        // Create app name element
+        const appNameElement = this.element('div', `appName_${UID}`, 'appName', appName, 'label');
+        
+        // Add elements to container
+        appDetailsContainer.add([iconElement, appNameElement]);
+
+        // Add methods to change icon and app name
+        appDetailsContainer.changeIcon = (newIconName) => {
+            if (newIconName && typeof newIconName === 'string') {
+                const icon = appDetailsContainer.query('.icon');
+                if (icon) {
+                    icon.changeIcon(newIconName);
+                }
+            }
+        };
+        
+        appDetailsContainer.setAppName = (newAppName) => {
+            if (newAppName && typeof newAppName === 'string') {
+                const nameElement = appDetailsContainer.query('.appName');
+                if (nameElement) {
+                    nameElement.innerText = newAppName;
+                }
+            }
+        };
+        
+        return appDetailsContainer;
+    }
+
+    /**
+     * Creates an editable project title element for the menu bar
+     * @param {string} initialTitle Initial title text
+     * @param {function} onChange Callback function when title changes
+     * @returns {UIElement} Created project title element
+     */
+    projectTitle(initialTitle = 'My Project', onChange = null) {
+        // Create the element
+        const UID = this.UID();
+        const projectTitleContainer = this.element('div', `projectTitle_${UID}`, 'projectTitle', null, 'projectTitle');
+        const projectTitleLabel = this.element('div', `projectTitleLabel_${UID}`, 'projectTitleLabel', initialTitle, 'label');
+        
+        // Add title label to container
+        projectTitleContainer.add(projectTitleLabel);
+        
+        // Add click event to make it editable
+        projectTitleContainer.listenEvent('click', () => {
+            // Create input element
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.value = projectTitleLabel.innerText;
+            titleInput.className = `${this.#classBase} projectTitleInput`;
+            titleInput.style.width = `${projectTitleLabel.offsetWidth}px`;
+            
+            // Replace label with input
+            projectTitleContainer.replaceChild(titleInput, projectTitleLabel);
+            titleInput.focus();
+            titleInput.select();
+            
+            // Save on enter or blur
+            const saveTitle = () => {
+                const newTitle = titleInput.value.trim() || initialTitle;
+                projectTitleLabel.innerText = newTitle;
+                projectTitleContainer.replaceChild(projectTitleLabel, titleInput);
+                
+                // Call onChange callback if provided
+                if (onChange && typeof onChange === 'function') {
+                    onChange(newTitle);
+                }
+            };
+            
+            titleInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveTitle();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    titleInput.value = projectTitleLabel.innerText;
+                    projectTitleContainer.replaceChild(projectTitleLabel, titleInput);
+                }
+            });
+            
+            titleInput.addEventListener('blur', saveTitle);
+        });
+        
+        // Add method to set title programmatically
+        projectTitleContainer.setTitle = (newTitle) => {
+            if (newTitle && typeof newTitle === 'string') {
+                projectTitleLabel.innerText = newTitle;
+            }
+        };
+        
+        return projectTitleContainer;
+    }
+
+    /**
      * @typedef {Object} UIMenuBarBase (Base) Menu Bar Element
      * @property {function(Array<UIMenuBarItem>): void} addItems - Add menu bar items to the menu bar (menuBarItems)
      */

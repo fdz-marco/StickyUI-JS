@@ -37,10 +37,21 @@
         let contextMenu2 = ui.contextMenu([menu2contextMenuItem1, menu2contextMenuItem2]);
         let contextMenu3 = ui.contextMenu([menu3contextMenuItem1, menu3contextMenuItem2, menu3contextMenuItem3, menu3contextMenuItem4]);
 
+        // Crear el icono de la aplicación
+        const appDetails = ui.appDetails('icon-robot', '24px', 'StickyUI App');
+        
+        // Crear título del proyecto editable
+        const projectTitle = ui.projectTitle('StickyUI Project', (newTitle) => {
+            console.log(`Título del proyecto cambiado a: ${newTitle}`);
+            // Aquí puedes añadir cualquier lógica adicional cuando el título cambie
+            // Por ejemplo, actualizar el título del documento
+            document.title = `${newTitle} - StickyUI`;
+        });
+
         let menuBarItem1 = ui.menuBarItem('File', 'icon-file', contextMenu1);
         let menuBarItem2 = ui.menuBarItem('View', 'icon-view', contextMenu2);
         let menuBarItem3 = ui.menuBarItem('Help', 'icon-help', contextMenu3);
-        let menuBar = ui.menuBar([menuBarItem1, menuBarItem2, menuBarItem3]);
+        let menuBar = ui.menuBar([appDetails, projectTitle, menuBarItem1, menuBarItem2, menuBarItem3]);
         ui.body.add(menuBar);
 
 

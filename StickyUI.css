@@ -139,6 +139,51 @@ body {
     z-index: var(--z-index-menuBar);
 }
 
+
+.stickyUI.appDetails {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+    margin-right: var(--spacing-md);
+    border-right: 1px solid var(--border-color);
+}
+
+.stickyUI.appDetailsIcon {
+    transform: scale(1.1);
+    margin-right: var(--spacing-sm);
+}
+
+.stickyUI.appName {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.stickyUI.projectTitle {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm);
+    margin-right: var(--spacing-md);
+    border-right: 1px solid var(--border-color);
+}
+
+.stickyUI.projectTitleLabel {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.stickyUI.projectTitleInput {
+    border-radius: var(--border-radius-xs);
+    font-size: 15px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    outline: none;
+    padding: 2px 4px;
+    font-weight: bold;
+}
+
 .stickyUI.menuBarItem {
     display: flex;
     align-items: center;
