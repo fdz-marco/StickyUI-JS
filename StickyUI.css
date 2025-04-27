@@ -1300,6 +1300,119 @@ input:checked + .stickyUI.switchSlider:before {
     }
 }
 
+/* ---------------------- TreeView ---------------------- */
+
+.stickyUI.treeView {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    margin: var(--spacing-md) var(--spacing-xs);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-sm);
+    max-height: 400px;
+    overflow: auto;
+}
+
+.stickyUI.treeView::-webkit-scrollbar {
+    width: 8px;
+}
+
+.stickyUI.treeView::-webkit-scrollbar-track {
+    background: var(--bg-color-secondary);
+    border-radius: 4px;
+}
+
+.stickyUI.treeView::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.stickyUI.treeView::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+.stickyUI.treeNode {
+    margin-left: 0;
+    padding: var(--spacing-xs) 0;
+}
+
+.stickyUI.treeNodeChildren {
+    margin-left: 24px;
+    transition: all 0.3s ease;
+    max-height: 1000px;
+    overflow: hidden;
+}
+
+.stickyUI.treeNodeChildren.collapsed {
+    max-height: 0;
+    padding: 0;
+}
+
+.stickyUI.treeNodeHeader {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.2s ease;
+}
+
+.stickyUI.treeNodeHeader:hover {
+    background: var(--hover-color);
+}
+
+.stickyUI.treeNodeHeader.selected {
+    background: var(--primary-color);
+    color: var(--text-color);
+}
+
+.stickyUI.treeNodeToggle {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    color: var(--text-color);
+}
+
+.stickyUI.treeNodeIcon {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--spacing-xs);
+    color: var(--text-color);
+}
+
+.stickyUI.treeNodeLabel {
+    font-size: var(--font-size-sm);
+    flex: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--text-color);
+}
+
+.stickyUI.treeLeaf {
+    padding-left: 24px;
+}
+
+.stickyUI.treeViewControls {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+    margin-top: var(--spacing-sm);
+}
+
+.stickyUI.treeViewControls .button {
+    flex: 1;
+    margin: 0 var(--spacing-xs);
+}
+
 /* ---------------------- Faceplate ---------------------- */
 
 .stickyUI.faceplate {

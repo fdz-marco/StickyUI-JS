@@ -220,7 +220,7 @@
         floatingPanel.add([separator5, rangeSlider, stepperSlider, intervalSlider]);
 
         // Add panel to body
-        ui.body.add(floatingPanel);
+       // ui.body.add(floatingPanel);
         
         // --------------------------------------
         // Panel 2
@@ -256,7 +256,7 @@
         floatingPanel2.add([separator7, tabs]);
         
         // Add panel to body
-        ui.body.add(floatingPanel2);
+        //ui.body.add(floatingPanel2);
 
        // --------------------------------------
         // Panel 3
@@ -279,7 +279,7 @@
         floatingPanel3.add([separator9, joystick1]);
 
         // Add panel to body
-        ui.body.add(floatingPanel3);
+       // ui.body.add(floatingPanel3);
 
         // --------------------------------------
         // Status Bar
@@ -441,6 +441,93 @@
         
         ui.setDraggable(toastFaceplate);
         ui.body.add(toastFaceplate);
+        
+        // ----------------------------------------
+        // TreeView Example
+        // ----------------------------------------
+        
+        // Create a TreeView component
+        const fileTreeView = ui.treeView();
+        
+        // Create file structure with folders and files
+        const rootFolder = ui.treeNode('My Project', 'icon-folder-open', false, [], (node) => {
+            console.log('Root folder selected', node);
+        });
+        
+        // Source folder with subfolders and files
+        const srcFolder = ui.treeNode('src', 'icon-folder-close', true, [], (node) => {
+            console.log('Source folder selected', node);
+        });
+        
+        const componentsFolder = ui.treeNode('components', 'icon-folder-close', true, [], (node) => {
+            console.log('Components folder selected', node);
+        });
+        
+        const utilsFolder = ui.treeNode('utils', 'icon-folder-close', true, [], (node) => {
+            console.log('Utils folder selected', node);
+        });
+        
+        // Add files to components folder
+        componentsFolder.add([
+            ui.treeLeaf('Button.js', 'icon-file', (leaf) => console.log('Button.js selected', leaf)),
+            ui.treeLeaf('Input.js', 'icon-file', (leaf) => console.log('Input.js selected', leaf)),
+            ui.treeLeaf('Modal.js', 'icon-file', (leaf) => console.log('Modal.js selected', leaf))
+        ]);
+        
+        // Add files to utils folder
+        utilsFolder.add([
+            ui.treeLeaf('helpers.js', 'icon-file', (leaf) => console.log('helpers.js selected', leaf)),
+            ui.treeLeaf('validation.js', 'icon-file', (leaf) => console.log('validation.js selected', leaf))
+        ]);
+        
+        // Add subfolders to src folder
+        srcFolder.add([componentsFolder, utilsFolder]);
+        
+        // Add files to src folder
+        srcFolder.add([
+            ui.treeLeaf('index.js', 'icon-file', (leaf) => console.log('index.js selected', leaf)),
+            ui.treeLeaf('App.js', 'icon-file', (leaf) => console.log('App.js selected', leaf))
+        ]);
+        
+        // Assets folder with files
+        const assetsFolder = ui.treeNode('assets', 'icon-folder-close', true, [], (node) => {
+            console.log('Assets folder selected', node);
+        });
+        
+        assetsFolder.add([
+            ui.treeLeaf('logo.png', 'icon-file', (leaf) => console.log('logo.png selected', leaf)),
+            ui.treeLeaf('background.jpg', 'icon-file', (leaf) => console.log('background.jpg selected', leaf))
+        ]);
+        
+        // Add files to root folder
+        rootFolder.add([
+            ui.treeLeaf('package.json', 'icon-file', (leaf) => console.log('package.json selected', leaf)),
+            ui.treeLeaf('README.md', 'icon-file', (leaf) => console.log('README.md selected', leaf))
+        ]);
+        
+        // Add folders to root
+        rootFolder.add([srcFolder, assetsFolder]);
+        
+        // Add the root folder to the TreeView
+        fileTreeView.add(rootFolder);
+        
+        // Create a floating panel to contain the TreeView
+        const treeViewPanel = ui.floatingPanel('File Explorer', 300, 500, 500, 500);
+        treeViewPanel.add(fileTreeView);
+        
+        // Add controls for expanding/collapsing all nodes
+        const treeViewControls = ui.element('div', null, 'treeViewControls', null);
+        const expandAllButton = ui.button('Expand All', null, null, 'icon-folder-open');
+        const collapseAllButton = ui.button('Collapse All', null, null, 'icon-folder-close');
+        
+        expandAllButton.addEventListener('click', () => fileTreeView.expandAll());
+        collapseAllButton.addEventListener('click', () => fileTreeView.collapseAll());
+        
+        treeViewControls.add([expandAllButton, collapseAllButton]);
+        treeViewPanel.add(treeViewControls);
+        
+        // Add the panel to the body
+        ui.body.add(treeViewPanel);
         
     </script>
 </body>

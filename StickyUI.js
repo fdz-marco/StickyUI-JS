@@ -4334,6 +4334,328 @@ class StickyUI {
     // <======================================= 
     // #endregion
     // ----------------------------------------
+
+    // ----------------------------------------
+    // #region TreeView
+    // ----------------------------------------
+
+    /**
+     * @typedef {Object} UITreeNodeBase UITreeNode (Base) Tree Node Element
+     * @property {function(): void} collapse - Collapse the tree node
+     * @property {function(): void} expand - Expand the tree node
+     * @property {function(boolean): boolean} toggle - Toggle the collapsed state of the tree node (collapsed = null)
+     * @property {function(Array): void} add - Add child nodes to the tree node (children = [])
+     * @property {function(UIElement): void} remove - Remove a child node from the tree node (node = null)
+     * @property {function(function): void} onSelect - Set the onSelect callback (callback = null)
+     * @property {function(): void} select - Select this node
+     * @property {function(): void} deselect - Deselect this node
+     */
+
+    /**
+     * @typedef {UIElement & UITreeNodeBase} UITreeNode Tree Node Element
+     */
+
+    /**
+     * Creates a tree node element
+     * @param {string} labelText - Label text of the node (labelText = 'Node')
+     * @param {string} icon - Icon of the node (icon = 'icon-folder-close')
+     * @param {boolean} collapsed - Collapsed state of the node (collapsed = false)
+     * @param {Array} children - Children nodes of this node (children = [])
+     * @param {function} onSelect - Callback when node is selected (onSelect = null)
+     * @returns {UITreeNode} Tree node element
+     */
+    treeNode(labelText = 'Node', icon = 'icon-folder-close', collapsed = false, children = [], onSelect = null) {
+        // Create the tree node
+        const UID = this.UID();
+        const node = this.element('div', `treeNode_${UID}`, 'treeNode', null, 'treeNode');
+        const header = this.element('div', `treeNodeHeader_${UID}`, 'treeNodeHeader', null, 'treeNodeHeader');
+        const toggle = this.icon('icon-chevron-down');
+        const nodeIcon = this.icon(icon);
+        const label = this.element('div', `treeNodeLabel_${UID}`, 'treeNodeLabel', labelText, 'treeNodeLabel');
+        
+        toggle.addClass('treeNodeToggle');
+        nodeIcon.addClass('treeNodeIcon');
+        
+        // Children container
+        const childrenContainer = this.element('div', `treeNodeChildren_${UID}`, 'treeNodeChildren', null, 'treeNodeChildren');
+        childrenContainer.add(children);
+        
+        header.add([toggle, nodeIcon, label]);
+        node.add([header, childrenContainer]);
+        
+        // Data attributes
+        node.dataset.isCollapsed = collapsed;
+        node.dataset.isSelected = false;
+        
+        // External methods
+        node.collapse = () => {
+            childrenContainer.addClass('collapsed');
+            node.dataset.isCollapsed = true;
+            toggle.changeIcon('icon-chevron-up');
+        };
+        node.expand = () => {
+            childrenContainer.removeClass('collapsed');
+            node.dataset.isCollapsed = false;
+            toggle.changeIcon('icon-chevron-down');
+        };
+        node.toggle = (collapsed = null) => {
+            if (collapsed === null) {
+                node.dataset.isCollapsed = !(JSON.parse(node.dataset.isCollapsed));
+            } else {
+                node.dataset.isCollapsed = collapsed;
+            }
+            
+            if (JSON.parse(node.dataset.isCollapsed)) {
+                node.collapse();
+            } else {
+                node.expand();
+            }
+            
+            return JSON.parse(node.dataset.isCollapsed);
+        }; 
+        node.add = (children = []) => {
+            childrenContainer.add(children);
+        }; 
+        node.remove = (child = null) => {
+            if (child) {
+                childrenContainer.removeChild(child);
+            } else {
+                childrenContainer.innerHTML = '';
+            }
+        };
+        
+        node.select = () => {
+            header.addClass('selected');
+            node.dataset.isSelected = true;
+            if (typeof node._onSelect === 'function') {
+                node._onSelect(node);
+            }
+        };
+        
+        node.deselect = () => {
+            header.removeClass('selected');
+            node.dataset.isSelected = false;
+        };
+        
+        node.onSelect = (callback = null) => {
+            if (typeof callback === 'function') {
+                node._onSelect = callback;
+            }
+        };
+        
+        node.setIcon = (iconName = null) => {
+            if (iconName) {
+                nodeIcon.changeIcon(iconName);
+            }
+        };
+        
+        node.setLabel = (text = null) => {
+            if (text) {
+                label.textContent = text;
+            }
+        };
+        
+        // Event listeners
+        header.listenEvent('click', (e) => {
+            // Stop event propagation to prevent parent nodes from being toggled
+            e.stopPropagation();
+            
+            // Toggle node expansion
+            node.toggle();
+            
+            // Select this node
+            const treeView = node.closest('.treeView');
+            if (treeView) {
+                // Deselect all other nodes
+                const allNodes = treeView.querySelectorAll('.treeNodeHeader');
+                allNodes.forEach(n => n.removeClass('selected'));
+                
+                // Select this node
+                node.select();
+            }
+        });
+        
+        // Set initial state
+        if (collapsed) {
+            node.collapse();
+        } else {
+            node.expand();
+        }
+        
+        // Set onSelect callback
+        if (onSelect) {
+            node.onSelect(onSelect);
+        }
+        
+        return node;
+    }
+
+    /**
+     * @typedef {Object} UITreeLeafBase UITreeLeaf (Base) Tree Leaf Element
+     * @property {function(function): void} onSelect - Set the onSelect callback (callback = null)
+     * @property {function(): void} select - Select this leaf
+     * @property {function(): void} deselect - Deselect this leaf
+     * @property {function(string): void} setIcon - Set the icon of the leaf (icon = null)
+     * @property {function(string): void} setLabel - Set the label of the leaf (text = null)
+     */
+
+    /**
+     * @typedef {UIElement & UITreeLeafBase} UITreeLeaf Tree Leaf Element
+     */
+
+    /**
+     * Creates a tree leaf element (a node without children)
+     * @param {string} labelText - Label text of the leaf (labelText = 'Leaf')
+     * @param {string} icon - Icon of the leaf (icon = 'icon-file')
+     * @param {function} onSelect - Callback when leaf is selected (onSelect = null)
+     * @returns {UITreeLeaf} Tree leaf element
+     */
+    treeLeaf(labelText = 'Leaf', icon = 'icon-file', onSelect = null) {
+        // Create the tree leaf
+        const UID = this.UID();
+        const leaf = this.element('div', `treeLeaf_${UID}`, 'treeNode treeLeaf', null, 'treeLeaf');
+        const header = this.element('div', `treeNodeHeader_${UID}`, 'treeNodeHeader', null, 'treeNodeHeader');
+        const nodeIcon = this.icon(icon);
+        const label = this.element('div', `treeNodeLabel_${UID}`, 'treeNodeLabel', labelText, 'treeNodeLabel');
+        
+        nodeIcon.addClass('treeNodeIcon');
+        
+        header.add([nodeIcon, label]);
+        leaf.add(header);
+        
+        // Data attributes
+        leaf.dataset.isSelected = false;
+        
+        // External methods
+        leaf.select = () => {
+            header.addClass('selected');
+            leaf.dataset.isSelected = true;
+            if (typeof leaf._onSelect === 'function') {
+                leaf._onSelect(leaf);
+            }
+        };
+        
+        leaf.deselect = () => {
+            header.removeClass('selected');
+            leaf.dataset.isSelected = false;
+        };
+        
+        leaf.onSelect = (callback = null) => {
+            if (typeof callback === 'function') {
+                leaf._onSelect = callback;
+            }
+        };
+        
+        leaf.setIcon = (iconName = null) => {
+            if (iconName) {
+                nodeIcon.changeIcon(iconName);
+            }
+        };
+        
+        leaf.setLabel = (text = null) => {
+            if (text) {
+                label.textContent = text;
+            }
+        };
+        
+        // Event listeners
+        header.listenEvent('click', (e) => {
+            // Stop event propagation
+            e.stopPropagation();
+            
+            // Select this leaf
+            const treeView = leaf.closest('.treeView');
+            if (treeView) {
+                // Deselect all other nodes
+                const allNodes = treeView.querySelectorAll('.treeNodeHeader');
+                allNodes.forEach(n => n.removeClass('selected'));
+                
+                // Select this leaf
+                leaf.select();
+            }
+        });
+        
+        // Set onSelect callback
+        if (onSelect) {
+            leaf.onSelect(onSelect);
+        }
+        
+        return leaf;
+    }
+
+    /**
+     * @typedef {Object} UITreeViewBase UITreeView (Base) Tree View Element
+     * @property {function(Array): void} add - Add nodes to the tree view (nodes = [])
+     * @property {function(UIElement): void} remove - Remove a node from the tree view (node = null)
+     * @property {function(): void} expandAll - Expand all nodes in the tree view
+     * @property {function(): void} collapseAll - Collapse all nodes in the tree view
+     * @property {function(): UIElement} getSelectedNode - Get the currently selected node
+     * @property {function(boolean): void} setMaxHeight - Set the maximum height of the tree view (maxHeight = null)
+     */
+
+    /**
+     * @typedef {UIElement & UITreeViewBase} UITreeView Tree View Element
+     */
+
+    /**
+     * Creates a tree view element
+     * @param {Array} nodes - Nodes to add to the tree view (nodes = [])
+     * @param {string} maxHeight - Maximum height of the tree view (maxHeight = '400px')
+     * @returns {UITreeView} Tree view element
+     */
+    treeView(nodes = [], maxHeight = '400px') {
+        // Create the tree view
+        const UID = this.UID();
+        const treeView = this.element('div', `treeView_${UID}`, 'treeView', null, 'treeView');
+        
+        // Add nodes
+        treeView.add(nodes);
+        
+        // Set max height
+        if (maxHeight) {
+            treeView.style.maxHeight = maxHeight;
+        }
+        
+        // External methods
+        treeView.expandAll = () => {
+            const nodes = treeView.querySelectorAll('.treeNode:not(.treeLeaf)');
+            nodes.forEach(node => {
+                if (typeof node.expand === 'function') {
+                    node.expand();
+                }
+            });
+        };
+        
+        treeView.collapseAll = () => {
+            const nodes = treeView.querySelectorAll('.treeNode:not(.treeLeaf)');
+            nodes.forEach(node => {
+                if (typeof node.collapse === 'function') {
+                    node.collapse();
+                }
+            });
+        };
+        
+        treeView.getSelectedNode = () => {
+            const selected = treeView.querySelector('.treeNodeHeader.selected');
+            if (selected) {
+                return selected.closest('.treeNode');
+            }
+            return null;
+        };
+        
+        treeView.setMaxHeight = (maxHeight = null) => {
+            if (maxHeight) {
+                treeView.style.maxHeight = maxHeight;
+            }
+        };
+        
+        return treeView;
+    }
+
+    // <======================================= 
+    // #endregion
+    // ----------------------------------------
+
 }
 
 
