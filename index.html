@@ -84,6 +84,7 @@
             ui.textInput('Password', 'Enter your password'),
             ui.button('Save'),
         ]);
+        rightPanel.hide();
         ui.body.add(rightPanel);
 
         // --------------------------------------
@@ -220,7 +221,7 @@
         floatingPanel.add([separator5, rangeSlider, stepperSlider, intervalSlider]);
 
         // Add panel to body
-       // ui.body.add(floatingPanel);
+        ui.body.add(floatingPanel);
         
         // --------------------------------------
         // Panel 2
@@ -256,7 +257,7 @@
         floatingPanel2.add([separator7, tabs]);
         
         // Add panel to body
-        //ui.body.add(floatingPanel2);
+        ui.body.add(floatingPanel2);
 
        // --------------------------------------
         // Panel 3
@@ -279,7 +280,7 @@
         floatingPanel3.add([separator9, joystick1]);
 
         // Add panel to body
-       // ui.body.add(floatingPanel3);
+        ui.body.add(floatingPanel3);
 
         // --------------------------------------
         // Status Bar
@@ -512,7 +513,7 @@
         fileTreeView.add(rootFolder);
         
         // Create a floating panel to contain the TreeView
-        const treeViewPanel = ui.floatingPanel('File Explorer', 300, 500, 500, 500);
+        const treeViewPanel = ui.floatingPanel('File Explorer', 300, 400, 1490, 250);
         treeViewPanel.add(fileTreeView);
         
         // Add controls for expanding/collapsing all nodes
