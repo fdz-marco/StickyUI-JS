@@ -687,6 +687,99 @@
         // Add the panel to the body
         ui.body.add(jsonTreeViewPanel);
         
+        // ----------------------------------------
+        // Code Editor - Ejemplo Avanzado
+        // ----------------------------------------
+        
+        // Crear un segundo panel para el editor con pestañas
+        const multiEditorPanel = ui.floatingPanel('Editores de Código', 600, 400, 1060, 900);
+        
+        // Crear las pestañas para diferentes lenguajes
+        
+        // JavaScript Editor
+        const jsEditor2 = ui.codeEditor('JavaScript', 'javascript', 
+            '// Ejemplo de JavaScript\nfunction suma(a, b) {\n    return a + b;\n}\n\nconsole.log(suma(5, 3));', 
+            '100%', 300);
+        const jsTab = ui.tabPage('JavaScript', 'icon-file', [jsEditor2]);
+        
+        // HTML Editor
+        const htmlEditor = ui.codeEditor('HTML', 'html', 
+            //`<!DOCTYPE html>\n<html>\n<head>\n    <title>Ejemplo</title>\n</head>\n<body>\n    <h1>Título</h1>\n    <p>Párrafo</p>\n\n`, 
+            '',
+            '100%', 300);
+        const htmlTab = ui.tabPage('HTML', 'icon-file', [htmlEditor]);
+        
+        // CSS Editor
+        const cssEditor = ui.codeEditor('CSS', 'css', 
+            'body {\n    font-family: Arial, sans-serif;\n    color: #333;\n}\n\nh1 {\n    color: blue;\n}\n\np {\n    margin: 10px 0;\n}', 
+            '100%', 300);
+        const cssTab = ui.tabPage('CSS', 'icon-file', [cssEditor]);
+        
+        // Python Editor
+        const pythonEditor = ui.codeEditor('Python', 'python', 
+            '# Ejemplo de Python\ndef factorial(n):\n    if n == 0 or n == 1:\n        return 1\n    else:\n        return n * factorial(n-1)\n\nprint(factorial(5))', 
+            '100%', 300);
+        const pythonTab = ui.tabPage('Python', 'icon-file', [pythonEditor]);
+        
+        // JSON Editor
+        const jsonEditor = ui.codeEditor('JSON', 'json', 
+            '{\n    "nombre": "Juan",\n    "edad": 30,\n    "activo": true,\n    "hobbies": ["programar", "leer", "correr"]\n}', 
+            '100%', 300);
+        const jsonTab = ui.tabPage('JSON', 'icon-file', [jsonEditor]);
+        
+        // Crear contenedor de pestañas
+        const editorTabs = ui.tabs([jsTab, htmlTab, cssTab, pythonTab, jsonTab]);
+        
+        // Añadir las pestañas al panel
+        multiEditorPanel.add(editorTabs);
+        
+        // Añadir botones para demostrar funcionalidad
+        const buttonsContainer = ui.element('div', null, 'controlContainer', null);
+        
+        // Botón para obtener el código
+        const getCodeButton = ui.button('Obtener Código', null, null, 'icon-file');
+        getCodeButton.addEventListener('click', () => {
+            const activeTab = editorTabs.getActiveTab();
+            const tabName = activeTab.querySelector('.tabPageButton').textContent.trim();
+            const editor = activeTab.querySelector('.codeEditorContainer');
+            if (editor) {
+                const code = editor.getValue();
+                alert('Código de ' + tabName + ':\n\n' + code);
+            }
+        });
+        
+        // Botón para cambiar el idioma
+        const setJsCodeButton = ui.button('Mostrar Ejemplo Función', null, null, 'icon-robot');
+        setJsCodeButton.addEventListener('click', () => {
+            jsEditor2.setValue('function multiplicar(a, b) {\n    return a * b;\n}\n\nconsole.log(multiplicar(4, 5));');
+        });
+        
+        buttonsContainer.add([getCodeButton, setJsCodeButton]);
+        multiEditorPanel.add(buttonsContainer);
+        
+        // Añadir panel al body
+        ui.body.add(multiEditorPanel);
+        
+        // Hacer que el panel sea redimensionable
+        ui.setResizable(multiEditorPanel, 300, 300);
+        
+        // ----------------------------------------
+        // Code Editor en el Workspace
+        // ----------------------------------------
+        
+        // Crear un editor de código simple
+        const workspaceEditor = ui.codeEditor('Editor en Workspace', 'javascript', 
+            '// Editor de código en el Workspace\n\n// Este editor se coloca directamente en el área de trabajo\n// permitiendo editarlo a pantalla completa\n\nfunction ejemploWorkspace() {\n    const mensaje = "Hola desde el workspace";\n    console.log(mensaje);\n    return mensaje;\n}\n\nejemploWorkspace();', 
+            '100%', '600px');
+        
+        // Crear un nuevo contenido para el workspace
+        const workspaceContent = document.createElement('div');
+        workspaceContent.style.padding = '20px';
+        workspaceContent.appendChild(workspaceEditor);
+        
+        // Agregar el editor al workspace existente
+        workspace02.setContent(workspaceContent);
+        
     </script>
 </body>
 </html>

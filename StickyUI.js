@@ -3105,7 +3105,7 @@ class StickyUI {
      * @property {function(number, number): void} setAxisY - Set the axis of the vector2 (minY = null, maxY = null)
      * @property {function(boolean): void} showValues - Show/Hide the values of the vector2 (show = true)
      * @property {function(number): void} setGridSize - Set the size of the grid of the vector2 (gridSize = null)
-     * @property {function(number, number): void} updatePosition - Update the position of the vector2 (x = 0, y = 0, updatePoint = true)
+     * @property {function(number, number, number, number): void} updatePosition - Update the position of the vector2 (x = 0, y = 0, updatePoint = true)
      * @property {function(): void} listenEvent - Listen the event of the vector2 (eventType = null, change, input, keydown, keyup, etc.)
      */ 
 
@@ -4768,6 +4768,567 @@ class StickyUI {
     // #endregion
     // ----------------------------------------
 
+    // ----------------------------------------
+    // #region Code Editor
+    // =======================================>
+
+    /**
+     * @typedef {Object} UICodeEditorBase CodeEditorBase (Base) Code Editor Element
+     * @property {function(string): void} setValue - Set the value of the code editor
+     * @property {function(): string} getValue - Get the value of the code editor
+     * @property {function(string): void} setLanguage - Set the language of the code editor
+     * @property {function(): string} getLanguage - Get the language of the code editor
+     * @property {function(): void} focus - Focus the code editor
+     * @property {function(number, number): void} setCursorPosition - Set the cursor position
+     * @property {function(): {line: number, column: number}} getCursorPosition - Get the cursor position
+     * @property {function(string, function): void} onEvent - Register event handler
+     */
+
+    /**
+     * @typedef {UIElement & UICodeEditorBase} UICodeEditor Code Editor Element
+     */
+
+    /**
+     * Creates a code editor with syntax highlighting and intellisense
+     * @param {string} labelText Label text for the editor
+     * @param {string} language Programming language (js, css, html, json, etc)
+     * @param {string} defaultValue Initial code content
+     * @param {number} width Width of the editor
+     * @param {number} height Height of the editor
+     * @returns {UICodeEditor} Created code editor
+     */
+    codeEditor(labelText = 'Code Editor', language = 'javascript', defaultValue = '', width = null, height = null) {
+        // Create the element container
+        const UID = this.UID();
+        const container = this.element('div', `codeEditorContainer_${UID}`, 'codeEditorContainer', null, 'codeEditor');
+        
+        if (width) container.style.width = typeof width === 'number' ? `${width}px` : width;
+        if (height) container.style.height = typeof height === 'number' ? `${height}px` : height;
+
+        // Create the label if provided
+        if (labelText) {
+            const label = this.element('div', `codeEditorLabel_${UID}`, 'codeEditorLabel', labelText, 'label');
+            container.add(label);
+        }
+
+        // Create the editor wrapper
+        const editorWrapper = this.element('div', `codeEditorWrapper_${UID}`, 'codeEditorWrapper', null, 'editorWrapper');
+        container.add(editorWrapper);
+
+        // Create the line numbers element
+        const lineNumbers = this.element('div', `codeEditorLineNumbers_${UID}`, 'codeEditorLineNumbers', null, 'lineNumbers');
+        editorWrapper.add(lineNumbers);
+
+        // Create the actual editor textarea
+        const editor = document.createElement('textarea');
+        editor.id = `codeEditor_${UID}`;
+        editor.className = `${this.#classBase} codeEditor`;
+        editor.spellcheck = false;
+        editor.value = defaultValue;
+        editorWrapper.add(editor);
+
+        // Create the syntax highlighting layer
+        const highlighter = this.element('code', `codeEditorHighlighter_${UID}`, 'codeEditorHighlighter', '', 'highlighter');
+        editorWrapper.add(highlighter);
+        
+        // Create the intellisense popup
+        const intellisensePopup = this.element('div', `codeEditorIntellisense_${UID}`, 'codeEditorIntellisense', null, 'intellisense');
+        editorWrapper.add(intellisensePopup);
+
+        // Set up language definitions for syntax highlighting
+        const keywords = {
+            javascript: [
+                'var', 'let', 'const', 'function', 'class', 'extends', 'return', 'if', 'else', 'for', 'while', 'do',
+                'switch', 'case', 'break', 'continue', 'default', 'try', 'catch', 'finally', 'throw', 'new', 'delete',
+                'typeof', 'instanceof', 'void', 'this', 'super', 'null', 'true', 'false', 'in', 'of', 'await', 'async',
+                'import', 'export', 'from', 'as', 'yield', 'with', 'debugger', 'implements', 'interface', 'package',
+                'private', 'protected', 'public', 'static'
+            ],
+            html: [
+                'html', 'head', 'body', 'div', 'span', 'p', 'a', 'img', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th',
+                'form', 'input', 'button', 'select', 'option', 'textarea', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'script', 
+                'style', 'link', 'meta', 'title', 'section', 'article', 'aside', 'footer', 'header', 'nav', 'main'
+            ],
+            css: [
+                'color', 'background', 'margin', 'padding', 'border', 'font', 'width', 'height', 'display', 'position',
+                'top', 'right', 'bottom', 'left', 'flex', 'grid', 'transition', 'animation', 'transform', 'opacity',
+                'visibility', 'z-index', 'overflow', 'text-align', 'line-height', 'background-color', 'font-size',
+                'font-weight', 'box-shadow', 'border-radius', 'content', 'cursor', 'justify-content', 'align-items'
+            ],
+            python: [
+                'def', 'class', 'if', 'else', 'elif', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'import',
+                'from', 'return', 'yield', 'pass', 'break', 'continue', 'global', 'nonlocal', 'lambda', 'True', 'False',
+                'None', 'and', 'or', 'not', 'is', 'in', 'del', 'assert', 'raise', 'self'
+            ],
+            json: [
+                'true', 'false', 'null'
+            ]
+        };
+
+        // List of common suggestions for intellisense per language
+        const suggestions = {
+            javascript: [
+                { text: 'function', snippet: 'function ${1:name}(${2:params}) {\n\t${3:}\n}' },
+                { text: 'for', snippet: 'for (let ${1:i} = 0; ${1:i} < ${2:array}.length; ${1:i}++) {\n\t${3:}\n}' },
+                { text: 'if', snippet: 'if (${1:condition}) {\n\t${2:}\n}' },
+                { text: 'class', snippet: 'class ${1:Name} {\n\tconstructor(${2:params}) {\n\t\t${3:}\n\t}\n}' },
+                { text: 'const', snippet: 'const ${1:name} = ${2:value};' },
+                { text: 'let', snippet: 'let ${1:name} = ${2:value};' },
+                { text: 'console.log', snippet: 'console.log(${1:});' },
+                { text: 'setTimeout', snippet: 'setTimeout(() => {\n\t${1:}\n}, ${2:1000});' },
+                { text: 'addEventListener', snippet: 'addEventListener(\'${1:event}\', (${2:e}) => {\n\t${3:}\n});' },
+                { text: 'document.querySelector', snippet: 'document.querySelector(\'${1:selector}\')' }
+            ],
+            html: [
+                { text: 'div', snippet: '<div ${1:class=""}>${2:}</div>' },
+                { text: 'span', snippet: '<span ${1:class=""}>${2:}</span>' },
+                { text: 'input', snippet: '<input type="${1:text}" ${2:class=""} ${3:placeholder=""}>' },
+                { text: 'button', snippet: '<button ${1:class=""}>${2:Button}</button>' },
+                { text: 'a', snippet: '<a href="${1:#}" ${2:class=""}>${3:Link}</a>' },
+                { text: 'ul', snippet: '<ul>\n\t<li>${1:Item 1}</li>\n\t<li>${2:Item 2}</li>\n</ul>' },
+                { text: 'table', snippet: '<table>\n\t<tr>\n\t\t<th>${1:Header 1}</th>\n\t\t<th>${2:Header 2}</th>\n\t</tr>\n\t<tr>\n\t\t<td>${3:Data 1}</td>\n\t\t<td>${4:Data 2}</td>\n\t</tr>\n</table>' },
+                { text: 'form', snippet: '<form>\n\t${1:}\n</form>' },
+                { text: 'img', snippet: '<img src="${1:}" alt="${2:}">' },
+                { text: 'script', snippet: '<script>\n\t${1:}\n</script>' }
+            ],
+            css: [
+                { text: 'background-color', snippet: 'background-color: ${1:#fff};' },
+                { text: 'color', snippet: 'color: ${1:#000};' },
+                { text: 'margin', snippet: 'margin: ${1:0};' },
+                { text: 'padding', snippet: 'padding: ${1:0};' },
+                { text: 'display', snippet: 'display: ${1:flex};' },
+                { text: 'flex', snippet: 'display: flex;\njustify-content: ${1:center};\nalign-items: ${2:center};' },
+                { text: 'position', snippet: 'position: ${1:relative};' },
+                { text: 'border', snippet: 'border: ${1:1px} ${2:solid} ${3:#000};' },
+                { text: 'width', snippet: 'width: ${1:100%};' },
+                { text: 'height', snippet: 'height: ${1:auto};' }
+            ],
+            python: [
+                { text: 'def', snippet: 'def ${1:function_name}(${2:parameters}):\n\t${3:pass}' },
+                { text: 'class', snippet: 'class ${1:ClassName}:\n\tdef __init__(self, ${2:parameters}):\n\t\t${3:pass}' },
+                { text: 'if', snippet: 'if ${1:condition}:\n\t${2:pass}' },
+                { text: 'for', snippet: 'for ${1:item} in ${2:items}:\n\t${3:pass}' },
+                { text: 'while', snippet: 'while ${1:condition}:\n\t${2:pass}' },
+                { text: 'try', snippet: 'try:\n\t${1:pass}\nexcept ${2:Exception} as ${3:e}:\n\t${4:pass}' },
+                { text: 'import', snippet: 'import ${1:module}' },
+                { text: 'from', snippet: 'from ${1:module} import ${2:objects}' },
+                { text: 'with', snippet: 'with ${1:expression} as ${2:variable}:\n\t${3:pass}' },
+                { text: 'print', snippet: 'print(${1:object})' }
+            ],
+            json: [
+                { text: 'object', snippet: '{\n\t"${1:key}": ${2:value}\n}' },
+                { text: 'array', snippet: '[\n\t${1:}\n]' },
+                { text: 'property', snippet: '"${1:key}": ${2:value}' },
+                { text: 'string', snippet: '"${1:string}"' },
+                { text: 'number', snippet: '${1:0}' },
+                { text: 'boolean', snippet: '${1:true}' },
+                { text: 'null', snippet: 'null' }
+            ]
+        };
+
+        // Internal variables
+        let currentLanguage = language;
+        let cursorPosition = { line: 0, column: 0 };
+        let intellisenseVisible = false;
+        let filteredSuggestions = [];
+        let selectedSuggestion = 0;
+        let events = {};
+
+        // Update line numbers
+        const updateLineNumbers = () => {
+            const text = editor.value;
+            const lines = text.split('\n');
+            lineNumbers.innerHTML = '';
+            
+            for (let i = 0; i < lines.length; i++) {
+                const lineNumber = document.createElement('div');
+                lineNumber.textContent = i + 1;
+                lineNumbers.appendChild(lineNumber);
+            }
+
+            // Ensure there's at least one line number
+            if (lines.length === 0 || (lines.length === 1 && lines[0] === '')) {
+                const lineNumber = document.createElement('div');
+                lineNumber.textContent = '1';
+                lineNumbers.appendChild(lineNumber);
+            }
+        };
+
+        // Apply syntax highlighting
+        const applySyntaxHighlighting = () => {
+            let text = editor.value;
+            
+            // Escape HTML characters to prevent XSS
+            text = text.replace(/&/g, '&amp;')
+                       .replace(/</g, '&lt;')
+                       .replace(/>/g, '&gt;');
+            
+            const lang = currentLanguage.toLowerCase();
+            
+            // Different syntax highlighting rules based on language
+            if (lang === 'javascript' || lang === 'js') {
+                // Highlight strings
+                text = text.replace(/(["'`])(.*?)\1/g, '<span class="string">$&</span>');
+                
+                // Highlight comments
+                text = text.replace(/\/\/.*$/gm, '<span class="comment">$&</span>');
+                text = text.replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>');
+                
+                // Highlight numbers
+                text = text.replace(/\b(\d+)\b/g, '<span class="number">$&</span>');
+                
+                // Highlight keywords
+                const keywordPattern = new RegExp(`\\b(${keywords.javascript.join('|')})\\b`, 'g');
+                text = text.replace(keywordPattern, '<span class="keyword">$&</span>');
+                
+                // Highlight function calls
+                text = text.replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/g, '<span class="function">$1</span>(');
+            } else if (lang === 'html') {
+                // Highlight tags
+                text = text.replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="keyword">$2</span>');
+                
+                // Highlight attributes
+                text = text.replace(/(\s+)([\w-]+)(?=\s*=)/g, '$1<span class="attr-name">$2</span>');
+                
+                // Highlight attribute values
+                text = text.replace(/(".*?")/g, '<span class="attr-value">$1</span>');
+                
+                // Highlight comments
+                text = text.replace(/&lt;!--[\s\S]*?--&gt;/g, '<span class="comment">$&</span>');
+            } else if (lang === 'css') {
+                // Highlight selectors
+                text = text.replace(/([^\{\}]+)(?=\{)/g, '<span class="selector">$1</span>');
+                
+                // Highlight properties
+                text = text.replace(/(\s+)([\w-]+)(?=\s*:)/g, '$1<span class="property">$2</span>');
+                
+                // Highlight values
+                text = text.replace(/(:)([^;]*)(;)/g, '$1<span class="value">$2</span>$3');
+                
+                // Highlight units
+                text = text.replace(/(\d+)(px|em|rem|%|vh|vw|fr|pt|s|ms)/g, '<span class="number">$1</span><span class="unit">$2</span>');
+                
+                // Highlight colors
+                text = text.replace(/(#[a-fA-F0-9]{3,6})/g, '<span class="color">$1</span>');
+                
+                // Highlight comments
+                text = text.replace(/\/\*[\s\S]*?\*\//g, '<span class="comment">$&</span>');
+            } else if (lang === 'python') {
+                // Highlight strings
+                text = text.replace(/(["'`])(.*?)\1/g, '<span class="string">$&</span>');
+                
+                // Highlight comments
+                text = text.replace(/#.*$/gm, '<span class="comment">$&</span>');
+                
+                // Highlight numbers
+                text = text.replace(/\b(\d+)\b/g, '<span class="number">$&</span>');
+                
+                // Highlight keywords
+                const keywordPattern = new RegExp(`\\b(${keywords.python.join('|')})\\b`, 'g');
+                text = text.replace(keywordPattern, '<span class="keyword">$&</span>');
+                
+                // Highlight function definitions
+                text = text.replace(/\b(def)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, '<span class="keyword">def</span> <span class="function">$2</span>');
+                
+                // Highlight class definitions
+                text = text.replace(/\b(class)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, '<span class="keyword">class</span> <span class="class">$2</span>');
+            } else if (lang === 'json') {
+                // Highlight strings
+                text = text.replace(/"(.*?)"/g, '"<span class="string">$1</span>"');
+                
+                // Highlight property names
+                text = text.replace(/"(.*?)"(?=\s*:)/g, '"<span class="property">$1</span>"');
+                
+                // Highlight numbers
+                text = text.replace(/:\s*(\d+)/g, ': <span class="number">$1</span>');
+                
+                // Highlight booleans and null
+                text = text.replace(/:\s*(true|false|null)/g, ': <span class="keyword">$1</span>');
+            }
+            
+            // Replace newlines with <br>
+            text = text.replace(/\n/g, '<br>');
+            
+            // Update the highlighter content
+            highlighter.innerHTML = text;
+        };
+
+        // Get word at cursor
+        const getWordAtCursor = () => {
+            const text = editor.value;
+            const position = editor.selectionStart;
+            let start = position;
+            let end = position;
+            
+            // Find the start of the current word
+            while (start > 0 && /[a-zA-Z0-9_\.]/.test(text.charAt(start - 1))) {
+                start--;
+            }
+            
+            // Find the end of the current word
+            while (end < text.length && /[a-zA-Z0-9_\.]/.test(text.charAt(end))) {
+                end++;
+            }
+            
+            return {
+                word: text.substring(start, end),
+                start,
+                end
+            };
+        };
+
+        // Show intellisense suggestions
+        const showIntellisense = () => {
+            const { word, start } = getWordAtCursor();
+            
+            if (word.length === 0) {
+                hideIntellisense();
+                return;
+            }
+            
+            // Find matching suggestions
+            const lang = currentLanguage.toLowerCase();
+            const langSuggestions = suggestions[lang] || [];
+            filteredSuggestions = langSuggestions.filter(s => s.text.toLowerCase().startsWith(word.toLowerCase()));
+            
+            if (filteredSuggestions.length === 0) {
+                hideIntellisense();
+                return;
+            }
+            
+            // Position intellisense popup
+            const textBeforeCursor = editor.value.substring(0, start);
+            const lines = textBeforeCursor.split('\n');
+            const currentLine = lines.length - 1;
+            const currentColumn = lines[currentLine].length;
+            
+            // Calculate pixel position
+            const lineHeight = parseInt(window.getComputedStyle(editor).lineHeight);
+            const charWidth = 8; // Approximate character width
+            
+            intellisensePopup.style.top = `${(currentLine + 1) * lineHeight}px`;
+            intellisensePopup.style.left = `${currentColumn * charWidth + 60}px`; // 60px offset for line numbers
+            
+            // Fill in suggestions
+            intellisensePopup.innerHTML = '';
+            filteredSuggestions.forEach((suggestion, index) => {
+                const item = document.createElement('div');
+                item.className = `${this.#classBase} codeEditorIntellisenseItem`;
+                if (index === selectedSuggestion) {
+                    item.classList.add('selected');
+                }
+                item.textContent = suggestion.text;
+                item.addEventListener('click', () => {
+                    applySuggestion(suggestion);
+                });
+                intellisensePopup.appendChild(item);
+            });
+            
+            intellisensePopup.style.display = 'block';
+            intellisenseVisible = true;
+        };
+
+        // Hide intellisense
+        const hideIntellisense = () => {
+            intellisensePopup.style.display = 'none';
+            intellisenseVisible = false;
+            selectedSuggestion = 0;
+        };
+
+        // Apply selected suggestion
+        const applySuggestion = (suggestion) => {
+            const { word, start, end } = getWordAtCursor();
+            const snippet = suggestion.snippet || suggestion.text;
+            
+            // Replace the current word with the suggestion
+            const text = editor.value;
+            const newText = text.substring(0, start) + snippet + text.substring(end);
+            editor.value = newText;
+            
+            // Update highlighting and line numbers
+            updateLineNumbers();
+            applySyntaxHighlighting();
+            
+            // Hide intellisense
+            hideIntellisense();
+            
+            // Place cursor after the inserted snippet
+            const cursorPos = start + snippet.length;
+            editor.setSelectionRange(cursorPos, cursorPos);
+            
+            // Focus editor
+            editor.focus();
+            
+            // Trigger change event
+            triggerEvent('change', editor.value);
+        };
+
+        // Calculate cursor position (line, column)
+        const calculateCursorPosition = () => {
+            const value = editor.value;
+            const selectionStart = editor.selectionStart;
+            
+            let line = 0;
+            let column = 0;
+            
+            for (let i = 0; i < selectionStart; i++) {
+                if (value[i] === '\n') {
+                    line++;
+                    column = 0;
+                } else {
+                    column++;
+                }
+            }
+            
+            cursorPosition = { line, column };
+            return cursorPosition;
+        };
+
+        // Scroll highlighter to match editor scroll position
+        const syncScroll = () => {
+            highlighter.scrollTop = editor.scrollTop;
+            lineNumbers.scrollTop = editor.scrollTop;
+        };
+
+        // Trigger registered event
+        const triggerEvent = (eventName, ...args) => {
+            if (events[eventName]) {
+                events[eventName].forEach(handler => handler(...args));
+            }
+        };
+
+        // Event listeners
+        editor.addEventListener('input', () => {
+            updateLineNumbers();
+            applySyntaxHighlighting();
+            showIntellisense();
+            calculateCursorPosition();
+            triggerEvent('change', editor.value);
+        });
+
+        editor.addEventListener('keydown', (e) => {
+            // Handle tab key for indentation
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                
+                // Insert tab
+                editor.value = editor.value.substring(0, start) + '    ' + editor.value.substring(end);
+                
+                // Move cursor after the inserted tab
+                editor.setSelectionRange(start + 4, start + 4);
+                
+                // Update highlighting and line numbers
+                updateLineNumbers();
+                applySyntaxHighlighting();
+                
+                triggerEvent('change', editor.value);
+            }
+            
+            // Handle intellisense navigation
+            if (intellisenseVisible) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedSuggestion = (selectedSuggestion + 1) % filteredSuggestions.length;
+                    showIntellisense();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedSuggestion = (selectedSuggestion - 1 + filteredSuggestions.length) % filteredSuggestions.length;
+                    showIntellisense();
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    if (filteredSuggestions[selectedSuggestion]) {
+                        applySuggestion(filteredSuggestions[selectedSuggestion]);
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideIntellisense();
+                }
+            }
+            
+            triggerEvent('keydown', e);
+        });
+
+        editor.addEventListener('click', () => {
+            calculateCursorPosition();
+            triggerEvent('click');
+        });
+
+        editor.addEventListener('blur', () => {
+            // Delay hiding intellisense to allow clicks on suggestions
+            setTimeout(hideIntellisense, 200);
+            triggerEvent('blur');
+        });
+
+        editor.addEventListener('scroll', syncScroll);
+
+        // Initialize
+        updateLineNumbers();
+        applySyntaxHighlighting();
+
+        // External methods
+        container.setValue = (value) => {
+            editor.value = value;
+            updateLineNumbers();
+            applySyntaxHighlighting();
+            triggerEvent('change', editor.value);
+        };
+        
+        container.getValue = () => {
+            return editor.value;
+        };
+        
+        container.setLanguage = (lang) => {
+            currentLanguage = lang;
+            applySyntaxHighlighting();
+            triggerEvent('languagechange', lang);
+        };
+        
+        container.getLanguage = () => {
+            return currentLanguage;
+        };
+        
+        container.focus = () => {
+            editor.focus();
+        };
+        
+        container.setCursorPosition = (line, column) => {
+            const lines = editor.value.split('\n');
+            let pos = 0;
+            
+            for (let i = 0; i < line; i++) {
+                if (i < lines.length) {
+                    pos += lines[i].length + 1; // +1 for the newline character
+                }
+            }
+            
+            pos += Math.min(column, lines[line] ? lines[line].length : 0);
+            
+            editor.setSelectionRange(pos, pos);
+            editor.focus();
+            
+            cursorPosition = { line, column };
+            triggerEvent('cursorchange', { line, column });
+        };
+        
+        container.getCursorPosition = () => {
+            return calculateCursorPosition();
+        };
+        
+        container.onEvent = (eventName, handler) => {
+            if (!events[eventName]) {
+                events[eventName] = [];
+            }
+            events[eventName].push(handler);
+        };
+
+        return container;
+    }
+
+    // <=======================================
+    // #endregion
+    // ----------------------------------------
 }
 
 

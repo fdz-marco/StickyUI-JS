@@ -2134,3 +2134,260 @@ input:checked + .stickyUI.switchSlider:before {
         width: 100%;
     }
 }
+
+/* ----------------------------------------
+   Code Editor
+   ---------------------------------------- */
+
+.stickyUI.codeEditorContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 400px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--stickyui-background-dark);
+    color: var(--stickyui-text-color);
+    margin-bottom: 16px;
+}
+
+.stickyUI.codeEditorLabel {
+    padding: 8px 12px;
+    font-weight: bold;
+    color: var(--stickyui-text-color);
+    background-color: var(--stickyui-background-medium);
+    border-bottom: 1px solid var(--stickyui-border-color);
+}
+
+.stickyUI.codeEditorWrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.stickyUI.codeEditorLineNumbers {
+    width: 50px;
+    padding: 8px 0;
+    background-color: var(--stickyui-background-darkest);
+    color: var(--stickyui-text-color-dim);
+    text-align: right;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow: hidden;
+    user-select: none;
+    border-right: 1px solid var(--stickyui-border-color);
+}
+
+.stickyUI.codeEditorLineNumbers div {
+    padding: 0 8px;
+}
+
+.stickyUI.codeEditor {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 8px;
+    background-color: transparent;
+    color: transparent;
+    caret-color: var(--stickyui-text-color);
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 4;
+    position: absolute;
+    top: 0;
+    left: 50px; /* Width of the line numbers */
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+}
+
+.stickyUI.codeEditorHighlighter {
+    position: absolute;
+    top: 0;
+    left: 50px; /* Width of the line numbers */
+    right: 0;
+    bottom: 0;
+    padding: 8px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: var(--stickyui-background-dark);
+    white-space: pre;
+    overflow: auto;
+    pointer-events: none;
+    z-index: 1;
+    tab-size: 4;
+}
+
+.stickyUI.codeEditorIntellisense {
+    position: absolute;
+    display: none;
+    min-width: 200px;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--stickyui-background-darkest);
+    border: 1px solid var(--stickyui-border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.stickyUI.codeEditorIntellisenseItem {
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.stickyUI.codeEditorIntellisenseItem:hover,
+.stickyUI.codeEditorIntellisenseItem.selected {
+    background-color: var(--stickyui-primary-color);
+    color: var(--stickyui-text-on-primary);
+}
+
+/* Syntax highlighting styles */
+.stickyUI.codeEditorHighlighter .keyword {
+    color: #569cd6; /* Blue */
+}
+
+.stickyUI.codeEditorHighlighter .string {
+    color: #ce9178; /* Brown/Orange */
+}
+
+.stickyUI.codeEditorHighlighter .comment {
+    color: #6a9955; /* Green */
+    font-style: italic;
+}
+
+.stickyUI.codeEditorHighlighter .number {
+    color: #b5cea8; /* Light green */
+}
+
+.stickyUI.codeEditorHighlighter .function {
+    color: #dcdcaa; /* Yellow */
+}
+
+.stickyUI.codeEditorHighlighter .class {
+    color: #4ec9b0; /* Light teal */
+}
+
+.stickyUI.codeEditorHighlighter .property {
+    color: #9cdcfe; /* Light blue */
+}
+
+.stickyUI.codeEditorHighlighter .selector {
+    color: #d7ba7d; /* Gold */
+}
+
+.stickyUI.codeEditorHighlighter .value {
+    color: #ce9178; /* Brown/Orange */
+}
+
+.stickyUI.codeEditorHighlighter .unit {
+    color: #b5cea8; /* Light green */
+}
+
+.stickyUI.codeEditorHighlighter .attr-name {
+    color: #9cdcfe; /* Light blue */
+}
+
+.stickyUI.codeEditorHighlighter .attr-value {
+    color: #ce9178; /* Brown/Orange */
+}
+
+.stickyUI.codeEditorHighlighter .color {
+    color: #d7ba7d; /* Gold */
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .stickyUI.codeEditorContainer,
+[data-theme="dark"] .stickyUI.codeEditorHighlighter {
+    background-color: var(--stickyui-background-dark);
+}
+
+[data-theme="dark"] .stickyUI.codeEditorLineNumbers {
+    background-color: var(--stickyui-background-darkest);
+}
+
+[data-theme="dark"] .stickyUI.codeEditorLabel {
+    background-color: var(--stickyui-background-medium);
+}
+
+/* Light theme adjustments */
+[data-theme="light"] .stickyUI.codeEditorContainer,
+[data-theme="light"] .stickyUI.codeEditorHighlighter {
+    background-color: #f5f5f5;
+}
+
+[data-theme="light"] .stickyUI.codeEditorLineNumbers {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+[data-theme="light"] .stickyUI.codeEditorLabel {
+    background-color: #ddd;
+    color: #333;
+}
+
+[data-theme="light"] .stickyUI.codeEditorIntellisense {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .stickyUI.codeEditorIntellisenseItem:hover,
+[data-theme="light"] .stickyUI.codeEditorIntellisenseItem.selected {
+    background-color: var(--stickyui-primary-color);
+    color: #fff;
+}
+
+/* Light theme syntax highlighting */
+[data-theme="light"] .stickyUI.codeEditorHighlighter .keyword {
+    color: #0000ff; /* Blue */
+}
+
+[data-theme="light"] .stickyUI.codeEditorHighlighter .string {
+    color: #a31515; /* Red */
+}
+
+[data-theme="light"] .stickyUI.codeEditorHighlighter .comment {
+    color: #008000; /* Green */
+}
+
+[data-theme="light"] .stickyUI.codeEditorHighlighter .number {
+    color: #098658; /* Dark green */
+}
+
+[data-theme="light"] .stickyUI.codeEditorHighlighter .function {
+    color: #795e26; /* Brown */
+}
+
+[data-theme="light"] .stickyUI.codeEditorHighlighter .property {
+    color: #001080; /* Dark blue */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stickyUI.codeEditorContainer {
+        height: 300px;
+    }
+    
+    .stickyUI.codeEditor,
+    .stickyUI.codeEditorHighlighter {
+        font-size: 12px;
+    }
+    
+    .stickyUI.codeEditorLineNumbers {
+        font-size: 12px;
+        width: 40px;
+    }
+    
+    .stickyUI.codeEditor,
+    .stickyUI.codeEditorHighlighter {
+        left: 40px;
+    }
+}
