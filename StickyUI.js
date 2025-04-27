@@ -4228,22 +4228,125 @@ class StickyUI {
     // <======================================= 
     // #endregion
     // ----------------------------------------
+
+    // <======================================= 
+    // #region Toast Notifications
+    // ----------------------------------------
+
+    /**
+     * @typedef {Object} UIMessageToastBase (Base) Message Toast Element
+     * @property {function(): void} show Show the toast
+     * @property {function(): void} close Close the toast
+     * @property {function(): void} _closeDelayed Close the toast after a delay
+     */
+
+    /**
+     * @typedef {UIElement & UIMessageToastBase} UIMessageToast Message Toast Element
+     */
+
+    /**w
+     * Creates a toast notification
+     * @param {string} message - The message to display in the toast
+     * @param {string} type - The type of toast (success, error, warning, info)
+     * @param {number} duration - The duration in milliseconds the toast should be visible
+     * @param {string} position - The position of the toast (top-right, top-left, bottom-right, bottom-left, top-center, bottom-center)
+     * @param {function} onClose - Callback function to execute when toast is closed
+     * @returns {object} Toast notification object with show and close methods
+     */
+    toast(message = 'Notification', type = 'info', duration = 3000, position = 'top-right', onClose = null) {
+
+        // Create toast wrapper (Group all toasts in a single wrapper)
+        let toastWrapper = this.body.getByClass('toastWrapper');
+        if (!toastWrapper) {
+            const _UID = this.UID();
+            toastWrapper = this.element('div', `toastWrapper_${_UID}`, 'toastWrapper', null, 'toastWrapper');
+            this.body.add(toastWrapper); // DOM Insertion ***
+        }
+
+        // Group toast elements in position container
+        let toastContainer = toastWrapper.query('.toastContainer.' + position);
+        if (!toastContainer) {
+            const __UID = this.UID();
+            toastContainer = this.element('div', `toastContainer_${__UID}`, `toastContainer ${position}`, null, 'toastContainer');
+            toastWrapper.add(toastContainer); // DOM Insertion ***
+        }
+
+        // Create toast element
+        const UID = this.UID();
+        const toast = this.element('div', `toast_${UID}`, `toast ${type}`, null, 'toast');
+        toast.setAttribute('role', 'alert');
+        let iconName = 
+            (type === 'success') ? 'icon-check' : 
+            (type === 'error') ? 'icon-close' : 
+            (type === 'warning') ? 'icon-alert' : 
+            (type === 'info') ? 'icon-message' : 'icon-info';
+        const iconElement = this.icon(iconName);
+        const messageElement = this.element('div', `toastMessage_${UID}`, 'toastMessage', message, 'toastMessage');
+        const closeButton = this.element('button', `toastCloseButton_${UID}`, 'toastCloseButton', '&times;', 'toastCloseButton');        
+        toast.add([iconElement, messageElement, closeButton]);
+        
+        // Add toast to container
+        toastContainer.add(toast); // DOM Insertion ***
+        
+        // External methods
+        toast.show = () => {
+            setTimeout(() => {
+                toast.addClass('show');
+            }, 10);
+        }
+        toast.close = () => {
+            toast.removeClass('show');
+            // Wait for fade out animation to complete before removing
+            setTimeout(() => {
+                if (toastContainer.contains(toast)) {
+                    // Remove toast from container
+                    toast.remove();
+                    // Execute onClose callback if provided
+                    if (onClose && typeof onClose === 'function')
+                        onClose();
+                    // Remove container if no more toasts
+                    if (toastContainer.children.length === 0)
+                        toastContainer.remove();
+                }
+            }, 300);
+        }
+        toast._closeDelayed = () => {
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.close();
+                }, duration);
+            }
+        }
+
+        // Event Listeners
+        closeButton.listenEvent('click', () => {
+            toast.close();
+        });
+        
+        // Set initial state
+        toast.show();
+        toast._closeDelayed();
+
+        // Return toast 
+        return toast;
+    }
+
+    // <======================================= 
+    // #endregion
+    // ----------------------------------------
 }
 
 
 /***
  * 
  * To Do:
- 
  * - Context Menu multiple 
  * - Context Menu submenu
  * - Context Menu right click
  * - Context Menu keyboard shortcuts
  * - Control the progress bar
  * - Big button with icon and text
- * - Add a toast notification
  * - Check add Event Listeners in all elements
- * - You were adding wrappers: for tooltip, for context menu, for messageBox & alertBox
- * - Some elements will be added to the body automatically: tooltip, context menu, messageBox & alertBox
+ * - Add tree view
  *   
 */

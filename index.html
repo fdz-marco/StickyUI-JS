@@ -312,7 +312,7 @@
         const tooltipLeft = ui.tooltip(buttonLeft, 'This is a tooltip that will adjust its position automatically!', 'left');
         const tooltipRight = ui.tooltip(buttonRight, 'This is a tooltip that will adjust its position automatically!', 'right');
 
-        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 930, 800);
+        const faceplate1 = ui.faceplate([buttonTop, buttonBottom, buttonLeft, buttonRight], 200, 80, 830, 690);
 
         ui.setDraggable(faceplate1);    
         // Add Tooltips Faceplate to body
@@ -381,6 +381,66 @@
         const topToolbar01icon09 = ui.toolbarButton('icon-alert', () => alertBox.show(), 'Top Toolbar 01 - Icon 09');
         const topToolbar01separator04 = ui.toolbarDivider();
         topToolbar01.add([topToolbar01icon08, topToolbar01separator04, topToolbar01icon09]);
+        
+        // ----------------------------------------
+        // Toast Notification Examples
+        // ----------------------------------------
+        
+        // Create toast buttons in toolbar
+        const successToastButton = ui.button('Success Toast');
+        const errorToastButton = ui.button('Error Toast');
+        const warningToastButton = ui.button('Warning Toast');
+        const infoToastButton = ui.button('Info Toast');
+        const positionsToastButton = ui.button('Different Positions');
+        
+        // Create toast notifications with different styles
+        successToastButton.addEventListener('click', () => {
+            ui.toast('Operation completed successfully!', 'success', 3000, 'top-right', () => {
+                console.log('Success toast closed');
+            });
+        });
+        
+        errorToastButton.addEventListener('click', () => {
+            ui.toast('An error occurred while processing your request', 'error', 5000, 'top-right', () => {
+                console.log('Error toast closed');
+            });
+        });
+        
+        warningToastButton.addEventListener('click', () => {
+            ui.toast('Warning: This action cannot be undone', 'warning', 4000, 'top-right', () => {
+                console.log('Warning toast closed');
+            });
+        });
+        
+        infoToastButton.addEventListener('click', () => {
+            ui.toast('You have 3 new notifications', 'info', 3000, 'top-right', () => {
+                console.log('Info toast closed');
+            });
+        });
+        
+        // Create toast notifications with different positions
+        let currentPositionIndex = 0;
+        const positions = ['top-right', 'top-left', 'bottom-right', 'bottom-left', 'top-center', 'bottom-center'];
+        
+        positionsToastButton.addEventListener('click', () => {
+            const position = positions[currentPositionIndex];
+            ui.toast(`Toast in ${position} position`, 'info', 3000, position);
+            
+            // Rotate through positions
+            currentPositionIndex = (currentPositionIndex + 1) % positions.length;
+        });
+        
+        // Add toast demonstration buttons to faceplate
+        const toastFaceplate = ui.faceplate([
+            successToastButton, 
+            errorToastButton, 
+            warningToastButton, 
+            infoToastButton, 
+            positionsToastButton
+        ], 180, 280, 1040, 690);
+        
+        ui.setDraggable(toastFaceplate);
+        ui.body.add(toastFaceplate);
         
     </script>
 </body>

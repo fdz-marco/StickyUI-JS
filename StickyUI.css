@@ -64,6 +64,10 @@
     --z-index-overlay: calc(var(--z-index-base) + 7);
     --z-index-messageBoxWrapper: calc(var(--z-index-base) + 8);
     --z-index-messageBox: calc(var(--z-index-base) + 9);
+
+    --z-index-toastWrapper: calc(var(--z-index-base) + 10);
+    --z-index-toastContainer: calc(var(--z-index-base) + 11);
+    --z-index-toast: calc(var(--z-index-base) + 12);
 }
 
 
@@ -1562,7 +1566,7 @@ input:checked + .stickyUI.switchSlider:before {
 }
 
 .icon-view {
-    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 8C2 6.34315 3.34315 5 5 5H19C20.6569 5 22 6.34315 22 8V16C22 17.6569 20.6569 19 19 19H5C3.34315 19 2 17.6569 2 16V8ZM13 7H19C19.5523 7 20 7.44771 20 16V11H13V7ZM11 7H5C4.44772 7 4 7.44772 4 8V11H11V7ZM4 13V16C4 16.5523 4.44772 17 5 17H11V13H4ZM13 17H19C19.5523 17 20 16.5523 20 16V13H13V17Z' fill='currentColor' /%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 8C2 6.34315 3.34315 5 5 5H19C20.6569 5 22 6.34315 22 8V16C22 17.6569 20.6569 19 19 19H5C3.34315 19 2 17.6569 2 16V8ZM13 7H19C19.5523 7 20 7.44771 20 8V16C20 16.5523 19.5523 17 19 17H5C4.44772 17 4 16.5523 4 16V8C4 7.44772 4.44772 7 5 7ZM11 7H5C4.44772 7 4 7.44772 4 8V11H11V7ZM4 13V16C4 16.5523 4.44772 17 5 17H11V13H4ZM13 17H19C19.5523 17 20 16.5523 20 16V13H13V17Z' fill='currentColor' /%3E%3C/svg%3E");
 }
 
 .icon-help {
@@ -1650,7 +1654,7 @@ input:checked + .stickyUI.switchSlider:before {
 }
 
 .icon-alert {
-    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%0A%3E%3Cpath d='M12 6C12.5523 6 13 6.44772 13 7V13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13V7C11 6.44772 11.4477 6 12 6Z' fill='currentColor' /%3E%3Cpath d='M12 16C11.4477 16 11 16.4477 11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17C13 16.4477 12.5523 16 12 16Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12Z' fill='currentColor' /%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 6C12.5523 6 13 6.44772 13 7V13C13 13.5523 12.5523 14 12 14C11.4477 14 11 13.5523 11 13V7C11 6.44772 11.4477 6 12 6Z' fill='currentColor' /%3E%3Cpath d='M12 16C11.4477 16 11 16.4477 11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17C13 16.4477 12.5523 16 12 16Z' fill='currentColor' /%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12Z' fill='currentColor' /%3E%3C/svg%3E");
 }
 
 /* ---------------------- Icon Bars - Floating bars (WORK IN PROGRESS - WIP) --------------------- */
@@ -1855,4 +1859,165 @@ input:checked + .stickyUI.switchSlider:before {
     height: 100%;
     pointer-events: none;
     z-index: var(--z-index-contextMenuWrapper);
+}
+
+/* Toast Notification */
+
+.stickyUI.toastWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: var(--z-index-toastWrapper);
+}
+
+
+.stickyUI.toastContainer {
+    position: fixed;
+    z-index: var(--z-index-toastContainer);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 350px;
+    width: 100%;
+    pointer-events: none;
+}
+
+.stickyUI.toastContainer.top-right {
+    top: var(--spacing-xl);
+    right: var(--spacing-xl);
+    align-items: flex-end;
+}
+
+.stickyUI.toastContainer.top-left {
+    top: var(--spacing-xl);
+    left: var(--spacing-xl);
+    align-items: flex-start;
+}
+
+.stickyUI.toastContainer.bottom-right {
+    bottom: var(--spacing-xl);
+    right: var(--spacing-xl);
+    align-items: flex-end;
+}
+
+.stickyUI.toastContainer.bottom-left {
+    bottom: var(--spacing-xl);
+    left: var(--spacing-xl);
+    align-items: flex-start;
+}
+
+.stickyUI.toastContainer.top-center {
+    top: var(--spacing-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+.stickyUI.toastContainer.bottom-center {
+    bottom: var(--spacing-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+}
+
+.stickyUI.toast {
+    display: flex;
+    align-items: center;
+    min-width: 250px;
+    max-width: 350px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    border-left: 4px solid;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: var(--z-index-toast);
+    pointer-events: auto;
+}
+
+.stickyUI.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.stickyUI.toast.success {
+    border-left-color: #4CAF50;
+}
+
+.stickyUI.toast.error {
+    border-left-color: #F44336;
+}
+
+.stickyUI.toast.warning {
+    border-left-color: #FF9800;
+}
+
+.stickyUI.toast.info {
+    border-left-color: #2196F3;
+}
+
+.stickyUI.toast .icon {
+    margin-right: var(--spacing-md);
+    min-width: 24px;
+}
+
+.stickyUI.toast.success .icon {
+    background-color: #4CAF50;
+}
+
+.stickyUI.toast.error .icon {
+    background-color: #F44336;
+}
+
+.stickyUI.toast.warning .icon {
+    background-color: #FF9800;
+}
+
+.stickyUI.toast.info .icon {
+    background-color: #2196F3;
+}
+
+.stickyUI.toastMessage {
+    flex: 1;
+    font-size: 14px;
+}
+
+.stickyUI.toastCloseButton {
+    background: transparent;
+    border: none;
+    color: var(--text-color-light);
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: var(--spacing-md);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.stickyUI.toastCloseButton:hover {
+    color: var(--text-color);
+}
+
+@media (max-width: 480px) {
+    .stickyUI.toastContainer {
+        max-width: 95%;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+    }
+    
+    .stickyUI.toast {
+        min-width: auto;
+        width: 100%;
+    }
 }
